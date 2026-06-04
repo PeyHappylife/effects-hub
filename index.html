@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Effects Hub — Button / Text / Animation</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --c1: #60a5fa;
+      --c2: #a78bfa;
+      --c3: #ec4899;
+      --c4: #10b981;
+      --c5: #f59e0b;
+      --c6: #06b6d4;
+    }
+
+    body {
+      background: radial-gradient(ellipse at top, #1a1f2e 0%, #0a0d14 100%);
+      color: #e0e0e0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      padding: 1rem 1.5rem 3rem;
+      min-height: 100vh;
+    }
+
+    header { text-align: center; margin-bottom: 1rem; }
+    h1 {
+      font-size: 1.8rem;
+      background: linear-gradient(120deg, #60a5fa, #a78bfa, #ec4899);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .subtitle { color: #777; font-size: 0.8rem; margin-top: 0.2rem; }
+
+    /* ===== Tabs ===== */
+    .tabs {
+      display: flex; justify-content: center; gap: 0.5rem;
+      margin: 1.2rem 0 1.5rem;
+    }
+    .tab {
+      padding: 0.6rem 1.4rem;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px; color: #aaa; cursor: pointer;
+      font-size: 0.9rem; font-weight: 600; font-family: inherit;
+      transition: all 0.2s;
+    }
+    .tab:hover { color: #fff; border-color: rgba(96,165,250,0.4); }
+    .tab.active {
+      background: linear-gradient(120deg, rgba(96,165,250,0.25), rgba(167,139,250,0.25));
+      border-color: rgba(96,165,250,0.6); color: #fff;
+    }
+
+    .section { display: none; }
+    .section.active { display: block; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+      gap: 0.8rem; max-width: 1500px; margin: 0 auto;
+    }
+    .cell {
+      background: rgba(255, 255, 255, 0.025);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 10px;
+      padding: 0.85rem 0.5rem 0.5rem;
+      display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+      cursor: pointer;
+    }
+    .cell:hover { border-color: rgba(96,165,250,0.3); }
+    .cell .name { font-size: 0.82rem; color: #888; text-align: center; }
+    .stage-cell {
+      min-height: 64px; display: flex; align-items: center; justify-content: center;
+      width: 100%;
+    }
+    .demo-text { font-size: 1.45rem; font-weight: 700; }
+
+    /* ===== Buttons ===== */
+    button.fx, .cell button {
+      width: 146px; height: 50px; border: none; cursor: pointer;
+      font-size: 1.05rem; font-weight: 600; color: #fff; border-radius: 10px;
+      font-family: inherit; display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .e-ripple { background: var(--c1); position: relative; overflow: hidden; --spd: 1.8s; }
+    .e-ripple::after { content:''; position:absolute; top:50%; left:50%; width:12px; height:12px; border-radius:50%; background:rgba(255,255,255,.5); transform:translate(-50%,-50%); animation: ripple var(--spd) ease-out infinite; }
+    @keyframes ripple { 0%{width:12px;height:12px;opacity:.6} 100%{width:300px;height:300px;opacity:0} }
+
+    .e-glow { background: var(--c2); --spd: 1.8s; animation: glow var(--spd) ease-in-out infinite; }
+    @keyframes glow { 0%,100%{box-shadow:0 0 9px rgba(167,139,250,.55);transform:scale(1)} 50%{box-shadow:0 0 26px rgba(167,139,250,1),0 0 43px rgba(167,139,250,.6);transform:scale(1.07)} }
+
+    .e-slide { background: var(--c3); position: relative; overflow: hidden; --spd: 2s; }
+    .e-slide::before { content:''; position:absolute; top:0; left:-100%; width:100%; height:100%; background:rgba(255,255,255,.28); animation: slide var(--spd) linear infinite; }
+    @keyframes slide { 0%{left:-100%} 60%,100%{left:100%} }
+
+    .e-bounce { background: var(--c4); --spd: 1.4s; animation: bounce var(--spd) ease-in-out infinite; }
+    @keyframes bounce { 0%,100%{transform:translateY(0)} 30%{transform:translateY(-9.7px)} 50%{transform:translateY(0)} 70%{transform:translateY(-4.8px)} }
+
+    .e-morph { background: var(--c5); --spd: 2.4s; animation: morph var(--spd) ease-in-out infinite; }
+    @keyframes morph { 0%,100%{border-radius:10px;letter-spacing:0} 50%{border-radius:3px;letter-spacing:.145em} }
+
+    .e-rotate { background: var(--c6); --spd: 2s; animation: rotate var(--spd) ease-in-out infinite; }
+    @keyframes rotate { 0%,100%{transform:rotate(0) scale(1)} 50%{transform:rotate(-7.3deg) scale(1.07)} }
+
+    .e-gradient { background: linear-gradient(135deg,#667eea,#764ba2); background-size:200% 200%; --spd: 2.5s; animation: gflow var(--spd) ease infinite; }
+    @keyframes gflow { 0%,100%{background-position:0% 50%} 50%{background-position:100% 50%} }
+
+    .e-border { background: transparent; border: 2px solid var(--c1); color: var(--c1); --spd: 2s; animation: bord var(--spd) ease-in-out infinite; }
+    @keyframes bord { 0%,100%{background:transparent;color:var(--c1);box-shadow:none} 50%{background:var(--c1);color:#fff;box-shadow:0 0 18px rgba(96,165,250,.6)} }
+
+    .e-push { background: var(--c3); --spd: 1.4s; animation: push var(--spd) ease-in-out infinite; }
+    @keyframes push { 0%,100%{transform:translateY(0);box-shadow:0 6px 0 #9d174d} 50%{transform:translateY(6px);box-shadow:0 0 0 #9d174d} }
+
+    .e-pulse { background: var(--c4); --spd: 1.6s; animation: pulse var(--spd) infinite; }
+    @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(16,185,129,.66)} 70%{box-shadow:0 0 0 14px rgba(16,185,129,0)} 100%{box-shadow:0 0 0 0 rgba(16,185,129,0)} }
+
+    .e-shake { background: var(--c5); --spd: 1.8s; animation: shake var(--spd) ease-in-out infinite; }
+    @keyframes shake { 0%,82%,100%{transform:translateX(0)} 86%{transform:translateX(-4.8px)} 90%{transform:translateX(4.8px)} 94%{transform:translateX(-4.8px)} 98%{transform:translateX(4.8px)} }
+
+    .e-fill { background: transparent; border: 2px solid var(--c2); color: var(--c2); position: relative; overflow: hidden; z-index: 1; --spd: 2.4s; animation: filltxt var(--spd) ease-in-out infinite; }
+    .e-fill::before { content:''; position:absolute; inset:0; top:100%; background: var(--c2); z-index:-1; animation: fill var(--spd) ease-in-out infinite; }
+    @keyframes fill { 0%,100%{top:100%} 50%{top:0} }
+    @keyframes filltxt { 0%,100%{color:var(--c2)} 50%{color:#fff} }
+
+    .e-neon { background: #0a0d14; color: var(--c6); border: 1px solid var(--c6); --spd: 1.6s; animation: neon var(--spd) ease-in-out infinite; }
+    @keyframes neon { 0%,100%{text-shadow:0 0 6px var(--c6);box-shadow:none} 50%{text-shadow:0 0 12px var(--c6);box-shadow:0 0 10px var(--c6),inset 0 0 10px var(--c6)} }
+
+    .e-skew { background: var(--c3); --spd: 2s; animation: skew var(--spd) ease-in-out infinite; }
+    @keyframes skew { 0%,100%{transform:skewX(0)} 50%{transform:skewX(-12deg)} }
+
+    .e-underline { background: transparent; color: var(--c1); position: relative; --spd: 2s; }
+    .e-underline::after { content:''; position:absolute; left:50%; bottom:10px; width:0; height:2px; background:var(--c1); transform:translateX(-50%); animation: uline var(--spd) ease-in-out infinite; }
+    @keyframes uline { 0%,100%{width:0} 50%{width:70%} }
+
+    .e-lift { background: var(--c2); --spd: 2s; animation: lift var(--spd) ease-in-out infinite; }
+    @keyframes lift { 0%,100%{transform:translateY(0);box-shadow:0 2px 6px rgba(167,139,250,.2)} 50%{transform:translateY(-6px);box-shadow:0 12px 24px rgba(167,139,250,.5)} }
+
+    .e-flip { background: var(--c4); --spd: 2.6s; animation: flip var(--spd) ease-in-out infinite; }
+    @keyframes flip { 0%,40%{transform:rotateX(0)} 70%,100%{transform:rotateX(360deg)} }
+
+    .e-gtext { background: #161b26; --spd: 2.2s; animation: gtbox var(--spd) ease-in-out infinite; }
+    .e-gtext span { background: linear-gradient(90deg,#60a5fa,#ec4899,#60a5fa); background-size:200% auto; -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; font-weight:700; animation: gtext var(--spd) linear infinite; }
+    @keyframes gtext { to { background-position: 200% center; } }
+    @keyframes gtbox { 0%,100%{box-shadow:none} 50%{box-shadow:0 0 14px rgba(236,72,153,.35)} }
+
+    .e-squeeze { background: var(--c5); --spd: 1.4s; animation: squeeze var(--spd) ease-in-out infinite; }
+    @keyframes squeeze { 0%,100%{transform:scale(1,1)} 50%{transform:scaleX(.82) scaleY(1.12)} }
+
+    .e-glitch { background: var(--c6); --spd: 2.4s; animation: glitch var(--spd) steps(1) infinite; }
+    @keyframes glitch { 0%,82%,100%{transform:translate(0)} 84%{transform:translate(-2.4px,2.4px)} 88%{transform:translate(-2.4px,-2.4px)} 92%{transform:translate(2.4px,2.4px)} 96%{transform:translate(2.4px,-2.4px)} }
+
+    .e-expand { background: var(--c1); --spd: 2s; animation: expand var(--spd) ease-in-out infinite; }
+    @keyframes expand { 0%,100%{transform:scaleX(1);letter-spacing:0} 50%{transform:scaleX(1.12);letter-spacing:.12em} }
+
+    .e-glass { background: rgba(255,255,255,.1); backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,.2); --spd: 2.2s; animation: glass var(--spd) ease-in-out infinite; }
+    @keyframes glass { 0%,100%{background:rgba(255,255,255,.1)} 50%{background:rgba(255,255,255,.24)} }
+
+    .e-wobble { background: var(--c3); --spd: 1.8s; animation: wobble var(--spd) ease-in-out infinite; }
+    @keyframes wobble { 0%,100%{transform:rotate(0)} 30%{transform:rotate(6deg)} 60%{transform:rotate(-6deg)} 80%{transform:rotate(3deg)} }
+
+    .e-inset { background: var(--c4); --spd: 1.8s; animation: inset var(--spd) ease-in-out infinite; }
+    @keyframes inset { 0%,100%{box-shadow:inset 0 0 0 rgba(0,0,0,0)} 50%{box-shadow:inset 0 0 22px rgba(0,0,0,.5)} }
+
+    .e-stripe { background: repeating-linear-gradient(45deg,#f59e0b,#f59e0b 10px,#d97706 10px,#d97706 20px); --spd: 0.8s; animation: stripe var(--spd) linear infinite; }
+    @keyframes stripe { to { background-position: 28px 0; } }
+
+    .e-dot { background: var(--c6); position: relative; --spd: 1.4s; }
+    .e-dot::before { content:''; position:absolute; right:12px; top:50%; width:7px; height:7px; border-radius:50%; background:#fff; transform:translateY(-50%); animation: dot var(--spd) ease-in-out infinite; }
+    @keyframes dot { 0%,100%{transform:translateY(-50%) scale(0)} 50%{transform:translateY(-50%) scale(1.1)} }
+
+    .e-tilt { background: var(--c2); transform-style: preserve-3d; --spd: 2.4s; animation: tilt var(--spd) ease-in-out infinite; }
+    @keyframes tilt { 0%,100%{transform:perspective(300px) rotateX(0) rotateY(0)} 50%{transform:perspective(300px) rotateX(16.5deg) rotateY(-16.5deg)} }
+
+    .e-cycle { background: var(--c1); --spd: 3s; animation: cycle var(--spd) linear infinite; }
+    @keyframes cycle { 0%{background:#60a5fa} 33%{background:#ec4899} 66%{background:#10b981} 100%{background:#60a5fa} }
+
+    .e-zoom { background: var(--c5); --spd: 1.8s; animation: zoom var(--spd) ease-in-out infinite; }
+    @keyframes zoom { 0%,100%{transform:scale(1);filter:brightness(1)} 50%{transform:scale(1.18);filter:brightness(1.25)} }
+
+    .e-sweep { background: #161b26; position: relative; z-index: 1; --spd: 2s; }
+    .e-sweep::before { content:''; position:absolute; inset:-2px; border-radius:10px; background:linear-gradient(90deg,#60a5fa,#ec4899,#10b981,#60a5fa); background-size:300% 100%; z-index:-1; animation: sweep var(--spd) linear infinite; }
+    @keyframes sweep { to { background-position: 300% 0; } }
+
+    .e-jelly { background: var(--c3); --spd: 1.6s; animation: jelly var(--spd) ease-in-out infinite; }
+    @keyframes jelly { 0%,100%,40%{transform:scale(1,1)} 50%{transform:scale(1.28,.72)} 60%{transform:scale(.82,1.18)} 70%{transform:scale(1.06,.94)} }
+
+    .e-arrow { background: var(--c4); --spd: 1.2s; }
+    .e-arrow::after { content:' →'; display:inline-block; animation: arrow var(--spd) ease-in-out infinite; }
+    @keyframes arrow { 0%,100%{transform:translateX(0)} 50%{transform:translateX(6px)} }
+
+    /* ===== Text effects ===== */
+    .t-gradient { background:linear-gradient(90deg,#60a5fa,#ec4899,#60a5fa); background-size:200% auto; -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:transparent; --spd:2.5s; animation:tgrad var(--spd) linear infinite; }
+    @keyframes tgrad { to { background-position: 200% center; } }
+
+    .t-glow { color:#a78bfa; --spd:1.8s; animation:tglow var(--spd) ease-in-out infinite; }
+    @keyframes tglow { 0%,100%{text-shadow:0 0 6px rgba(167,139,250,.6)} 50%{text-shadow:0 0 18px rgba(167,139,250,1),0 0 30px rgba(167,139,250,.7)} }
+
+    .t-neon { color:#06b6d4; --spd:2s; animation:tneon var(--spd) linear infinite; }
+    @keyframes tneon { 0%,18%,22%,100%{opacity:1;text-shadow:0 0 8px #06b6d4,0 0 16px #06b6d4} 20%,21%{opacity:.35;text-shadow:none} }
+
+    .t-rainbow { --spd:3s; animation:trainbow var(--spd) linear infinite; }
+    @keyframes trainbow { 0%{color:#ff4d4d} 16%{color:#ff9a3d} 33%{color:#ffe14d} 50%{color:#4dff88} 66%{color:#4db8ff} 83%{color:#a64dff} 100%{color:#ff4d4d} }
+
+    .t-shine { background:linear-gradient(110deg,#5b6472 0%,#5b6472 40%,#fff 50%,#5b6472 60%,#5b6472 100%); background-size:200% auto; -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:transparent; --spd:2.5s; animation:tshine var(--spd) linear infinite; }
+    @keyframes tshine { to { background-position: -200% center; } }
+
+    .t-cycle { --spd:2.5s; animation:tcycle var(--spd) ease infinite; }
+    @keyframes tcycle { 0%,100%{color:#60a5fa} 33%{color:#ec4899} 66%{color:#10b981} }
+
+    .t-blur { color:#e0e0e0; --spd:2s; animation:tblur var(--spd) ease-in-out infinite; }
+    @keyframes tblur { 0%,100%{filter:blur(0);opacity:1} 50%{filter:blur(4px);opacity:.5} }
+
+    .t-track { color:#f59e0b; --spd:2.5s; animation:ttrack var(--spd) ease-in-out infinite; }
+    @keyframes ttrack { 0%,100%{letter-spacing:0} 50%{letter-spacing:.3em} }
+
+    .t-shadow { color:#ec4899; --spd:1.6s; animation:tshadow var(--spd) ease-in-out infinite; }
+    @keyframes tshadow { 0%,100%{text-shadow:0 0 0 rgba(0,0,0,0)} 50%{text-shadow:4px 4px 0 rgba(0,0,0,.45)} }
+
+    .t-3d { color:#60a5fa; --spd:2s; animation:t3d var(--spd) ease-in-out infinite; }
+    @keyframes t3d { 0%,100%{text-shadow:1px 1px 0 #2563eb,2px 2px 0 #1d4ed8} 50%{text-shadow:3px 3px 0 #2563eb,6px 6px 0 #1d4ed8,9px 9px 12px rgba(0,0,0,.4)} }
+
+    .t-skew { color:#a78bfa; display:inline-block; --spd:2s; animation:tskew var(--spd) ease-in-out infinite; }
+    @keyframes tskew { 0%,100%{transform:skewX(0)} 50%{transform:skewX(-12deg)} }
+
+    .t-scale { color:#10b981; display:inline-block; --spd:1.4s; animation:tscale var(--spd) ease-in-out infinite; }
+    @keyframes tscale { 0%,100%{transform:scale(1)} 50%{transform:scale(1.25)} }
+
+    .t-fade { color:#e0e0e0; --spd:1.8s; animation:tfade var(--spd) ease-in-out infinite; }
+    @keyframes tfade { 0%,100%{opacity:1} 50%{opacity:.15} }
+
+    .t-wave { color:#06b6d4; display:inline-block; --spd:1.4s; animation:twave var(--spd) ease-in-out infinite; }
+    @keyframes twave { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+
+    .t-jelly { color:#ec4899; display:inline-block; --spd:1.6s; animation:tjelly var(--spd) ease-in-out infinite; }
+    @keyframes tjelly { 0%,100%,40%{transform:scale(1,1)} 50%{transform:scale(1.25,.75)} 60%{transform:scale(.85,1.15)} 70%{transform:scale(1.05,.95)} }
+
+    .t-glitch { color:#06b6d4; display:inline-block; --spd:2.4s; animation:tglitch var(--spd) steps(1) infinite; }
+    @keyframes tglitch { 0%,82%,100%{transform:translate(0);text-shadow:none} 84%{transform:translate(-2px,1px);text-shadow:2px 0 #ec4899,-2px 0 #60a5fa} 88%{transform:translate(2px,-1px)} 92%{transform:translate(-1px,1px);text-shadow:2px 0 #10b981,-2px 0 #ec4899} 96%{transform:translate(1px,-1px);text-shadow:none} }
+
+    /* ===== Text effects (extra) ===== */
+    .t-marquee { display:inline-block; white-space:nowrap; --spd:4s; animation:tmarquee var(--spd) linear infinite; }
+    @keyframes tmarquee { 0%{transform:translateX(70px)} 100%{transform:translateX(-100%)} }
+
+    .t-highlight { background:linear-gradient(transparent 58%, rgba(251,191,36,.55) 58%); background-size:0% 100%; background-repeat:no-repeat; --spd:2.6s; animation:thl var(--spd) ease-in-out infinite; }
+    @keyframes thl { 0%{background-size:0% 100%} 45%,55%{background-size:100% 100%} 100%{background-size:0% 100%} }
+
+    .t-outline { color:transparent; -webkit-text-stroke:1.5px #60a5fa; --spd:2.2s; animation:tout var(--spd) ease-in-out infinite; }
+    @keyframes tout { 0%,100%{filter:drop-shadow(0 0 0 #60a5fa)} 50%{filter:drop-shadow(0 0 7px #60a5fa)} }
+
+    .t-reveal { color:#a78bfa; -webkit-clip-path:inset(0 100% 0 0); clip-path:inset(0 100% 0 0); --spd:2.6s; animation:trev var(--spd) ease-in-out infinite; }
+    @keyframes trev { 0%{clip-path:inset(0 100% 0 0)} 45%,55%{clip-path:inset(0 0 0 0)} 100%{clip-path:inset(0 0 0 100%)} }
+
+    .t-flip3d { display:inline-block; color:#60a5fa; --spd:2.4s; animation:tflip3d var(--spd) ease-in-out infinite; }
+    @keyframes tflip3d { 0%,100%{transform:perspective(400px) rotateY(0)} 50%{transform:perspective(400px) rotateY(360deg)} }
+
+    .t-vibrate { display:inline-block; color:#ec4899; --spd:0.28s; animation:tvibrate var(--spd) linear infinite; }
+    @keyframes tvibrate { 0%,100%{transform:translate(0)} 25%{transform:translate(-1.5px,1.5px)} 50%{transform:translate(1.5px,-1.5px)} 75%{transform:translate(-1.5px,-1.5px)} }
+
+    .t-typewriter { color:#10b981; border-right:2px solid #10b981; padding-right:2px; --spd:3s; animation:tcaret .7s steps(1) infinite; }
+    @keyframes tcaret { 50%{border-color:transparent} }
+
+    .t-perletter { color:#60a5fa; --spd:1.4s; }
+    .t-perletter span { display:inline-block; animation:tperletter var(--spd) ease-in-out infinite; }
+    @keyframes tperletter { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-.45em)} }
+
+    .t-scramble { color:#a78bfa; font-family:'Monaco','Courier New',monospace; --spd:2s; }
+    .t-countup { color:#f59e0b; font-variant-numeric:tabular-nums; --spd:2s; }
+
+    /* ===== Animation effects (shapes) ===== */
+    .a-spin { width:var(--size); height:var(--size); border:4px solid rgba(96,165,250,.25); border-top-color:#60a5fa; border-radius:50%; --size:48px; --spd:0.9s; animation:aspin var(--spd) linear infinite; }
+    @keyframes aspin { to { transform: rotate(360deg); } }
+
+    .a-pulse { width:var(--size); height:var(--size); border-radius:50%; background:#a78bfa; --size:48px; --spd:1.4s; animation:apulse var(--spd) ease-in-out infinite; }
+    @keyframes apulse { 0%,100%{transform:scale(.6);opacity:.5} 50%{transform:scale(1);opacity:1} }
+
+    .a-bounce { width:var(--size); height:var(--size); border-radius:50%; background:#ec4899; --size:40px; --spd:1s; animation:abounce var(--spd) cubic-bezier(.5,.05,.5,.95) infinite; }
+    @keyframes abounce { 0%,100%{transform:translateY(-40%)} 50%{transform:translateY(40%)} }
+
+    .a-rotate { width:var(--size); height:var(--size); background:#10b981; border-radius:8px; --size:46px; --spd:1.6s; animation:arotate var(--spd) ease-in-out infinite; }
+    @keyframes arotate { 0%{transform:rotate(0)} 50%{transform:rotate(180deg)} 100%{transform:rotate(360deg)} }
+
+    .a-float { width:var(--size); height:var(--size); border-radius:14px; background:#f59e0b; --size:46px; --spd:2.4s; animation:afloat var(--spd) ease-in-out infinite; }
+    @keyframes afloat { 0%,100%{transform:translateY(-10px)} 50%{transform:translateY(10px)} }
+
+    .a-beat { width:var(--size); height:var(--size); border-radius:50%; background:#ef4444; --size:46px; --spd:1.2s; animation:abeat var(--spd) ease-in-out infinite; }
+    @keyframes abeat { 0%,100%{transform:scale(.8)} 15%{transform:scale(1.1)} 30%{transform:scale(.9)} 45%{transform:scale(1.05)} }
+
+    .a-flip { width:var(--size); height:var(--size); border-radius:10px; background:#60a5fa; --size:46px; --spd:1.8s; animation:aflip var(--spd) ease-in-out infinite; }
+    @keyframes aflip { 0%{transform:perspective(200px) rotateY(0)} 50%{transform:perspective(200px) rotateY(180deg)} 100%{transform:perspective(200px) rotateY(360deg)} }
+
+    .a-swing { width:var(--size); height:var(--size); border-radius:10px; background:#a78bfa; transform-origin:top center; --size:42px; --spd:1.8s; animation:aswing var(--spd) ease-in-out infinite; }
+    @keyframes aswing { 0%,100%{transform:rotate(-25deg)} 50%{transform:rotate(25deg)} }
+
+    .a-bars { display:flex; align-items:flex-end; gap:5px; height:var(--size); --size:44px; --spd:1s; }
+    .a-bars span { width:6px; height:100%; background:#10b981; border-radius:3px; transform-origin:bottom; animation:abars var(--spd) ease-in-out infinite; }
+    .a-bars span:nth-child(2){ animation-delay:.15s; }
+    .a-bars span:nth-child(3){ animation-delay:.3s; }
+    @keyframes abars { 0%,100%{transform:scaleY(.3)} 50%{transform:scaleY(1)} }
+
+    .a-dots { display:flex; gap:8px; --size:48px; --spd:1.2s; }
+    .a-dots span { width:calc(var(--size)/4); height:calc(var(--size)/4); border-radius:50%; background:#60a5fa; animation:adots var(--spd) ease-in-out infinite; }
+    .a-dots span:nth-child(2){ animation-delay:.2s; }
+    .a-dots span:nth-child(3){ animation-delay:.4s; }
+    @keyframes adots { 0%,100%{transform:translateY(0);opacity:.4} 50%{transform:translateY(-12px);opacity:1} }
+
+    .a-ring { width:calc(var(--size)/2); height:calc(var(--size)/2); border-radius:50%; background:#ec4899; --size:48px; --spd:1.5s; animation:aring var(--spd) ease-out infinite; }
+    @keyframes aring { 0%{box-shadow:0 0 0 0 rgba(236,72,153,.6)} 100%{box-shadow:0 0 0 calc(var(--size)/1.4) rgba(236,72,153,0)} }
+
+    .a-orbit { width:var(--size); height:var(--size); border-radius:50%; border:2px dashed rgba(255,255,255,.15); position:relative; --size:48px; --spd:1.8s; animation:aorbit var(--spd) linear infinite; }
+    .a-orbit::before { content:''; position:absolute; top:-5px; left:50%; width:10px; height:10px; margin-left:-5px; border-radius:50%; background:#06b6d4; }
+    @keyframes aorbit { to { transform: rotate(360deg); } }
+
+    .a-breathe { width:var(--size); height:var(--size); border-radius:30%; background:#a78bfa; --size:48px; --spd:3s; animation:abreathe var(--spd) ease-in-out infinite; }
+    @keyframes abreathe { 0%,100%{transform:scale(.7);border-radius:30%} 50%{transform:scale(1);border-radius:50%} }
+
+    .a-morph { width:var(--size); height:var(--size); background:linear-gradient(135deg,#60a5fa,#ec4899); --size:52px; --spd:4s; animation:amorph var(--spd) ease-in-out infinite; }
+    @keyframes amorph { 0%,100%{border-radius:42% 58% 70% 30%/45% 45% 55% 55%} 50%{border-radius:70% 30% 46% 54%/30% 60% 40% 70%} }
+
+    /* ===== Animation effects (extra, rich) ===== */
+    .a-dualring { width:var(--size); height:var(--size); position:relative; --size:48px; --spd:1.2s; }
+    .a-dualring::before, .a-dualring::after { content:''; position:absolute; border-radius:50%; border:4px solid transparent; }
+    .a-dualring::before { inset:0; border-top-color:#60a5fa; border-bottom-color:#60a5fa; animation:aspin var(--spd) linear infinite; }
+    .a-dualring::after { inset:8px; border-left-color:#ec4899; border-right-color:#ec4899; animation:aspin var(--spd) linear infinite reverse; }
+
+    .a-conic { width:var(--size); height:var(--size); border-radius:50%; background:conic-gradient(#60a5fa,#a78bfa,#ec4899,#60a5fa); --size:48px; --spd:2s; animation:aspin var(--spd) linear infinite; }
+
+    .a-ripple2 { width:calc(var(--size)/3); height:calc(var(--size)/3); border-radius:50%; background:#06b6d4; position:relative; --size:60px; --spd:1.6s; }
+    .a-ripple2::before, .a-ripple2::after { content:''; position:absolute; inset:0; border-radius:50%; border:2px solid #06b6d4; animation:aripple var(--spd) ease-out infinite; }
+    .a-ripple2::after { animation-delay:calc(var(--spd) / -2); }
+    @keyframes aripple { 0%{transform:scale(1);opacity:.8} 100%{transform:scale(4);opacity:0} }
+
+    .a-progress { width:calc(var(--size)*2.2); height:8px; border-radius:4px; background:rgba(255,255,255,.1); overflow:hidden; position:relative; --size:48px; --spd:1.4s; }
+    .a-progress::before { content:''; position:absolute; left:-40%; top:0; height:100%; width:40%; border-radius:4px; background:linear-gradient(90deg,#60a5fa,#a78bfa); animation:aprog var(--spd) ease-in-out infinite; }
+    @keyframes aprog { 0%{left:-40%} 100%{left:100%} }
+
+    .a-skeleton { width:calc(var(--size)*2.4); height:var(--size); border-radius:10px; background:linear-gradient(90deg,#1e2433 25%,#2a3346 37%,#1e2433 63%); background-size:400% 100%; --size:40px; --spd:1.4s; animation:askel var(--spd) ease-in-out infinite; }
+    @keyframes askel { 0%{background-position:100% 0} 100%{background-position:-100% 0} }
+
+    .a-wave { display:flex; align-items:center; gap:6px; --size:48px; --spd:1.2s; }
+    .a-wave span { width:8px; height:8px; border-radius:50%; background:#a78bfa; animation:awave var(--spd) ease-in-out infinite; }
+    .a-wave span:nth-child(2){ animation-delay:.1s; }
+    .a-wave span:nth-child(3){ animation-delay:.2s; }
+    .a-wave span:nth-child(4){ animation-delay:.3s; }
+    .a-wave span:nth-child(5){ animation-delay:.4s; }
+    @keyframes awave { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }
+
+    .a-flipcard { width:var(--size); height:var(--size); --size:56px; --spd:3s; perspective:300px; }
+    .a-flipcard .inner { position:relative; width:100%; height:100%; transform-style:preserve-3d; animation:aflipcard var(--spd) ease-in-out infinite; }
+    .a-flipcard .face { position:absolute; inset:0; border-radius:10px; -webkit-backface-visibility:hidden; backface-visibility:hidden; }
+    .a-flipcard .front { background:#60a5fa; }
+    .a-flipcard .back { background:#ec4899; transform:rotateY(180deg); }
+    @keyframes aflipcard { 0%,40%{transform:rotateY(0)} 60%,100%{transform:rotateY(180deg)} }
+
+    .a-cube { width:var(--size); height:var(--size); --size:44px; --spd:4s; perspective:320px; }
+    .a-cube .box { position:relative; width:100%; height:100%; transform-style:preserve-3d; animation:acube var(--spd) linear infinite; }
+    .a-cube .box div { position:absolute; width:var(--size); height:var(--size); background:rgba(96,165,250,.7); border:1px solid rgba(255,255,255,.35); }
+    .a-cube .fr{ transform:translateZ(calc(var(--size)/2)); }
+    .a-cube .bk{ transform:rotateY(180deg) translateZ(calc(var(--size)/2)); }
+    .a-cube .rt{ transform:rotateY(90deg) translateZ(calc(var(--size)/2)); }
+    .a-cube .lf{ transform:rotateY(-90deg) translateZ(calc(var(--size)/2)); }
+    .a-cube .tp{ transform:rotateX(90deg) translateZ(calc(var(--size)/2)); }
+    .a-cube .bm{ transform:rotateX(-90deg) translateZ(calc(var(--size)/2)); }
+    @keyframes acube { 0%{transform:rotateX(0) rotateY(0)} 100%{transform:rotateX(360deg) rotateY(360deg)} }
+
+    .a-bell { font-size:var(--size); line-height:1; --size:40px; --spd:1.6s; transform-origin:top center; animation:abell var(--spd) ease-in-out infinite; }
+    @keyframes abell { 0%,55%,100%{transform:rotate(0)} 10%,30%{transform:rotate(14deg)} 20%,40%{transform:rotate(-14deg)} }
+
+    .a-check { width:var(--size); height:var(--size); --size:48px; --spd:1.8s; }
+    .a-check svg { width:100%; height:100%; }
+    .a-check circle { fill:none; stroke:#10b981; stroke-width:5; stroke-dasharray:170; stroke-dashoffset:170; animation:acheckc var(--spd) ease-in-out infinite; }
+    .a-check path { fill:none; stroke:#10b981; stroke-width:7; stroke-linecap:round; stroke-linejoin:round; stroke-dasharray:50; stroke-dashoffset:50; animation:acheckp var(--spd) ease-in-out infinite; }
+    @keyframes acheckc { 0%{stroke-dashoffset:170} 45%,100%{stroke-dashoffset:0} }
+    @keyframes acheckp { 0%,45%{stroke-dashoffset:50} 80%,100%{stroke-dashoffset:0} }
+
+    .a-toast { width:calc(var(--size)*2.4); height:calc(var(--size)*0.72); border-radius:10px; background:linear-gradient(135deg,#10b981,#06b6d4); --size:46px; --spd:3s; animation:atoast var(--spd) ease-in-out infinite; }
+    @keyframes atoast { 0%,100%{transform:translateX(130%);opacity:0} 15%,75%{transform:translateX(0);opacity:1} }
+
+    /* ===================== Modal ===================== */
+    .overlay { position: fixed; inset: 0; background: rgba(5,8,14,.78); backdrop-filter: blur(4px); display:none; align-items:center; justify-content:center; z-index:100; padding:1rem; }
+    .overlay.open { display: flex; }
+    .modal { background: linear-gradient(160deg,#1a1f2e,#12161f); border:1px solid rgba(255,255,255,.12); border-radius:16px; width:100%; max-width:440px; max-height:92vh; overflow-y:auto; padding:1.5rem; position:relative; box-shadow:0 25px 60px rgba(0,0,0,.6); }
+    .modal-close { position:absolute; top:.9rem; right:.9rem; width:32px; height:32px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); border-radius:8px; color:#aaa; cursor:pointer; font-size:1rem; display:flex; align-items:center; justify-content:center; padding:0; }
+    .modal-close:hover { background:rgba(255,255,255,.12); color:#fff; }
+    .modal-title { font-size:1.1rem; font-weight:700; color:#60a5fa; margin-bottom:1.25rem; }
+    .preview-stage { display:flex; align-items:center; justify-content:center; min-height:150px; background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.06); border-radius:12px; margin-bottom:1.25rem; overflow:hidden; }
+    .preview-stage .demo-text { font-size:2rem; }
+    .controls { display:flex; flex-direction:column; gap:.9rem; margin-bottom:1.25rem; }
+    .ctrl-row { display:grid; grid-template-columns:64px 1fr 56px; align-items:center; gap:.6rem; }
+    .ctrl-row label { font-size:.82rem; color:#aaa; }
+    .ctrl-row input[type=range] { width:100%; accent-color:#60a5fa; }
+    .ctrl-val { font-size:.78rem; color:#60a5fa; text-align:right; font-variant-numeric:tabular-nums; }
+    .text-row { margin-bottom:1.25rem; }
+    .text-row label { display:block; font-size:.82rem; color:#aaa; margin-bottom:.45rem; }
+    .text-row input { width:100%; height:42px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.18); border-radius:8px; color:#fff; font-size:.95rem; font-family:inherit; padding:0 .75rem; }
+    .text-row input:focus { outline:none; border-color:#60a5fa; background:rgba(96,165,250,.1); }
+    .apply-btn { width:100%; height:46px; background:linear-gradient(120deg,#60a5fa,#a78bfa); color:#fff; font-weight:700; font-size:.95rem; border:none; border-radius:10px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+    .apply-btn:hover { filter:brightness(1.1); }
+    .apply-btn:active { transform:scale(.98); }
+    .code-wrap { margin-top:1.25rem; }
+    .code-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:.5rem; }
+    .code-head span { font-size:.8rem; color:#888; }
+    .copy-btn { background:rgba(96,165,250,.15); border:1px solid rgba(96,165,250,.4); color:#60a5fa; border-radius:6px; padding:.35rem .75rem; font-size:.78rem; cursor:pointer; }
+    .copy-btn:hover { background:rgba(96,165,250,.28); }
+    pre.code-out { background:rgba(0,0,0,.45); border:1px solid rgba(255,255,255,.08); border-radius:8px; padding:.9rem; font-family:'Monaco','Courier New',monospace; font-size:.72rem; line-height:1.5; color:#a0e7e5; white-space:pre; overflow:auto; max-height:240px; min-height:60px; }
+    .code-empty { color:#555; font-style:italic; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>⚡ Effects Hub</h1>
+    <p class="subtitle">ボタン / 文字 / アニメーション — クリックで調整＆コード取得</p>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" data-target="sec-button">🔘 ボタン</button>
+    <button class="tab" data-target="sec-text">🔤 文字</button>
+    <button class="tab" data-target="sec-anim">🎬 アニメーション</button>
+  </div>
+
+  <!-- Buttons -->
+  <div class="section active" id="sec-button">
+    <div class="grid">
+      <div class="cell"><div class="stage-cell"><button class="e-ripple">Ripple</button></div><span class="name">01 Ripple</span></div>
+      <div class="cell"><div class="stage-cell"><button class="e-glow">Glow</button></div><span class="name">02 Glow</span></div>
+      <div class="cell"><div class="stage-cell"><button class="e-slide">Slide</button></div><span class="name">03 Slide</span></div>
+      <div class="cell"><div class="stage-cell"><button class="e-bounce">Bounce</button></div><span class="name">04 Bounce</span></div>
+      <div class="cell"><div class="stage-cell"><button class="e-morph">Morph</button></div><span class="name">05 Morph</span></div>
+      <div class="cell"><div class="stage-cell"><button class="e-rotate">Rotate</button></div><span class="name">06 Rotate</span></div>
+      <div class="cell"><div class="stage-cell"><button class="e-gradient">Gradient</button></div><span class="name">07 Gradient</span></div>
+      <div class="cell"><div class="stage-cell"><button class="e-border">Border</button></div><span class="name">08 Border</span></div>
+      <div class="cell"><div class="stage-cell"><button class="e-push">Push</button></div><span class="name">09 Push 3D</span></div>
+      <div class="cell"><div class="stage-cell"><button class="e-pulse">Pulse</button></div><span class="name">10 Pulse</span></div>
+      <div class="cell"><div class="stage-cell"><button class="e-shake">Shake</button></div><span class="name">11 Shake</span></div>
+      <div class="cell"><div class="stage-cell"><button class="e-fill">Fill</button></div><span class="name">12 Fill Up</span></div>
+      <div class="cell"><div class="stage-cell"><button class="e-neon">Neon</button></div><span class="name">13 Neon</span></div>
+      <div class="cell"><div class="stage-cell"><button class="e-skew">Skew</button></div><span class="name">14 Skew</span></div>
+      <div class="cell"><div class="stage-cell"><button class="e-underline">Underline</button></div><span class="name">15 Underline</span></div>
+      <div class="cell"><div class="stage-cell"><button class="e-lift">Lift</button></div><span class="name">16 Shadow Lift</span></div>
+      <div class="cell"><div class="stage-cell"><button class="e-flip">Flip</button></div><span class="name">17 Flip</span></div>
+      <div class="cell"><div class="stage-cell"><button class="e-gtext"><span>G-Text</span></button></div><span class="name">18 Gradient Text</span></div>
+      <div class="cell"><div class="stage-cell"><button class="e-squeeze">Squeeze</button></div><span class="name">19 Squeeze</span></div>
+      <div class="cell"><div class="stage-cell"><button class="e-glitch">Glitch</button></div><span class="name">20 Glitch</span></div>
+      <div class="cell"><div class="stage-cell"><button class="e-expand">Expand</button></div><span class="name">21 Expand</span></div>
+      <div class="cell"><div class="stage-cell"><button class="e-glass">Glass</button></div><span class="name">22 Glass</span></div>
+      <div class="cell"><div class="stage-cell"><button class="e-wobble">Wobble</button></div><span class="name">23 Wobble</span></div>
+      <div class="cell"><div class="stage-cell"><button class="e-inset">Inset</button></div><span class="name">24 Inset Glow</span></div>
+      <div class="cell"><div class="stage-cell"><button class="e-stripe">Stripe</button></div><span class="name">25 Stripe</span></div>
+      <div class="cell"><div class="stage-cell"><button class="e-dot">Dot</button></div><span class="name">26 Scale Dot</span></div>
+      <div class="cell"><div class="stage-cell"><button class="e-tilt">Tilt</button></div><span class="name">27 Tilt 3D</span></div>
+      <div class="cell"><div class="stage-cell"><button class="e-cycle">Cycle</button></div><span class="name">28 Color Cycle</span></div>
+      <div class="cell"><div class="stage-cell"><button class="e-zoom">Zoom</button></div><span class="name">29 Zoom</span></div>
+      <div class="cell"><div class="stage-cell"><button class="e-sweep">Sweep</button></div><span class="name">30 Sweep Border</span></div>
+      <div class="cell"><div class="stage-cell"><button class="e-jelly">Jelly</button></div><span class="name">31 Jelly</span></div>
+      <div class="cell"><div class="stage-cell"><button class="e-arrow">Arrow</button></div><span class="name">32 Arrow</span></div>
+    </div>
+  </div>
+
+  <!-- Text -->
+  <div class="section" id="sec-text">
+    <div class="grid">
+      <div class="cell"><div class="stage-cell demo-text"><span class="t-gradient">Gradient</span></div><span class="name">01 Gradient</span></div>
+      <div class="cell"><div class="stage-cell demo-text"><span class="t-glow">Glow</span></div><span class="name">02 Glow</span></div>
+      <div class="cell"><div class="stage-cell demo-text"><span class="t-neon">Neon</span></div><span class="name">03 Neon</span></div>
+      <div class="cell"><div class="stage-cell demo-text"><span class="t-rainbow">Rainbow</span></div><span class="name">04 Rainbow</span></div>
+      <div class="cell"><div class="stage-cell demo-text"><span class="t-shine">Shine</span></div><span class="name">05 Shine</span></div>
+      <div class="cell"><div class="stage-cell demo-text"><span class="t-cycle">Cycle</span></div><span class="name">06 Color Cycle</span></div>
+      <div class="cell"><div class="stage-cell demo-text"><span class="t-blur">Blur</span></div><span class="name">07 Blur</span></div>
+      <div class="cell"><div class="stage-cell demo-text"><span class="t-track">Track</span></div><span class="name">08 Tracking</span></div>
+      <div class="cell"><div class="stage-cell demo-text"><span class="t-shadow">Shadow</span></div><span class="name">09 Shadow Pop</span></div>
+      <div class="cell"><div class="stage-cell demo-text"><span class="t-3d">3D</span></div><span class="name">10 3D Extrude</span></div>
+      <div class="cell"><div class="stage-cell demo-text"><span class="t-skew">Skew</span></div><span class="name">11 Skew</span></div>
+      <div class="cell"><div class="stage-cell demo-text"><span class="t-scale">Scale</span></div><span class="name">12 Scale</span></div>
+      <div class="cell"><div class="stage-cell demo-text"><span class="t-fade">Fade</span></div><span class="name">13 Fade</span></div>
+      <div class="cell"><div class="stage-cell demo-text"><span class="t-wave">Wave</span></div><span class="name">14 Wave</span></div>
+      <div class="cell"><div class="stage-cell demo-text"><span class="t-jelly">Jelly</span></div><span class="name">15 Jelly</span></div>
+      <div class="cell"><div class="stage-cell demo-text"><span class="t-glitch">Glitch</span></div><span class="name">16 Glitch</span></div>
+      <div class="cell"><div class="stage-cell demo-text"><span class="t-marquee">Marquee →</span></div><span class="name">17 Marquee</span></div>
+      <div class="cell"><div class="stage-cell demo-text"><span class="t-highlight">Highlight</span></div><span class="name">18 Highlight</span></div>
+      <div class="cell"><div class="stage-cell demo-text"><span class="t-outline">Outline</span></div><span class="name">19 Outline</span></div>
+      <div class="cell"><div class="stage-cell demo-text"><span class="t-reveal">Reveal</span></div><span class="name">20 Reveal</span></div>
+      <div class="cell"><div class="stage-cell demo-text"><span class="t-flip3d">Flip3D</span></div><span class="name">21 3D Flip</span></div>
+      <div class="cell"><div class="stage-cell demo-text"><span class="t-vibrate">Vibrate</span></div><span class="name">22 Vibrate</span></div>
+      <div class="cell"><div class="stage-cell demo-text"><span class="t-typewriter">Typewriter</span></div><span class="name">23 Typewriter ⚙</span></div>
+      <div class="cell"><div class="stage-cell demo-text"><span class="t-perletter">Bounce</span></div><span class="name">24 Per-letter ⚙</span></div>
+      <div class="cell"><div class="stage-cell demo-text"><span class="t-scramble">DECODE</span></div><span class="name">25 Scramble ⚙</span></div>
+      <div class="cell"><div class="stage-cell demo-text"><span class="t-countup">2580</span></div><span class="name">26 Count Up ⚙</span></div>
+    </div>
+  </div>
+
+  <!-- Animation -->
+  <div class="section" id="sec-anim">
+    <div class="grid">
+      <div class="cell"><div class="stage-cell"><div class="a-spin"></div></div><span class="name">01 Spinner</span></div>
+      <div class="cell"><div class="stage-cell"><div class="a-pulse"></div></div><span class="name">02 Pulse</span></div>
+      <div class="cell"><div class="stage-cell"><div class="a-bounce"></div></div><span class="name">03 Bounce</span></div>
+      <div class="cell"><div class="stage-cell"><div class="a-rotate"></div></div><span class="name">04 Rotate</span></div>
+      <div class="cell"><div class="stage-cell"><div class="a-float"></div></div><span class="name">05 Float</span></div>
+      <div class="cell"><div class="stage-cell"><div class="a-beat"></div></div><span class="name">06 Heartbeat</span></div>
+      <div class="cell"><div class="stage-cell"><div class="a-flip"></div></div><span class="name">07 Flip</span></div>
+      <div class="cell"><div class="stage-cell"><div class="a-swing"></div></div><span class="name">08 Swing</span></div>
+      <div class="cell"><div class="stage-cell"><div class="a-bars"><span></span><span></span><span></span></div></div><span class="name">09 Bars</span></div>
+      <div class="cell"><div class="stage-cell"><div class="a-dots"><span></span><span></span><span></span></div></div><span class="name">10 Dots</span></div>
+      <div class="cell"><div class="stage-cell"><div class="a-ring"></div></div><span class="name">11 Ring</span></div>
+      <div class="cell"><div class="stage-cell"><div class="a-orbit"></div></div><span class="name">12 Orbit</span></div>
+      <div class="cell"><div class="stage-cell"><div class="a-breathe"></div></div><span class="name">13 Breathe</span></div>
+      <div class="cell"><div class="stage-cell"><div class="a-morph"></div></div><span class="name">14 Blob Morph</span></div>
+      <div class="cell"><div class="stage-cell"><div class="a-dualring"></div></div><span class="name">15 Dual Ring</span></div>
+      <div class="cell"><div class="stage-cell"><div class="a-conic"></div></div><span class="name">16 Conic</span></div>
+      <div class="cell"><div class="stage-cell"><div class="a-ripple2"></div></div><span class="name">17 Ripple</span></div>
+      <div class="cell"><div class="stage-cell"><div class="a-progress"></div></div><span class="name">18 Progress</span></div>
+      <div class="cell"><div class="stage-cell"><div class="a-skeleton"></div></div><span class="name">19 Skeleton</span></div>
+      <div class="cell"><div class="stage-cell"><div class="a-wave"><span></span><span></span><span></span><span></span><span></span></div></div><span class="name">20 Wave</span></div>
+      <div class="cell"><div class="stage-cell"><div class="a-flipcard"><div class="inner"><div class="face front"></div><div class="face back"></div></div></div></div><span class="name">21 Flip Card</span></div>
+      <div class="cell"><div class="stage-cell"><div class="a-cube"><div class="box"><div class="fr"></div><div class="bk"></div><div class="rt"></div><div class="lf"></div><div class="tp"></div><div class="bm"></div></div></div></div><span class="name">22 Cube 3D</span></div>
+      <div class="cell"><div class="stage-cell"><div class="a-bell">🔔</div></div><span class="name">23 Bell</span></div>
+      <div class="cell"><div class="stage-cell"><div class="a-check"><svg viewBox="0 0 60 60"><circle cx="30" cy="30" r="27"/><path d="M18 31 l8 8 l16 -18"/></svg></div></div><span class="name">24 Checkmark</span></div>
+      <div class="cell"><div class="stage-cell"><div class="a-toast"></div></div><span class="name">25 Toast</span></div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="overlay" id="overlay">
+    <div class="modal">
+      <button class="modal-close" id="closeBtn">✕</button>
+      <div class="modal-title" id="modalTitle">エフェクト</div>
+      <div class="preview-stage" id="stage"></div>
+
+      <div class="controls">
+        <div class="ctrl-row" data-kinds="button text anim"><label>速度</label><input type="range" id="cSpeed" min="40" max="220" value="100" step="5"><span class="ctrl-val" id="vSpeed">100%</span></div>
+        <div class="ctrl-row" data-kinds="button"><label>幅</label><input type="range" id="cWidth" min="100" max="260" value="146" step="2"><span class="ctrl-val" id="vWidth">146px</span></div>
+        <div class="ctrl-row" data-kinds="button"><label>高さ</label><input type="range" id="cHeight" min="36" max="96" value="50" step="2"><span class="ctrl-val" id="vHeight">50px</span></div>
+        <div class="ctrl-row" data-kinds="button text"><label>文字</label><input type="range" id="cFont" min="12" max="64" value="17" step="1"><span class="ctrl-val" id="vFont">17px</span></div>
+        <div class="ctrl-row" data-kinds="text"><label>字間</label><input type="range" id="cLetter" min="0" max="40" value="0" step="1"><span class="ctrl-val" id="vLetter">0em</span></div>
+        <div class="ctrl-row" data-kinds="text"><label>太さ</label><input type="range" id="cWeight" min="100" max="900" value="700" step="100"><span class="ctrl-val" id="vWeight">700</span></div>
+        <div class="ctrl-row" data-kinds="button"><label>角丸</label><input type="range" id="cRadius" min="0" max="32" value="10" step="1"><span class="ctrl-val" id="vRadius">10px</span></div>
+        <div class="ctrl-row" data-kinds="anim"><label>サイズ</label><input type="range" id="cSize" min="24" max="110" value="48" step="2"><span class="ctrl-val" id="vSize">48px</span></div>
+      </div>
+
+      <div class="text-row" id="textRow">
+        <label for="cText">文字</label>
+        <input type="text" id="cText" placeholder="表示する文字を入力" maxlength="40">
+      </div>
+
+      <button class="apply-btn" id="applyBtn">決定 — コードを生成</button>
+
+      <div class="code-wrap">
+        <div class="code-head"><span>コピー用コード</span><button class="copy-btn" id="copyBtn">コピー</button></div>
+        <pre class="code-out code-empty" id="codeOut">「決定」を押すとここにコードが表示されます</pre>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ----- Tabs -----
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById(tab.dataset.target).classList.add('active');
+      });
+    });
+
+    // ----- Modal refs -----
+    const overlay = document.getElementById('overlay');
+    const stage = document.getElementById('stage');
+    const modalTitle = document.getElementById('modalTitle');
+    const codeOut = document.getElementById('codeOut');
+    const textRow = document.getElementById('textRow');
+    const textInput = document.getElementById('cText');
+
+    const S = {
+      speed: ['cSpeed','vSpeed'], width:['cWidth','vWidth'], height:['cHeight','vHeight'],
+      font:['cFont','vFont'], letter:['cLetter','vLetter'], weight:['cWeight','vWeight'],
+      radius:['cRadius','vRadius'], size:['cSize','vSize'],
+    };
+    const el = {}; const val = {};
+    for (const k in S) { el[k] = document.getElementById(S[k][0]); val[k] = document.getElementById(S[k][1]); }
+
+    let current = { cls:null, kind:'button', label:'', inner:'', rawText:'', baseSpd:1.8, previewEl:null };
+
+    const PREFIX_KIND = { 'e-':'button', 't-':'text', 'a-':'anim' };
+    function getEffectClass(node) { return [...node.classList].find(c => /^[eta]-/.test(c)); }
+    function kindOf(cls) { return PREFIX_KIND[cls.slice(0,2)]; }
+    function tagFor(kind) { return kind==='button' ? 'button' : kind==='text' ? 'span' : 'div'; }
+
+    function escapeHtml(s){ return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+    function makeInner(text){ const safe = escapeHtml(text||''); return current.cls==='e-gtext' ? `<span>${safe}</span>` : safe; }
+
+    // ----- JS-driven text effects (each returns a stop() function) -----
+    function runTypewriter(el, text, dur){
+      var i = 0, dir = 1, timer;
+      function step(){
+        el.textContent = text.slice(0, i);
+        i += dir;
+        var delay = dur * 1000 / Math.max(text.length, 1) / 2.2;
+        if (i > text.length){ i = text.length; dir = -1; delay = dur * 500; }
+        else if (i < 0){ i = 0; dir = 1; delay = dur * 400; }
+        timer = setTimeout(step, Math.max(45, delay));
+      }
+      step();
+      return function(){ clearTimeout(timer); };
+    }
+    function runPerletter(el, text, dur){
+      el.textContent = '';
+      [].forEach.call(text, function(ch, idx){
+        var s = document.createElement('span');
+        s.textContent = ch === ' ' ? ' ' : ch;
+        s.style.animationDelay = (idx * 0.08) + 's';
+        el.appendChild(s);
+      });
+      return function(){};
+    }
+    function runScramble(el, text, dur){
+      var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&';
+      var timer, frame = 0;
+      function cycle(){
+        var reveal = Math.floor(frame / 2);
+        var out = '';
+        for (var k = 0; k < text.length; k++){
+          if (text[k] === ' '){ out += ' '; continue; }
+          out += k < reveal ? text[k] : chars[Math.floor(Math.random() * chars.length)];
+        }
+        el.textContent = out;
+        frame++;
+        if (reveal > text.length + 4) frame = 0;
+        timer = setTimeout(cycle, dur * 1000 / (text.length * 2.5 + 8));
+      }
+      cycle();
+      return function(){ clearTimeout(timer); };
+    }
+    function runCountup(el, text, dur){
+      var target = parseInt(text.replace(/[^0-9]/g, ''), 10) || 100;
+      var suffix = text.replace(/[0-9]/g, '');
+      var raf, start = null;
+      function loop(ts){
+        if (start === null) start = ts;
+        var p = Math.min(((ts - start) % (dur * 1000 + 700)) / (dur * 1000), 1);
+        el.textContent = Math.floor(p * target) + suffix;
+        raf = requestAnimationFrame(loop);
+      }
+      raf = requestAnimationFrame(loop);
+      return function(){ cancelAnimationFrame(raf); };
+    }
+    const RUNNERS = { 't-typewriter':runTypewriter, 't-perletter':runPerletter, 't-scramble':runScramble, 't-countup':runCountup };
+    const JS_CLASSES = new Set(Object.keys(RUNNERS));
+    function isJs(cls){ return JS_CLASSES.has(cls); }
+
+    function showRowsFor(kind) {
+      document.querySelectorAll('.ctrl-row').forEach(r => {
+        r.style.display = r.dataset.kinds.split(' ').includes(kind) ? 'grid' : 'none';
+      });
+      textRow.style.display = (kind === 'anim') ? 'none' : 'block';
+    }
+
+    function openModal(node, label) {
+      const cls = getEffectClass(node);
+      const kind = kindOf(cls);
+      current.cls = cls; current.kind = kind; current.label = label;
+
+      const spdStr = getComputedStyle(node).getPropertyValue('--spd').trim();
+      current.baseSpd = parseFloat(spdStr) || 1.8;
+
+      modalTitle.textContent = label;
+      showRowsFor(kind);
+
+      // defaults
+      el.speed.value = 100;
+      el.width.value = 146; el.height.value = 50; el.radius.value = 10;
+      el.letter.value = 0; el.weight.value = 700;
+      el.font.value = (kind === 'text') ? 34 : 17;
+      el.size.value = 48;
+
+      // inner content
+      if (kind === 'anim') {
+        current.inner = node.innerHTML; // fixed structure (e.g. bars/dots spans)
+      } else {
+        const t = isJs(cls) ? (node.dataset.fxText || node.textContent.trim()) : node.textContent.trim();
+        current.rawText = t;
+        textInput.value = t;
+        current.inner = isJs(cls) ? escapeHtml(t) : makeInner(t);
+      }
+
+      // build preview element
+      stage.innerHTML = '';
+      const pv = document.createElement(tagFor(kind));
+      pv.className = cls;
+      if (!isJs(cls)) pv.innerHTML = current.inner; // JS effects fill their own content
+      if (kind === 'text') pv.classList.add('demo-text');
+      stage.appendChild(pv);
+      current.previewEl = pv;
+
+      applyToPreview();
+      codeOut.textContent = '「決定」を押すとここにコードが表示されます';
+      codeOut.classList.add('code-empty');
+      overlay.classList.add('open');
+    }
+
+    function closeModal() {
+      if (current.previewEl && current.previewEl._fxStop) current.previewEl._fxStop();
+      overlay.classList.remove('open'); stage.innerHTML = '';
+    }
+
+    function readVals() {
+      const speedPct = +el.speed.value;
+      return {
+        speedPct,
+        dur: +(current.baseSpd * (100/speedPct)).toFixed(2),
+        width:+el.width.value, height:+el.height.value, font:+el.font.value,
+        letter:+el.letter.value, weight:+el.weight.value,
+        radius:+el.radius.value, size:+el.size.value,
+      };
+    }
+
+    function applyToPreview() {
+      const v = readVals();
+      val.speed.textContent = v.speedPct + '%';
+      val.width.textContent = v.width + 'px';
+      val.height.textContent = v.height + 'px';
+      val.font.textContent = v.font + 'px';
+      val.letter.textContent = (v.letter/100) + 'em';
+      val.weight.textContent = v.weight;
+      val.radius.textContent = v.radius + 'px';
+      val.size.textContent = v.size + 'px';
+
+      const pv = current.previewEl; if (!pv) return;
+      pv.style.setProperty('--spd', v.dur + 's');
+      if (current.kind === 'button') {
+        pv.style.width = v.width+'px'; pv.style.height = v.height+'px';
+        pv.style.fontSize = v.font+'px'; pv.style.borderRadius = v.radius+'px';
+      } else if (current.kind === 'text') {
+        pv.style.fontSize = v.font+'px';
+        pv.style.letterSpacing = (v.letter/100)+'em';
+        pv.style.fontWeight = v.weight;
+      } else {
+        pv.style.setProperty('--size', v.size+'px');
+      }
+      if (isJs(current.cls)) {
+        if (pv._fxStop) pv._fxStop();
+        pv._fxStop = RUNNERS[current.cls](pv, current.rawText, v.dur);
+      }
+    }
+
+    for (const k in el) el[k].addEventListener('input', applyToPreview);
+
+    textInput.addEventListener('input', () => {
+      if (current.kind === 'anim') return;
+      if (isJs(current.cls)) {
+        current.rawText = textInput.value;
+        current.inner = escapeHtml(textInput.value);
+        const pv = current.previewEl;
+        if (pv) { if (pv._fxStop) pv._fxStop(); pv._fxStop = RUNNERS[current.cls](pv, current.rawText, readVals().dur); }
+        return;
+      }
+      current.inner = makeInner(textInput.value);
+      if (current.previewEl) current.previewEl.innerHTML = current.inner;
+    });
+
+    // ----- Code generation from live stylesheet -----
+    function buildCode() {
+      const cls = current.cls, kind = current.kind, v = readVals();
+      const sel = '.' + cls;
+      const all = [...document.styleSheets[0].cssRules];
+      const matchSel = s => { s = s.trim(); return s===sel || s.startsWith(sel+'::') || s.startsWith(sel+':') || s.startsWith(sel+' '); };
+      const effectRules = all.filter(r => r.selectorText && r.selectorText.split(',').some(matchSel));
+
+      // Collect only the animation declarations (var(--spd) defeats animationName
+      // parsing, so read from text — but limit to `animation` to avoid matching
+      // CSS properties/values that share a keyframe's name, e.g. `inset:0`).
+      const animText = effectRules
+        .map(r => (r.cssText.match(/animation(?:-name)?\s*:[^;}]*/g) || []).join(' '))
+        .join(' ');
+      const allKf = all.filter(r => r.type === 7);
+      const kf = allKf.filter(r => new RegExp('\\b' + r.name + '\\b').test(animText));
+
+      const colors = ':root{--c1:#60a5fa;--c2:#a78bfa;--c3:#ec4899;--c4:#10b981;--c5:#f59e0b;--c6:#06b6d4;}';
+
+      let base, strip;
+      if (kind === 'button') {
+        base = `.fx{box-sizing:border-box;border:none;cursor:pointer;color:#fff;font-weight:600;display:flex;align-items:center;justify-content:center;width:${v.width}px;height:${v.height}px;font-size:${v.font}px;border-radius:${v.radius}px;--spd:${v.dur}s;}`;
+        strip = /--spd\s*:[^;}]*;?/g;
+      } else if (kind === 'text') {
+        base = `.fx{display:inline-block;font-family:inherit;font-size:${v.font}px;letter-spacing:${v.letter/100}em;font-weight:${v.weight};--spd:${v.dur}s;}`;
+        strip = /(--spd|font-size|letter-spacing|font-weight)\s*:[^;}]*;?/g;
+      } else {
+        base = `.fx{--size:${v.size}px;--spd:${v.dur}s;}`;
+        strip = /(--spd|--size)\s*:[^;}]*;?/g;
+      }
+
+      let effectCss = '';
+      effectRules.forEach(r => {
+        let t = r.cssText.split(sel).join('.fx').replace(strip, '');
+        // cssText drops -webkit-* longhands; re-inject so the copied code works
+        const wk = [];
+        if (r.style.getPropertyValue('-webkit-background-clip') === 'text') wk.push('-webkit-background-clip: text;');
+        const strokeW = r.style.getPropertyValue('-webkit-text-stroke-width');
+        if (strokeW) wk.push('-webkit-text-stroke: ' + strokeW + ' ' + (r.style.getPropertyValue('-webkit-text-stroke-color') || 'currentColor') + ';');
+        if (wk.length) t = t.replace('{', '{ ' + wk.join(' '));
+        effectCss += t + '\n';
+      });
+      let kfCss = ''; kf.forEach(r => { kfCss += r.cssText + '\n'; });
+
+      const html = `<${tagFor(kind)} class="fx">${current.inner}</${tagFor(kind)}>`;
+      const css = colors + '\n\n' + base + '\n\n' + effectCss + kfCss.trim();
+      let out = html + '\n\n<style>\n' + css + '\n</style>';
+
+      if (isJs(cls)) {
+        const fn = RUNNERS[cls];
+        out += '\n\n<scr' + 'ipt>\n(function(){\n  var dur = ' + v.dur + ';\n  ' + fn.toString()
+          + '\n  document.querySelectorAll(".fx").forEach(function(el){ ' + fn.name + '(el, el.textContent.trim(), dur); });\n})();\n</scr' + 'ipt>';
+      }
+      return out;
+    }
+
+    document.getElementById('applyBtn').addEventListener('click', () => {
+      codeOut.textContent = buildCode();
+      codeOut.classList.remove('code-empty');
+    });
+    document.getElementById('copyBtn').addEventListener('click', (e) => {
+      if (codeOut.classList.contains('code-empty')) { codeOut.textContent = buildCode(); codeOut.classList.remove('code-empty'); }
+      navigator.clipboard.writeText(codeOut.textContent);
+      const b = e.currentTarget, o = b.textContent; b.textContent = 'コピー済み';
+      setTimeout(() => { b.textContent = o; }, 1400);
+    });
+
+    // open on any cell click
+    document.querySelectorAll('.cell').forEach(cell => {
+      cell.addEventListener('click', () => {
+        const node = cell.querySelector('.stage-cell > *');
+        const label = cell.querySelector('.name').textContent;
+        openModal(node, label);
+      });
+    });
+
+    document.getElementById('closeBtn').addEventListener('click', closeModal);
+    overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+    // start JS-driven text effects in the gallery
+    JS_CLASSES.forEach(cls => {
+      document.querySelectorAll('.' + cls).forEach(node => {
+        node.dataset.fxText = node.textContent.trim();
+        const dur = parseFloat(getComputedStyle(node).getPropertyValue('--spd')) || 2;
+        node._fxStop = RUNNERS[cls](node, node.dataset.fxText, dur);
+      });
+    });
+  </script>
+</body>
+</html>
