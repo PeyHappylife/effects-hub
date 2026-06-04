@@ -407,6 +407,12 @@
     .a-toast { width:calc(var(--size)*2.4); height:calc(var(--size)*0.72); border-radius:10px; background:linear-gradient(135deg,#10b981,#06b6d4); --size:46px; --spd:3s; animation:atoast var(--spd) ease-in-out infinite; }
     @keyframes atoast { 0%,100%{transform:translateX(130%);opacity:0} 15%,75%{transform:translateX(0);opacity:1} }
 
+    .a-mailsend { font-size:var(--size); line-height:1; --size:42px; --spd:2.4s; animation:amailsend var(--spd) ease-in infinite; }
+    @keyframes amailsend { 0%{transform:translate(0,6px) scale(.85);opacity:0} 18%{transform:translate(0,0) scale(1);opacity:1} 50%{transform:translate(4px,-2px) scale(1);opacity:1} 80%,100%{transform:translate(38px,-36px) scale(.35);opacity:0} }
+
+    .a-mailrecv { font-size:var(--size); line-height:1; --size:42px; --spd:2.4s; animation:amailrecv var(--spd) ease-out infinite; }
+    @keyframes amailrecv { 0%{transform:translate(36px,-36px) scale(.35);opacity:0} 35%{transform:translate(0,-4px) scale(1);opacity:1} 45%{transform:translate(0,3px) scale(1.06)} 55%{transform:translate(0,0) scale(1)} 84%,100%{transform:translate(0,0) scale(1);opacity:1} }
+
     /* ===== Telop (動画用テロップ) ===== */
     .p-lower { font-size:12px; --spd:4s; display:inline-flex; align-items:center; background:rgba(15,20,30,.92); border-left:4px solid #60a5fa; padding:.5em .9em .5em .7em; border-radius:0 6px 6px 0; color:#fff; font-weight:700; white-space:nowrap; overflow:hidden; animation:plower var(--spd) ease-in-out infinite; }
     @keyframes plower { 0%{transform:translateX(-115%);opacity:0} 12%,80%{transform:translateX(0);opacity:1} 95%,100%{transform:translateX(-115%);opacity:0} }
@@ -653,6 +659,8 @@
       <div class="cell"><div class="stage-cell"><div class="a-bell">🔔</div></div><span class="name">23 Bell</span></div>
       <div class="cell"><div class="stage-cell"><div class="a-check"><svg viewBox="0 0 60 60"><circle cx="30" cy="30" r="27"/><path d="M18 31 l8 8 l16 -18"/></svg></div></div><span class="name">24 Checkmark</span></div>
       <div class="cell"><div class="stage-cell"><div class="a-toast"></div></div><span class="name">25 Toast</span></div>
+      <div class="cell"><div class="stage-cell"><div class="a-mailsend">✉️</div></div><span class="name">26 メール送信</span></div>
+      <div class="cell"><div class="stage-cell"><div class="a-mailrecv">✉️</div></div><span class="name">27 メール受信</span></div>
     </div>
   </div>
 
@@ -890,11 +898,27 @@
       val.count.textContent = n;
     }
 
+    // 本数を変えられるアニメ（Bars/Dots/Wave）
+    const REPEAT = {
+      'a-bars': { min:2, max:10, def:5, step:0.12 },
+      'a-dots': { min:2, max:8,  def:4, step:0.16 },
+      'a-wave': { min:3, max:12, def:6, step:0.10 },
+    };
+    function fillRepeat(container, cls, count){
+      container.innerHTML = '';
+      const step = REPEAT[cls].step;
+      for (let i = 0; i < count; i++){
+        const s = document.createElement('span');
+        s.style.animationDelay = (i * step).toFixed(2) + 's';
+        container.appendChild(s);
+      }
+    }
+
     function showRowsFor(kind) {
       document.querySelectorAll('.ctrl-row').forEach(r => {
         r.style.display = r.dataset.kinds.split(' ').includes(kind) ? 'grid' : 'none';
       });
-      document.getElementById('countRow').style.display = (current.cls === 'p-zawa') ? 'grid' : 'none';
+      document.getElementById('countRow').style.display = (current.cls === 'p-zawa' || REPEAT[current.cls]) ? 'grid' : 'none';
       document.getElementById('arRow').style.display = (kind === 'telop') ? 'grid' : 'none';
       textRow.style.display = (kind === 'anim') ? 'none' : 'block';
     }
@@ -925,7 +949,9 @@
       el.width.value = 146; el.height.value = 50; el.radius.value = 10;
       el.letter.value = 0; el.weight.value = 700;
       el.size.value = 48;
-      el.count.value = 16;
+      // 数スライダーの範囲は効果ごとに
+      if (REPEAT[cls]) { const R = REPEAT[cls]; el.count.min = R.min; el.count.max = R.max; el.count.step = 1; el.count.value = R.def; }
+      else { el.count.min = 4; el.count.max = 16; el.count.step = 1; el.count.value = 16; }
       // 文字スライダーは種類で範囲を変える（telop は実画面px相当）
       if (kind === 'telop') { el.font.min = 16; el.font.max = 200; el.font.step = 2; el.font.value = 56; }
       else if (kind === 'text') { el.font.min = 12; el.font.max = 64; el.font.step = 1; el.font.value = 34; }
@@ -956,6 +982,7 @@
       if (kind === 'text') pv.classList.add('demo-text');
       frame.appendChild(pv);
       current.previewEl = pv;
+      if (REPEAT[cls]) fillRepeat(pv, cls, +el.count.value); // 本数を反映
 
       applyToPreview();
       codeOut.textContent = '「決定」を押すとここにコードが表示されます';
@@ -1019,7 +1046,10 @@
     for (const k in el) el[k].addEventListener('input', applyToPreview);
 
     // 「ざわ…」の数スライダー → 再生成
-    el.count.addEventListener('input', fillZawaSync);
+    el.count.addEventListener('input', () => {
+      if (current.cls === 'p-zawa') fillZawaSync();
+      else if (REPEAT[current.cls] && current.previewEl) fillRepeat(current.previewEl, current.cls, +el.count.value);
+    });
 
     // アスペクト比トグル（16:9 / 9:16）
     document.querySelectorAll('.ar-btn').forEach(btn => {
@@ -1099,7 +1129,7 @@
       });
       let kfCss = ''; kf.forEach(r => { kfCss += r.cssText + '\n'; });
 
-      const inner = (kind === 'telop' && current.previewEl) ? current.previewEl.innerHTML : current.inner;
+      const inner = ((kind === 'telop' || kind === 'anim') && current.previewEl) ? current.previewEl.innerHTML : current.inner;
       const html = `<${tagFor(kind)} class="fx">${inner}</${tagFor(kind)}>`;
       const css = colors + '\n\n' + base + '\n\n' + effectCss + kfCss.trim();
       let out = html + '\n\n<style>\n' + css + '\n</style>';
