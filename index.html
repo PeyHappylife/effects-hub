@@ -376,6 +376,86 @@
     .a-toast { width:calc(var(--size)*2.4); height:calc(var(--size)*0.72); border-radius:10px; background:linear-gradient(135deg,#10b981,#06b6d4); --size:46px; --spd:3s; animation:atoast var(--spd) ease-in-out infinite; }
     @keyframes atoast { 0%,100%{transform:translateX(130%);opacity:0} 15%,75%{transform:translateX(0);opacity:1} }
 
+    /* ===== Telop (動画用テロップ) ===== */
+    .p-lower { font-size:12px; --spd:4s; display:inline-flex; align-items:center; background:rgba(15,20,30,.92); border-left:4px solid #60a5fa; padding:.5em .9em .5em .7em; border-radius:0 6px 6px 0; color:#fff; font-weight:700; white-space:nowrap; overflow:hidden; animation:plower var(--spd) ease-in-out infinite; }
+    @keyframes plower { 0%{transform:translateX(-115%);opacity:0} 12%,80%{transform:translateX(0);opacity:1} 95%,100%{transform:translateX(-115%);opacity:0} }
+
+    .p-ticker { font-size:12px; --spd:6s; display:inline-flex; align-items:center; max-width:15em; background:#0a0d14; border:1px solid #1e2433; border-radius:4px; overflow:hidden; color:#fff; }
+    .p-ticker .label { background:#ec4899; padding:.45em .6em; font-weight:800; white-space:nowrap; }
+    .p-ticker .scroll { position:relative; overflow:hidden; flex:1; padding:.45em 0; }
+    .p-ticker .txt { display:inline-block; white-space:nowrap; padding-left:100%; animation:pticker var(--spd) linear infinite; }
+    @keyframes pticker { to { transform:translateX(-100%); } }
+
+    .p-subtitle { font-size:13px; --spd:3.6s; display:inline-block; background:rgba(0,0,0,.66); color:#fff; padding:.4em .8em; border-radius:6px; font-weight:600; white-space:nowrap; animation:psub var(--spd) ease-in-out infinite; }
+    @keyframes psub { 0%{opacity:0;transform:translateY(8px)} 15%,82%{opacity:1;transform:translateY(0)} 100%{opacity:0;transform:translateY(8px)} }
+
+    .p-variety { font-size:24px; --spd:2.8s; display:inline-block; color:#ffe14d; font-weight:900; -webkit-text-stroke:2px #b91c1c; paint-order:stroke fill; text-shadow:3px 3px 0 rgba(0,0,0,.4); white-space:nowrap; animation:pvariety var(--spd) ease-in-out infinite; }
+    @keyframes pvariety { 0%{transform:scale(0);opacity:0} 18%{transform:scale(1.15)} 28%{transform:scale(1)} 82%{transform:scale(1);opacity:1} 100%{transform:scale(0);opacity:0} }
+
+    .p-bubble { font-size:13px; --spd:3s; position:relative; display:inline-block; background:#fff; color:#111; padding:.5em .85em; border-radius:12px; font-weight:700; white-space:nowrap; animation:pbubble var(--spd) ease-in-out infinite; }
+    .p-bubble::after { content:''; position:absolute; left:1.2em; bottom:-.5em; border:.5em solid transparent; border-top-color:#fff; border-bottom:0; }
+    @keyframes pbubble { 0%{transform:scale(.4);opacity:0} 16%{transform:scale(1.08)} 26%,82%{transform:scale(1);opacity:1} 100%{transform:scale(.4);opacity:0} }
+
+    .p-titlebar { font-size:15px; --spd:3.6s; display:inline-block; overflow:hidden; color:#fff; background:linear-gradient(90deg,#60a5fa,#a78bfa); padding:.45em 1em; border-radius:4px; font-weight:800; white-space:nowrap; -webkit-clip-path:inset(0 100% 0 0); clip-path:inset(0 100% 0 0); animation:ptitle var(--spd) ease-in-out infinite; }
+    @keyframes ptitle { 0%{clip-path:inset(0 100% 0 0)} 18%,80%{clip-path:inset(0 0 0 0)} 100%{clip-path:inset(0 0 0 100%)} }
+
+    .p-corner { font-size:12px; --spd:4s; display:inline-flex; align-items:center; gap:.45em; background:rgba(15,20,30,.92); border:1px solid #2a3346; border-radius:20px; padding:.35em .8em; color:#fff; font-weight:700; white-space:nowrap; animation:pcorner var(--spd) ease-in-out infinite; }
+    .p-corner::before { content:''; width:.55em; height:.55em; border-radius:50%; background:#10b981; flex-shrink:0; }
+    @keyframes pcorner { 0%{transform:translateX(120%);opacity:0} 14%,82%{transform:translateX(0);opacity:1} 100%{transform:translateX(120%);opacity:0} }
+
+    .p-flash { font-size:14px; --spd:1.6s; display:inline-block; background:#dc2626; color:#fff; padding:.45em 1em; border-radius:4px; font-weight:900; letter-spacing:.05em; white-space:nowrap; animation:pflash var(--spd) ease-in-out infinite; }
+    @keyframes pflash { 0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,.7);filter:brightness(1)} 50%{box-shadow:0 0 22px 4px rgba(220,38,38,.6);filter:brightness(1.25)} }
+
+    .p-caption { font-size:18px; --spd:3.4s; display:inline-block; color:#fff; font-weight:900; -webkit-text-stroke:4px #000; paint-order:stroke fill; text-shadow:0 2px 0 #000; white-space:nowrap; animation:pcap var(--spd) ease-in-out infinite; }
+    @keyframes pcap { 0%{opacity:0;transform:translateY(10px) scale(.9)} 14%,82%{opacity:1;transform:translateY(0) scale(1)} 100%{opacity:0;transform:translateY(10px) scale(.9)} }
+
+    .p-gradient { font-size:13px; --spd:4s; position:relative; display:inline-block; overflow:hidden; background:linear-gradient(135deg,#ec4899,#a78bfa); color:#fff; font-weight:800; padding:.5em 1em; border-radius:6px; white-space:nowrap; animation:pgrad var(--spd) ease-in-out infinite; }
+    .p-gradient::after { content:''; position:absolute; top:0; left:-60%; width:40%; height:100%; background:linear-gradient(110deg,transparent,rgba(255,255,255,.5),transparent); transform:skewX(-20deg); animation:pgradshine var(--spd) ease-in-out infinite; }
+    @keyframes pgrad { 0%{transform:translateX(-110%);opacity:0} 12%,82%{transform:translateX(0);opacity:1} 96%,100%{transform:translateX(-110%);opacity:0} }
+    @keyframes pgradshine { 0%,40%{left:-60%} 60%,100%{left:130%} }
+
+    .p-keyword { font-size:16px; --spd:3s; display:inline-block; color:#fde047; font-weight:800; background:linear-gradient(transparent 55%, rgba(253,224,71,.85) 55%); background-size:0% 100%; background-repeat:no-repeat; padding:0 .2em; white-space:nowrap; animation:pkw var(--spd) ease-in-out infinite; }
+    @keyframes pkw { 0%{background-size:0% 100%;color:#fde047} 22%{color:#1a1a1a} 30%,80%{background-size:100% 100%;color:#1a1a1a} 100%{background-size:0% 100%;color:#fde047} }
+
+    .p-impact { font-size:26px; --spd:2.6s; display:inline-block; color:#fff; font-weight:900; text-shadow:0 0 12px rgba(96,165,250,.8); white-space:nowrap; animation:pimpact var(--spd) cubic-bezier(.2,.8,.2,1) infinite; }
+    @keyframes pimpact { 0%{transform:scale(2.4);opacity:0;filter:blur(8px)} 16%{transform:scale(1);opacity:1;filter:blur(0)} 82%{transform:scale(1);opacity:1;filter:blur(0)} 100%{transform:scale(.8);opacity:0;filter:blur(3px)} }
+
+    .p-center { font-size:18px; --spd:3.8s; display:inline-block; color:#fff; font-weight:600; letter-spacing:.05em; white-space:nowrap; animation:pcenter var(--spd) ease-in-out infinite; }
+    @keyframes pcenter { 0%{opacity:0;letter-spacing:-.1em} 18%,80%{opacity:1;letter-spacing:.2em} 100%{opacity:0;letter-spacing:.45em} }
+
+    .p-comment { font-size:15px; --spd:5s; display:inline-block; color:#fff; font-weight:700; text-shadow:0 0 3px #000,1px 1px 2px #000; white-space:nowrap; animation:pcomment var(--spd) linear infinite; }
+    @keyframes pcomment { from{transform:translateX(110%)} to{transform:translateX(-110%)} }
+
+    .p-flip3d { font-size:16px; --spd:3.4s; display:inline-block; background:#1e2433; color:#fff; font-weight:800; padding:.5em 1em; border-radius:6px; white-space:nowrap; transform-style:preserve-3d; animation:ptflip3d var(--spd) ease-in-out infinite; }
+    @keyframes ptflip3d { 0%{transform:perspective(500px) rotateX(-90deg);opacity:0} 16%,80%{transform:perspective(500px) rotateX(0);opacity:1} 100%{transform:perspective(500px) rotateX(90deg);opacity:0} }
+
+    .p-glitch { font-size:18px; --spd:2.6s; display:inline-block; color:#fff; font-weight:800; white-space:nowrap; animation:ptglitch var(--spd) steps(1) infinite; }
+    @keyframes ptglitch { 0%,100%{transform:translate(0);text-shadow:none;opacity:1} 6%{opacity:0} 8%{opacity:1} 70%{transform:translate(0);text-shadow:none} 74%{transform:translate(-2px,1px);text-shadow:2px 0 #ec4899,-2px 0 #06b6d4} 78%{transform:translate(2px,-1px);text-shadow:-2px 0 #ec4899,2px 0 #06b6d4} 82%{transform:translate(0);text-shadow:none} }
+
+    .p-neon { font-size:18px; --spd:2.2s; display:inline-block; color:#fff; font-weight:700; padding:.4em .9em; border:2px solid #06b6d4; border-radius:8px; white-space:nowrap; animation:ptneon var(--spd) ease-in-out infinite; }
+    @keyframes ptneon { 0%,100%{color:#fff;text-shadow:0 0 6px #06b6d4,0 0 12px #06b6d4;box-shadow:0 0 6px #06b6d4,inset 0 0 6px #06b6d4} 47%,49%{color:#3a4250;text-shadow:none;box-shadow:none} 48%{color:#fff;text-shadow:0 0 6px #06b6d4} }
+
+    .p-stamp { font-size:20px; --spd:3s; display:inline-block; color:#dc2626; font-weight:900; border:3px solid #dc2626; border-radius:8px; padding:.18em .5em; white-space:nowrap; animation:ptstamp var(--spd) ease-out infinite; }
+    @keyframes ptstamp { 0%{transform:rotate(-12deg) scale(3);opacity:0} 10%{transform:rotate(-12deg) scale(1);opacity:1} 82%{transform:rotate(-12deg) scale(1);opacity:1} 100%{transform:rotate(-12deg) scale(1.1);opacity:0} }
+
+    .p-rainbow { font-size:18px; --spd:3s; display:inline-block; font-weight:900; background:linear-gradient(90deg,#ff4d4d,#ffe14d,#4dff88,#4db8ff,#a64dff,#ff4d4d); background-size:200% auto; -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:transparent; white-space:nowrap; animation:ptrainbow var(--spd) linear infinite; }
+    @keyframes ptrainbow { to { background-position: 200% center; } }
+
+    .p-badge { font-size:14px; --spd:3.2s; display:inline-flex; align-items:center; gap:.4em; background:linear-gradient(135deg,#f59e0b,#dc2626); color:#fff; font-weight:900; padding:.45em .9em; border-radius:6px; white-space:nowrap; animation:ptbadge var(--spd) ease-in-out infinite; }
+    .p-badge::before { content:'★'; }
+    @keyframes ptbadge { 0%{transform:scale(0) rotate(-20deg);opacity:0} 14%{transform:scale(1.15) rotate(0);opacity:1} 24%,82%{transform:scale(1) rotate(0);opacity:1} 100%{transform:scale(0) rotate(20deg);opacity:0} }
+
+    .p-doon { font-size:26px; --spd:2.8s; position:relative; display:inline-block; color:#fff; font-weight:900; -webkit-text-stroke:3px #dc2626; paint-order:stroke fill; text-shadow:0 0 14px rgba(220,38,38,.9); white-space:nowrap; animation:ptdoon var(--spd) cubic-bezier(.2,.7,.2,1) infinite; }
+    .p-doon::before { content:''; position:absolute; left:50%; top:50%; width:1.4em; height:1.4em; margin:-.7em 0 0 -.7em; border-radius:50%; z-index:-1; animation:ptdoonring var(--spd) ease-out infinite; }
+    @keyframes ptdoon { 0%{transform:scale(.2);opacity:0} 12%{transform:scale(1.45);opacity:1} 18%{transform:scale(.92)} 22%{transform:scale(1.08)} 26%{transform:scale(1)} 29%{transform:translate(-3px,2px)} 32%{transform:translate(3px,-2px)} 35%{transform:translate(-2px,-2px)} 38%,82%{transform:translate(0) scale(1);opacity:1} 100%{transform:scale(1.3);opacity:0} }
+    @keyframes ptdoonring { 0%,9%{box-shadow:0 0 0 0 rgba(220,38,38,.55);opacity:0} 12%{opacity:1} 42%{box-shadow:0 0 0 70px rgba(220,38,38,0);opacity:0} 100%{box-shadow:0 0 0 0 rgba(220,38,38,0);opacity:0} }
+
+    .p-zawa { position:relative; display:block; width:100%; height:7em; font-size:11px; --spd:3s; color:rgba(232,232,238,.72); font-weight:700; }
+    .p-zawa .txt { position:absolute; white-space:nowrap; text-shadow:0 1px 2px rgba(0,0,0,.55); animation:ptzawa var(--spd) ease-in-out infinite; }
+    @keyframes ptzawa { 0%,100%{opacity:0} 45%,55%{opacity:.85} }
+
+    .telop-cell { overflow:hidden; }
+
     /* ===================== Modal ===================== */
     .overlay { position: fixed; inset: 0; background: rgba(5,8,14,.78); backdrop-filter: blur(4px); display:none; align-items:center; justify-content:center; z-index:100; padding:1rem; }
     .overlay.open { display: flex; }
@@ -385,6 +465,13 @@
     .modal-title { font-size:1.1rem; font-weight:700; color:#60a5fa; margin-bottom:1.25rem; }
     .preview-stage { display:flex; align-items:center; justify-content:center; min-height:150px; background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.06); border-radius:12px; margin-bottom:1.25rem; overflow:hidden; }
     .preview-stage .demo-text { font-size:2rem; }
+    #frame { display:flex; align-items:center; justify-content:center; width:100%; min-height:150px; position:relative; overflow:hidden; }
+    #frame.ar-169 { width:100%; aspect-ratio:16/9; min-height:0; background:#05080e; border:1px solid rgba(255,255,255,.1); border-radius:6px; }
+    #frame.ar-916 { height:300px; aspect-ratio:9/16; width:auto; min-height:0; background:#05080e; border:1px solid rgba(255,255,255,.1); border-radius:6px; }
+
+    .ar-toggle { display:flex; gap:0.4rem; }
+    .ar-btn { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.18); color:#aaa; border-radius:6px; padding:0.3rem 0.6rem; font-size:0.78rem; font-family:inherit; cursor:pointer; }
+    .ar-btn.active { background:rgba(96,165,250,0.25); border-color:rgba(96,165,250,0.6); color:#fff; }
     .controls { display:flex; flex-direction:column; gap:.9rem; margin-bottom:1.25rem; }
     .ctrl-row { display:grid; grid-template-columns:64px 1fr 56px; align-items:center; gap:.6rem; }
     .ctrl-row label { font-size:.82rem; color:#aaa; }
@@ -430,6 +517,7 @@
     <button class="tab active" data-target="sec-button">🔘 ボタン</button>
     <button class="tab" data-target="sec-text">🔤 文字</button>
     <button class="tab" data-target="sec-anim">🎬 アニメーション</button>
+    <button class="tab" data-target="sec-telop">📺 テロップ</button>
   </div>
 
   <!-- Buttons -->
@@ -533,22 +621,52 @@
     </div>
   </div>
 
+  <!-- Telop -->
+  <div class="section" id="sec-telop">
+    <div class="grid">
+      <div class="cell"><div class="stage-cell telop-cell"><div class="p-lower"><span class="txt">名前テロップ</span></div></div><span class="name">01 ロワーサード</span></div>
+      <div class="cell"><div class="stage-cell telop-cell"><div class="p-ticker"><span class="label">速報</span><span class="scroll"><span class="txt">ニュース速報のテロップが流れます</span></span></div></div><span class="name">02 ティッカー</span></div>
+      <div class="cell"><div class="stage-cell telop-cell"><div class="p-subtitle"><span class="txt">字幕スタイル</span></div></div><span class="name">03 字幕</span></div>
+      <div class="cell"><div class="stage-cell telop-cell"><div class="p-variety"><span class="txt">超おもしろい</span></div></div><span class="name">04 バラエティ</span></div>
+      <div class="cell"><div class="stage-cell telop-cell"><div class="p-bubble"><span class="txt">ツッコミ！</span></div></div><span class="name">05 吹き出し</span></div>
+      <div class="cell"><div class="stage-cell telop-cell"><div class="p-titlebar"><span class="txt">タイトル</span></div></div><span class="name">06 タイトルワイプ</span></div>
+      <div class="cell"><div class="stage-cell telop-cell"><div class="p-corner"><span class="txt">コーナー名</span></div></div><span class="name">07 コーナー名</span></div>
+      <div class="cell"><div class="stage-cell telop-cell"><div class="p-flash"><span class="txt">速報</span></div></div><span class="name">08 速報フラッシュ</span></div>
+      <div class="cell"><div class="stage-cell telop-cell"><div class="p-caption"><span class="txt">テッテレー</span></div></div><span class="name">09 定番字幕</span></div>
+      <div class="cell"><div class="stage-cell telop-cell"><div class="p-gradient"><span class="txt">出演者名</span></div></div><span class="name">10 グラデ帯</span></div>
+      <div class="cell"><div class="stage-cell telop-cell"><div class="p-keyword"><span class="txt">重要ワード</span></div></div><span class="name">11 キーワード強調</span></div>
+      <div class="cell"><div class="stage-cell telop-cell"><div class="p-impact"><span class="txt">衝撃の事実</span></div></div><span class="name">12 インパクト</span></div>
+      <div class="cell"><div class="stage-cell telop-cell"><div class="p-center"><span class="txt">TITLE</span></div></div><span class="name">13 センタータイトル</span></div>
+      <div class="cell"><div class="stage-cell telop-cell"><div class="p-comment"><span class="txt">コメントが流れる</span></div></div><span class="name">14 コメント流れ</span></div>
+      <div class="cell"><div class="stage-cell telop-cell"><div class="p-flip3d"><span class="txt">回転ロゴ</span></div></div><span class="name">15 3D回転</span></div>
+      <div class="cell"><div class="stage-cell telop-cell"><div class="p-glitch"><span class="txt">GLITCH</span></div></div><span class="name">16 グリッチ</span></div>
+      <div class="cell"><div class="stage-cell telop-cell"><div class="p-neon"><span class="txt">ネオン</span></div></div><span class="name">17 ネオン管</span></div>
+      <div class="cell"><div class="stage-cell telop-cell"><div class="p-stamp"><span class="txt">認定</span></div></div><span class="name">18 スタンプ</span></div>
+      <div class="cell"><div class="stage-cell telop-cell"><div class="p-rainbow"><span class="txt">レインボー</span></div></div><span class="name">19 虹色</span></div>
+      <div class="cell"><div class="stage-cell telop-cell"><div class="p-badge"><span class="txt">No.1</span></div></div><span class="name">20 バッジ</span></div>
+      <div class="cell"><div class="stage-cell telop-cell"><div class="p-doon"><span class="txt">ドーン！！</span></div></div><span class="name">21 ドーン</span></div>
+      <div class="cell"><div class="stage-cell telop-cell"><div class="p-zawa"></div></div><span class="name">22 ざわ…(カイジ風)</span></div>
+    </div>
+  </div>
+
   <!-- Modal -->
   <div class="overlay" id="overlay">
     <div class="modal">
       <button class="modal-close" id="closeBtn">✕</button>
       <div class="modal-title" id="modalTitle">エフェクト</div>
-      <div class="preview-stage" id="stage"></div>
+      <div class="preview-stage" id="stage"><div id="frame"></div></div>
 
       <div class="controls">
-        <div class="ctrl-row" data-kinds="button text anim"><label>速度</label><input type="range" id="cSpeed" min="40" max="220" value="100" step="5"><span class="ctrl-val" id="vSpeed">100%</span></div>
+        <div class="ctrl-row" data-kinds="button text anim telop"><label>速度</label><input type="range" id="cSpeed" min="20" max="100" value="100" step="5"><span class="ctrl-val" id="vSpeed">100%</span></div>
         <div class="ctrl-row" data-kinds="button"><label>幅</label><input type="range" id="cWidth" min="100" max="260" value="146" step="2"><span class="ctrl-val" id="vWidth">146px</span></div>
         <div class="ctrl-row" data-kinds="button"><label>高さ</label><input type="range" id="cHeight" min="36" max="96" value="50" step="2"><span class="ctrl-val" id="vHeight">50px</span></div>
-        <div class="ctrl-row" data-kinds="button text"><label>文字</label><input type="range" id="cFont" min="12" max="64" value="17" step="1"><span class="ctrl-val" id="vFont">17px</span></div>
+        <div class="ctrl-row" data-kinds="button text telop"><label>文字</label><input type="range" id="cFont" min="12" max="64" value="17" step="1"><span class="ctrl-val" id="vFont">17px</span></div>
         <div class="ctrl-row" data-kinds="text"><label>字間</label><input type="range" id="cLetter" min="0" max="40" value="0" step="1"><span class="ctrl-val" id="vLetter">0em</span></div>
         <div class="ctrl-row" data-kinds="text"><label>太さ</label><input type="range" id="cWeight" min="100" max="900" value="700" step="100"><span class="ctrl-val" id="vWeight">700</span></div>
         <div class="ctrl-row" data-kinds="button"><label>角丸</label><input type="range" id="cRadius" min="0" max="32" value="10" step="1"><span class="ctrl-val" id="vRadius">10px</span></div>
         <div class="ctrl-row" data-kinds="anim"><label>サイズ</label><input type="range" id="cSize" min="24" max="110" value="48" step="2"><span class="ctrl-val" id="vSize">48px</span></div>
+        <div class="ctrl-row" data-kinds="zawa" id="countRow"><label>数</label><input type="range" id="cCount" min="4" max="16" value="16" step="1"><span class="ctrl-val" id="vCount">16</span></div>
+        <div class="ctrl-row" data-kinds="telop" id="arRow"><label>画面比</label><div class="ar-toggle"><button type="button" class="ar-btn active" data-ar="169">16:9</button><button type="button" class="ar-btn" data-ar="916">9:16</button></div><span></span></div>
       </div>
 
       <div class="text-row" id="textRow">
@@ -573,12 +691,17 @@
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         tab.classList.add('active');
         document.getElementById(tab.dataset.target).classList.add('active');
+        // テロップタブ表示時に「ざわ…」を（可視状態で）重なり回避配置
+        if (tab.dataset.target === 'sec-telop') {
+          document.querySelectorAll('#sec-telop .p-zawa').forEach(c => fillZawa(c, 'ざわ…', 16));
+        }
       });
     });
 
     // ----- Modal refs -----
     const overlay = document.getElementById('overlay');
     const stage = document.getElementById('stage');
+    const frame = document.getElementById('frame');
     const modalTitle = document.getElementById('modalTitle');
     const codeOut = document.getElementById('codeOut');
     const textRow = document.getElementById('textRow');
@@ -587,15 +710,18 @@
     const S = {
       speed: ['cSpeed','vSpeed'], width:['cWidth','vWidth'], height:['cHeight','vHeight'],
       font:['cFont','vFont'], letter:['cLetter','vLetter'], weight:['cWeight','vWeight'],
-      radius:['cRadius','vRadius'], size:['cSize','vSize'],
+      radius:['cRadius','vRadius'], size:['cSize','vSize'], count:['cCount','vCount'],
     };
     const el = {}; const val = {};
     for (const k in S) { el[k] = document.getElementById(S[k][0]); val[k] = document.getElementById(S[k][1]); }
 
-    let current = { cls:null, kind:'button', label:'', inner:'', rawText:'', baseSpd:1.8, previewEl:null };
+    let current = { cls:null, kind:'button', label:'', inner:'', rawText:'', baseSpd:1.8, previewEl:null, ar:'169' };
 
-    const PREFIX_KIND = { 'e-':'button', 't-':'text', 'a-':'anim' };
-    function getEffectClass(node) { return [...node.classList].find(c => /^[eta]-/.test(c)); }
+    // 16:9 は横1920px、9:16 は横1080px の実画面を基準にする
+    const REF_WIDTH = { '169': 1920, '916': 1080 };
+
+    const PREFIX_KIND = { 'e-':'button', 't-':'text', 'a-':'anim', 'p-':'telop' };
+    function getEffectClass(node) { return [...node.classList].find(c => /^[etap]-/.test(c)); }
     function kindOf(cls) { return PREFIX_KIND[cls.slice(0,2)]; }
     function tagFor(kind) { return kind==='button' ? 'button' : kind==='text' ? 'span' : 'div'; }
 
@@ -661,11 +787,87 @@
     const JS_CLASSES = new Set(Object.keys(RUNNERS));
     function isJs(cls){ return JS_CLASSES.has(cls); }
 
+    // 「ざわ…」を重ならないよう count 個生成（シャッフルしたグリッドの各セルに1個）
+    // ※ container が表示状態（レイアウト済み）のときに呼ぶこと
+    function fillZawa(container, word, count){
+      const safe = word || 'ざわ…';
+      container.innerHTML = '';
+      const cw = container.clientWidth || 300;
+      const ch = container.clientHeight || 150;
+      const gap = 6;
+
+      // 文字サイズを測る（指定 em で）。セルに収まる最大サイズを探す
+      const measure = (em) => {
+        const t = document.createElement('span');
+        t.className = 'txt';
+        t.textContent = safe;
+        t.style.cssText = `font-size:${em}em;left:0;top:0;visibility:hidden`;
+        container.appendChild(t);
+        const r = { w: t.offsetWidth, h: t.offsetHeight };
+        container.removeChild(t);
+        return r;
+      };
+
+      let sizeMax = 1.25, cols = 1, rows = 1;
+      for (let k = 0; k < 9; k++){
+        const m = measure(sizeMax);
+        cols = Math.max(1, Math.floor(cw / (m.w + gap)));
+        rows = Math.max(1, Math.floor(ch / (m.h + gap)));
+        if (cols * rows >= count || sizeMax <= 0.7) break;
+        sizeMax -= 0.07;
+      }
+      const sizeMin = Math.max(0.6, sizeMax - 0.4);
+      const n = Math.min(count, cols * rows); // 容量を超える分は重ならないよう間引く
+
+      // セル一覧をシャッフル
+      const cells = [];
+      for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) cells.push([c, r]);
+      for (let i = cells.length - 1; i > 0; i--){ const j = Math.floor(Math.random()*(i+1)); [cells[i],cells[j]]=[cells[j],cells[i]]; }
+
+      const cellW = cw / cols, cellH = ch / rows;
+      for (let i = 0; i < n; i++){
+        const [c, r] = cells[i];
+        const size  = sizeMin + Math.random() * (sizeMax - sizeMin);
+        const rot   = Math.random() * 22 - 11;
+        const delay = Math.random() * 2.6;
+        const s = document.createElement('span');
+        s.className = 'txt';
+        s.textContent = safe;
+        s.style.cssText = `font-size:${size.toFixed(2)}em;transform:rotate(${rot.toFixed(1)}deg);animation-delay:${delay.toFixed(2)}s;left:0;top:0;visibility:hidden`;
+        container.appendChild(s);
+        const w = s.offsetWidth, h = s.offsetHeight;
+        const jx = Math.max(0, cellW - w - 2), jy = Math.max(0, cellH - h - 2);
+        let lx = c * cellW + 1 + Math.random() * jx;
+        let ty = r * cellH + 1 + Math.random() * jy;
+        if (c === 0) lx -= w * 0.12; // 左端の列は少し画面外へ
+        s.style.left = (lx / cw * 100).toFixed(2) + '%';
+        s.style.top  = (ty / ch * 100).toFixed(2) + '%';
+        s.style.visibility = '';
+      }
+      return n; // 実際に配置した数
+    }
+
+    // ざわ…を生成し、スライダー値を実際の数に同期
+    function fillZawaSync() {
+      if (current.cls !== 'p-zawa' || !current.previewEl) return;
+      const n = fillZawa(current.previewEl, current.rawText, +el.count.value);
+      el.count.value = n;
+      val.count.textContent = n;
+    }
+
     function showRowsFor(kind) {
       document.querySelectorAll('.ctrl-row').forEach(r => {
         r.style.display = r.dataset.kinds.split(' ').includes(kind) ? 'grid' : 'none';
       });
+      document.getElementById('countRow').style.display = (current.cls === 'p-zawa') ? 'grid' : 'none';
+      document.getElementById('arRow').style.display = (kind === 'telop') ? 'grid' : 'none';
       textRow.style.display = (kind === 'anim') ? 'none' : 'block';
+    }
+
+    // フレームのアスペクト比を設定（telop のみ）
+    function setFrame(kind) {
+      frame.classList.remove('ar-169', 'ar-916');
+      if (kind === 'telop') frame.classList.add(current.ar === '916' ? 'ar-916' : 'ar-169');
     }
 
     function openModal(node, label) {
@@ -677,18 +879,32 @@
       current.baseSpd = parseFloat(spdStr) || 1.8;
 
       modalTitle.textContent = label;
+      current.ar = '169';
       showRowsFor(kind);
+      // aspect ボタンの見た目をリセット
+      document.querySelectorAll('.ar-btn').forEach(b => b.classList.toggle('active', b.dataset.ar === '169'));
+      setFrame(kind);
 
       // defaults
       el.speed.value = 100;
       el.width.value = 146; el.height.value = 50; el.radius.value = 10;
       el.letter.value = 0; el.weight.value = 700;
-      el.font.value = (kind === 'text') ? 34 : 17;
       el.size.value = 48;
+      el.count.value = 16;
+      // 文字スライダーは種類で範囲を変える（telop は実画面px相当）
+      if (kind === 'telop') { el.font.min = 16; el.font.max = 200; el.font.step = 2; el.font.value = 56; }
+      else if (kind === 'text') { el.font.min = 12; el.font.max = 64; el.font.step = 1; el.font.value = 34; }
+      else { el.font.min = 12; el.font.max = 64; el.font.step = 1; el.font.value = 17; }
 
       // inner content
       if (kind === 'anim') {
         current.inner = node.innerHTML; // fixed structure (e.g. bars/dots spans)
+      } else if (kind === 'telop') {
+        const slot = node.querySelector('.txt');
+        const t = slot ? slot.textContent.trim() : node.textContent.trim();
+        current.rawText = t;
+        textInput.value = t;
+        current.inner = node.innerHTML; // banner structure incl. editable .txt
       } else {
         const t = isJs(cls) ? (node.dataset.fxText || node.textContent.trim()) : node.textContent.trim();
         current.rawText = t;
@@ -697,23 +913,27 @@
       }
 
       // build preview element
-      stage.innerHTML = '';
+      frame.innerHTML = '';
       const pv = document.createElement(tagFor(kind));
       pv.className = cls;
-      if (!isJs(cls)) pv.innerHTML = current.inner; // JS effects fill their own content
+      if (kind === 'anim' || kind === 'telop' || !isJs(cls)) pv.innerHTML = current.inner; // JS effects fill their own content
+      if (cls === 'p-zawa') { pv.style.width = '100%'; pv.style.height = '100%'; } // フレーム全面に
       if (kind === 'text') pv.classList.add('demo-text');
-      stage.appendChild(pv);
+      frame.appendChild(pv);
       current.previewEl = pv;
 
       applyToPreview();
       codeOut.textContent = '「決定」を押すとここにコードが表示されます';
       codeOut.classList.add('code-empty');
       overlay.classList.add('open');
+      // overlay 表示後（レイアウト確定後）に実寸スケール再計算＆ざわ配置
+      applyToPreview();
+      if (cls === 'p-zawa') fillZawaSync();
     }
 
     function closeModal() {
       if (current.previewEl && current.previewEl._fxStop) current.previewEl._fxStop();
-      overlay.classList.remove('open'); stage.innerHTML = '';
+      overlay.classList.remove('open'); frame.innerHTML = '';
     }
 
     function readVals() {
@@ -723,7 +943,7 @@
         dur: +(current.baseSpd * (100/speedPct)).toFixed(2),
         width:+el.width.value, height:+el.height.value, font:+el.font.value,
         letter:+el.letter.value, weight:+el.weight.value,
-        radius:+el.radius.value, size:+el.size.value,
+        radius:+el.radius.value, size:+el.size.value, count:+el.count.value,
       };
     }
 
@@ -737,6 +957,7 @@
       val.weight.textContent = v.weight;
       val.radius.textContent = v.radius + 'px';
       val.size.textContent = v.size + 'px';
+      val.count.textContent = v.count;
 
       const pv = current.previewEl; if (!pv) return;
       pv.style.setProperty('--spd', v.dur + 's');
@@ -747,6 +968,10 @@
         pv.style.fontSize = v.font+'px';
         pv.style.letterSpacing = (v.letter/100)+'em';
         pv.style.fontWeight = v.weight;
+      } else if (current.kind === 'telop') {
+        // v.font は実画面(基準幅)でのpx。プレビュー枠の縮尺に合わせて表示
+        const scale = (frame.clientWidth || REF_WIDTH[current.ar]) / REF_WIDTH[current.ar];
+        pv.style.fontSize = (v.font * scale).toFixed(2) + 'px';
       } else {
         pv.style.setProperty('--size', v.size+'px');
       }
@@ -758,8 +983,27 @@
 
     for (const k in el) el[k].addEventListener('input', applyToPreview);
 
+    // 「ざわ…」の数スライダー → 再生成
+    el.count.addEventListener('input', fillZawaSync);
+
+    // アスペクト比トグル（16:9 / 9:16）
+    document.querySelectorAll('.ar-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        current.ar = btn.dataset.ar;
+        document.querySelectorAll('.ar-btn').forEach(b => b.classList.toggle('active', b === btn));
+        setFrame(current.kind);
+        applyToPreview(); // 枠サイズが変わったので実寸スケール再計算
+        fillZawaSync();
+      });
+    });
+
     textInput.addEventListener('input', () => {
       if (current.kind === 'anim') return;
+      if (current.kind === 'telop') {
+        current.rawText = textInput.value;
+        if (current.previewEl) current.previewEl.querySelectorAll('.txt').forEach(s => { s.textContent = textInput.value; });
+        return;
+      }
       if (isJs(current.cls)) {
         current.rawText = textInput.value;
         current.inner = escapeHtml(textInput.value);
@@ -797,6 +1041,9 @@
       } else if (kind === 'text') {
         base = `.fx{display:inline-block;font-family:inherit;font-size:${v.font}px;letter-spacing:${v.letter/100}em;font-weight:${v.weight};--spd:${v.dur}s;}`;
         strip = /(--spd|font-size|letter-spacing|font-weight)\s*:[^;}]*;?/g;
+      } else if (kind === 'telop') {
+        base = `.fx{display:inline-block;font-family:inherit;font-size:${v.font}px;--spd:${v.dur}s;}`;
+        strip = /(--spd|font-size)\s*:[^;}]*;?/g;
       } else {
         base = `.fx{--size:${v.size}px;--spd:${v.dur}s;}`;
         strip = /(--spd|--size)\s*:[^;}]*;?/g;
@@ -810,12 +1057,15 @@
         if (r.style.getPropertyValue('-webkit-background-clip') === 'text') wk.push('-webkit-background-clip: text;');
         const strokeW = r.style.getPropertyValue('-webkit-text-stroke-width');
         if (strokeW) wk.push('-webkit-text-stroke: ' + strokeW + ' ' + (r.style.getPropertyValue('-webkit-text-stroke-color') || 'currentColor') + ';');
+        const wclip = r.style.getPropertyValue('-webkit-clip-path');
+        if (wclip) wk.push('-webkit-clip-path: ' + wclip + ';');
         if (wk.length) t = t.replace('{', '{ ' + wk.join(' '));
         effectCss += t + '\n';
       });
       let kfCss = ''; kf.forEach(r => { kfCss += r.cssText + '\n'; });
 
-      const html = `<${tagFor(kind)} class="fx">${current.inner}</${tagFor(kind)}>`;
+      const inner = (kind === 'telop' && current.previewEl) ? current.previewEl.innerHTML : current.inner;
+      const html = `<${tagFor(kind)} class="fx">${inner}</${tagFor(kind)}>`;
       const css = colors + '\n\n' + base + '\n\n' + effectCss + kfCss.trim();
       let out = html + '\n\n<style>\n' + css + '\n</style>';
 
