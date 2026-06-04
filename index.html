@@ -189,6 +189,37 @@
     .e-arrow::after { content:' →'; display:inline-block; animation: arrow var(--spd) ease-in-out infinite; }
     @keyframes arrow { 0%,100%{transform:translateX(0)} 50%{transform:translateX(6px)} }
 
+    /* 33 Trace（光が枠を一周） */
+    .e-trace { position:relative; background:transparent; color:#fff; overflow:hidden; z-index:0; --spd:2s; }
+    .e-trace::before { content:''; position:absolute; z-index:-2; left:50%; top:50%; width:220%; height:220%; background:conic-gradient(from 0deg, transparent 0deg 300deg, #60a5fa 345deg, #a78bfa 360deg); animation:etrace var(--spd) linear infinite; }
+    .e-trace::after { content:''; position:absolute; z-index:-1; inset:2px; background:#161b26; border-radius:inherit; }
+    @keyframes etrace { from{transform:translate(-50%,-50%) rotate(0)} to{transform:translate(-50%,-50%) rotate(360deg)} }
+
+    /* 34 Snake（細い彗星が一周） */
+    .e-snake { position:relative; background:transparent; color:#fff; overflow:hidden; z-index:0; --spd:1.4s; }
+    .e-snake::before { content:''; position:absolute; z-index:-2; left:50%; top:50%; width:220%; height:220%; background:conic-gradient(from 0deg, transparent 0deg 330deg, #10b981 358deg, transparent 360deg); animation:esnake var(--spd) linear infinite; }
+    .e-snake::after { content:''; position:absolute; z-index:-1; inset:1.5px; background:#0f1622; border-radius:inherit; }
+    @keyframes esnake { from{transform:translate(-50%,-50%) rotate(0)} to{transform:translate(-50%,-50%) rotate(360deg)} }
+
+    /* 35 Runner（2つの光が追いかける） */
+    .e-runner { position:relative; background:transparent; color:#fff; overflow:hidden; z-index:0; --spd:2s; }
+    .e-runner::before { content:''; position:absolute; z-index:-2; left:50%; top:50%; width:220%; height:220%; background:conic-gradient(from 0deg, transparent 0deg 30deg, #ec4899 45deg, transparent 60deg 210deg, #f59e0b 225deg, transparent 240deg 360deg); animation:erunner var(--spd) linear infinite; }
+    .e-runner::after { content:''; position:absolute; z-index:-1; inset:2px; background:#161b26; border-radius:inherit; }
+    @keyframes erunner { from{transform:translate(-50%,-50%) rotate(0)} to{transform:translate(-50%,-50%) rotate(360deg)} }
+
+    /* 36 Marching（点線が枠を流れる） */
+    .e-marching { background-color:#161b26; color:#fff; --spd:0.6s;
+      background-image:
+        linear-gradient(90deg,#60a5fa 50%,transparent 0),
+        linear-gradient(90deg,#60a5fa 50%,transparent 0),
+        linear-gradient(0deg,#60a5fa 50%,transparent 0),
+        linear-gradient(0deg,#60a5fa 50%,transparent 0);
+      background-size:14px 2px,14px 2px,2px 14px,2px 14px;
+      background-position:0 0,0 100%,0 0,100% 0;
+      background-repeat:repeat-x,repeat-x,repeat-y,repeat-y;
+      animation:emarching var(--spd) linear infinite; }
+    @keyframes emarching { to { background-position:14px 0,-14px 100%,0 -14px,100% 14px; } }
+
     /* ===== Text effects ===== */
     .t-gradient { background:linear-gradient(90deg,#60a5fa,#ec4899,#60a5fa); background-size:200% auto; -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:transparent; --spd:2.5s; animation:tgrad var(--spd) linear infinite; }
     @keyframes tgrad { to { background-position: 200% center; } }
@@ -555,6 +586,10 @@
       <div class="cell"><div class="stage-cell"><button class="e-sweep">Sweep</button></div><span class="name">30 Sweep Border</span></div>
       <div class="cell"><div class="stage-cell"><button class="e-jelly">Jelly</button></div><span class="name">31 Jelly</span></div>
       <div class="cell"><div class="stage-cell"><button class="e-arrow">Arrow</button></div><span class="name">32 Arrow</span></div>
+      <div class="cell"><div class="stage-cell"><button class="e-trace">Trace</button></div><span class="name">33 Trace</span></div>
+      <div class="cell"><div class="stage-cell"><button class="e-snake">Snake</button></div><span class="name">34 Snake</span></div>
+      <div class="cell"><div class="stage-cell"><button class="e-runner">Runner</button></div><span class="name">35 Runner</span></div>
+      <div class="cell"><div class="stage-cell"><button class="e-marching">Marching</button></div><span class="name">36 Marching</span></div>
     </div>
   </div>
 
