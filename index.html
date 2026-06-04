@@ -404,6 +404,20 @@
     .copy-btn:hover { background:rgba(96,165,250,.28); }
     pre.code-out { background:rgba(0,0,0,.45); border:1px solid rgba(255,255,255,.08); border-radius:8px; padding:.9rem; font-family:'Monaco','Courier New',monospace; font-size:.72rem; line-height:1.5; color:#a0e7e5; white-space:pre; overflow:auto; max-height:240px; min-height:60px; }
     .code-empty { color:#555; font-style:italic; }
+
+    /* ===== Mobile: 横3列 ===== */
+    @media (max-width: 560px) {
+      body { padding: 0.8rem 0.5rem 2rem; }
+      h1 { font-size: 1.4rem; }
+      .tabs { flex-wrap: wrap; gap: 0.4rem; margin: 1rem 0 1.2rem; }
+      .tab { padding: 0.5rem 0.8rem; font-size: 0.8rem; }
+      .grid { grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+      .cell { padding: 0.55rem 0.25rem 0.4rem; gap: 0.4rem; }
+      .cell .name { font-size: 0.58rem; }
+      .stage-cell { min-height: 50px; overflow: hidden; }
+      .cell button { width: 100%; min-width: 0; height: 40px; font-size: 0.7rem; border-radius: 8px; }
+      .demo-text { font-size: 1rem; }
+    }
   </style>
 </head>
 <body>
@@ -836,6 +850,22 @@
     document.getElementById('closeBtn').addEventListener('click', closeModal);
     overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+    // アクセス回数を記録し、4回ごとに昇順／降順を入れ替える
+    // （下の方のボタンも目に留まるように）
+    (function rotateOrder(){
+      let visits = 1;
+      try {
+        visits = (parseInt(localStorage.getItem('fxVisits') || '0', 10) || 0) + 1;
+        localStorage.setItem('fxVisits', String(visits));
+      } catch (e) { /* localStorage 不可なら昇順のまま */ }
+      const descending = Math.floor((visits - 1) / 4) % 2 === 1;
+      if (descending) {
+        document.querySelectorAll('.grid').forEach(grid => {
+          [...grid.children].reverse().forEach(cell => grid.appendChild(cell));
+        });
+      }
+    })();
 
     // start JS-driven text effects in the gallery
     JS_CLASSES.forEach(cls => {
