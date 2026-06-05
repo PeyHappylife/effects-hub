@@ -220,6 +220,26 @@
       animation:emarching var(--spd) linear infinite; }
     @keyframes emarching { to { background-position:14px 0,-14px 100%,0 -14px,100% 14px; } }
 
+    /* ===== プロフィール / アカウントチップ（枠線をなぞる Trace 案） ===== */
+    /* アバター＋アカウント名のピル。枠線を光がぐるっとなぞる。文字＝アカウント名を編集可 */
+    .u-protrace { position:relative; overflow:hidden; z-index:0; display:inline-flex; align-items:center; gap:.55em; background:transparent; color:#fff; font-weight:700; border-radius:999px; padding:.4em 1.15em .4em .4em; font-size:.8rem; --spd:2.6s; }
+    .u-protrace::before { content:''; position:absolute; z-index:-2; left:50%; top:50%; width:48em; height:48em; background:conic-gradient(from 0deg, transparent 0deg 290deg, #60a5fa 338deg, #a78bfa 360deg); animation:uprotrace var(--spd) linear infinite; }
+    .u-protrace::after { content:''; position:absolute; z-index:-1; inset:2px; background:#161b26; border-radius:inherit; }
+    @keyframes uprotrace { from{transform:translate(-50%,-50%) rotate(0)} to{transform:translate(-50%,-50%) rotate(360deg)} }
+    .u-protrace .av { flex:0 0 auto; width:1.9em; height:1.9em; border-radius:50%; background:linear-gradient(135deg,#60a5fa,#a78bfa); position:relative; overflow:hidden; }
+    .u-protrace .av::before { content:''; position:absolute; left:50%; top:20%; width:34%; height:34%; border-radius:50%; background:#fff; transform:translateX(-50%); }
+    .u-protrace .av::after { content:''; position:absolute; left:50%; bottom:-10%; width:64%; height:50%; border-radius:50% 50% 42% 42%; background:#fff; transform:translateX(-50%); }
+    .u-protrace .txt { white-space:nowrap; line-height:1.1; }
+
+    /* 彗星バージョン：細い光が一周（緑） */
+    .u-prosnake { position:relative; overflow:hidden; z-index:0; display:inline-flex; align-items:center; gap:.55em; background:transparent; color:#fff; font-weight:700; border-radius:999px; padding:.4em 1.15em .4em .4em; font-size:.8rem; --spd:1.8s; }
+    .u-prosnake::before { content:''; position:absolute; z-index:-2; left:50%; top:50%; width:48em; height:48em; background:conic-gradient(from 0deg, transparent 0deg 328deg, #34d399 356deg, transparent 360deg); animation:uprotrace var(--spd) linear infinite; }
+    .u-prosnake::after { content:''; position:absolute; z-index:-1; inset:1.5px; background:#0f1622; border-radius:inherit; }
+    .u-prosnake .av { flex:0 0 auto; width:1.9em; height:1.9em; border-radius:50%; background:linear-gradient(135deg,#10b981,#34d399); position:relative; overflow:hidden; }
+    .u-prosnake .av::before { content:''; position:absolute; left:50%; top:20%; width:34%; height:34%; border-radius:50%; background:#fff; transform:translateX(-50%); }
+    .u-prosnake .av::after { content:''; position:absolute; left:50%; bottom:-10%; width:64%; height:50%; border-radius:50% 50% 42% 42%; background:#fff; transform:translateX(-50%); }
+    .u-prosnake .txt { white-space:nowrap; line-height:1.1; }
+
     /* ===== Text effects ===== */
     .t-gradient { background:linear-gradient(90deg,#60a5fa,#ec4899,#60a5fa); background-size:200% auto; -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:transparent; --spd:2.5s; animation:tgrad var(--spd) linear infinite; }
     @keyframes tgrad { to { background-position: 200% center; } }
@@ -649,6 +669,8 @@
       <div class="cell"><div class="stage-cell"><button class="e-snake">Snake</button></div><span class="name">34 Snake</span></div>
       <div class="cell"><div class="stage-cell"><button class="e-runner">Runner</button></div><span class="name">35 Runner</span></div>
       <div class="cell"><div class="stage-cell"><button class="e-marching">Marching</button></div><span class="name">36 Marching</span></div>
+      <div class="cell"><div class="stage-cell"><div class="u-protrace"><span class="av"></span><span class="txt">アカウント名</span></div></div><span class="name">37 アカウント枠なぞり</span></div>
+      <div class="cell"><div class="stage-cell"><div class="u-prosnake"><span class="av"></span><span class="txt">アカウント名</span></div></div><span class="name">38 アカウント彗星</span></div>
     </div>
   </div>
 
@@ -761,10 +783,10 @@
       <div class="preview-stage" id="stage"><div id="frame"></div></div>
 
       <div class="controls">
-        <div class="ctrl-row" data-kinds="button text anim telop"><label>速度</label><input type="range" id="cSpeed" min="20" max="100" value="100" step="5"><span class="ctrl-val" id="vSpeed">100%</span></div>
+        <div class="ctrl-row" data-kinds="button text anim telop profile"><label>速度</label><input type="range" id="cSpeed" min="20" max="100" value="100" step="5"><span class="ctrl-val" id="vSpeed">100%</span></div>
         <div class="ctrl-row" data-kinds="button"><label>幅</label><input type="range" id="cWidth" min="100" max="260" value="146" step="2"><span class="ctrl-val" id="vWidth">146px</span></div>
         <div class="ctrl-row" data-kinds="button"><label>高さ</label><input type="range" id="cHeight" min="36" max="96" value="50" step="2"><span class="ctrl-val" id="vHeight">50px</span></div>
-        <div class="ctrl-row" data-kinds="button text telop"><label>文字</label><input type="range" id="cFont" min="12" max="64" value="17" step="1"><span class="ctrl-val" id="vFont">17px</span></div>
+        <div class="ctrl-row" data-kinds="button text telop profile"><label>文字</label><input type="range" id="cFont" min="12" max="64" value="17" step="1"><span class="ctrl-val" id="vFont">17px</span></div>
         <div class="ctrl-row" data-kinds="text"><label>字間</label><input type="range" id="cLetter" min="0" max="40" value="0" step="1"><span class="ctrl-val" id="vLetter">0em</span></div>
         <div class="ctrl-row" data-kinds="text"><label>太さ</label><input type="range" id="cWeight" min="100" max="900" value="700" step="100"><span class="ctrl-val" id="vWeight">700</span></div>
         <div class="ctrl-row" data-kinds="button"><label>角丸</label><input type="range" id="cRadius" min="0" max="32" value="10" step="1"><span class="ctrl-val" id="vRadius">10px</span></div>
@@ -824,8 +846,8 @@
     // 16:9 は横1920px、9:16 は横1080px の実画面を基準にする
     const REF_WIDTH = { '169': 1920, '916': 1080 };
 
-    const PREFIX_KIND = { 'e-':'button', 't-':'text', 'a-':'anim', 'p-':'telop' };
-    function getEffectClass(node) { return [...node.classList].find(c => /^[etap]-/.test(c)); }
+    const PREFIX_KIND = { 'e-':'button', 't-':'text', 'a-':'anim', 'p-':'telop', 'u-':'profile' };
+    function getEffectClass(node) { return [...node.classList].find(c => /^[etapu]-/.test(c)); }
     function kindOf(cls) { return PREFIX_KIND[cls.slice(0,2)]; }
     function tagFor(kind) { return kind==='button' ? 'button' : kind==='text' ? 'span' : 'div'; }
 
@@ -1021,12 +1043,12 @@
       // inner content
       if (kind === 'anim') {
         current.inner = node.innerHTML; // fixed structure (e.g. bars/dots spans)
-      } else if (kind === 'telop') {
+      } else if (kind === 'telop' || kind === 'profile') {
         const slot = node.querySelector('.txt');
         const t = slot ? slot.textContent.trim() : node.textContent.trim();
         current.rawText = t;
         textInput.value = t;
-        current.inner = node.innerHTML; // banner structure incl. editable .txt
+        current.inner = node.innerHTML; // structure incl. avatar + editable .txt
       } else {
         const t = isJs(cls) ? (node.dataset.fxText || node.textContent.trim()) : node.textContent.trim();
         current.rawText = t;
@@ -1095,6 +1117,8 @@
         // v.font は実画面(基準幅)でのpx。プレビュー枠の縮尺に合わせて表示
         const scale = (frame.clientWidth || REF_WIDTH[current.ar]) / REF_WIDTH[current.ar];
         pv.style.fontSize = (v.font * scale).toFixed(2) + 'px';
+      } else if (current.kind === 'profile') {
+        pv.style.fontSize = v.font + 'px';
       } else {
         pv.style.setProperty('--size', v.size+'px');
       }
@@ -1125,7 +1149,7 @@
 
     textInput.addEventListener('input', () => {
       if (current.kind === 'anim') return;
-      if (current.kind === 'telop') {
+      if (current.kind === 'telop' || current.kind === 'profile') {
         current.rawText = textInput.value;
         if (current.previewEl) current.previewEl.querySelectorAll('.txt').forEach(s => { s.textContent = textInput.value; });
         return;
@@ -1170,6 +1194,9 @@
       } else if (kind === 'telop') {
         base = `.fx{display:inline-block;font-family:inherit;font-size:${v.font}px;--spd:${v.dur}s;}`;
         strip = /(--spd|font-size)\s*:[^;}]*;?/g;
+      } else if (kind === 'profile') {
+        base = `.fx{display:inline-flex;align-items:center;font-family:inherit;font-size:${v.font}px;--spd:${v.dur}s;}`;
+        strip = /(--spd|font-size)\s*:[^;}]*;?/g;
       } else {
         base = `.fx{--size:${v.size}px;--spd:${v.dur}s;}`;
         strip = /(--spd|--size)\s*:[^;}]*;?/g;
@@ -1190,7 +1217,7 @@
       });
       let kfCss = ''; kf.forEach(r => { kfCss += r.cssText + '\n'; });
 
-      const inner = ((kind === 'telop' || kind === 'anim') && current.previewEl) ? current.previewEl.innerHTML : current.inner;
+      const inner = ((kind === 'telop' || kind === 'anim' || kind === 'profile') && current.previewEl) ? current.previewEl.innerHTML : current.inner;
       const html = `<${tagFor(kind)} class="fx">${inner}</${tagFor(kind)}>`;
       const css = colors + '\n\n' + base + '\n\n' + effectCss + kfCss.trim();
       let out = html + '\n\n<style>\n' + css + '\n</style>';
