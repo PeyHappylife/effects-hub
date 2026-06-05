@@ -222,19 +222,20 @@
 
     /* ===== プロフィール / アカウントチップ（枠線をなぞる Trace 案） ===== */
     /* アバター＋アカウント名のピル。枠線を光がぐるっとなぞる。文字＝アカウント名を編集可 */
-    .u-protrace { position:relative; overflow:hidden; z-index:0; display:inline-flex; align-items:center; gap:.55em; background:transparent; color:var(--trace-fg,#fff); font-weight:700; border-radius:999px; padding:.4em 1.15em .4em .4em; font-size:.8rem; --spd:2.6s; }
-    .u-protrace::before { content:''; position:absolute; z-index:-2; left:50%; top:50%; width:48em; height:48em; background:var(--trace-grad, conic-gradient(from 0deg, transparent 0deg 290deg, #60a5fa 338deg, #a78bfa 360deg)); filter:blur(var(--trace-blur,0px)); animation:uprotrace var(--spd) linear infinite; }
-    .u-protrace::after { content:''; position:absolute; z-index:-1; inset:var(--trace-bw,2px); background:var(--trace-bg,#161b26); border-radius:inherit; }
-    @keyframes uprotrace { from{transform:translate(-50%,-50%) rotate(0)} to{transform:translate(-50%,-50%) rotate(360deg)} }
+    /* 回転は角度カスタムプロパティ --uang を補間（@property 登録で滑らかに回る） */
+    @property --uang { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+    .u-protrace { position:relative; z-index:0; display:inline-flex; align-items:center; gap:.55em; background:var(--trace-bg,#161b26); color:var(--trace-fg,#fff); font-weight:700; border-radius:999px; padding:.4em 1.15em .4em .4em; font-size:.8rem; --spd:2.6s; }
+    /* リング状の光。inset を負にして枠の外へ、padding を枠幅＋ボカシ分にして帯を確保。filter:blur が枠線をはみ出してグローになる（overflow:hidden なし＝外へにじむ） */
+    .u-protrace::before { content:''; position:absolute; z-index:-1; inset:calc(-1 * var(--trace-blur,4px)); border-radius:inherit; padding:calc(var(--trace-bw,2px) + var(--trace-blur,4px)); background:var(--trace-grad, repeating-conic-gradient(from var(--uang), transparent 0deg, transparent 290deg, #60a5fa 325deg, #a78bfa 360deg)); filter:blur(var(--trace-blur,4px)); -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude; animation:uprotrace var(--spd) linear infinite; pointer-events:none; }
+    @keyframes uprotrace { to { --uang:360deg; } }
     .u-protrace .av { flex:0 0 auto; width:1.9em; height:1.9em; border-radius:50%; background:linear-gradient(135deg,#60a5fa,#a78bfa); position:relative; overflow:hidden; }
     .u-protrace .av::before { content:''; position:absolute; left:50%; top:20%; width:34%; height:34%; border-radius:50%; background:#fff; transform:translateX(-50%); }
     .u-protrace .av::after { content:''; position:absolute; left:50%; bottom:-10%; width:64%; height:50%; border-radius:50% 50% 42% 42%; background:#fff; transform:translateX(-50%); }
     .u-protrace .txt { white-space:nowrap; line-height:1.1; }
 
     /* 彗星バージョン：細い光が一周（緑） */
-    .u-prosnake { position:relative; overflow:hidden; z-index:0; display:inline-flex; align-items:center; gap:.55em; background:transparent; color:var(--trace-fg,#fff); font-weight:700; border-radius:999px; padding:.4em 1.15em .4em .4em; font-size:.8rem; --spd:1.8s; }
-    .u-prosnake::before { content:''; position:absolute; z-index:-2; left:50%; top:50%; width:48em; height:48em; background:var(--trace-grad, conic-gradient(from 0deg, transparent 0deg 328deg, #34d399 356deg, transparent 360deg)); filter:blur(var(--trace-blur,0px)); animation:uprotrace var(--spd) linear infinite; }
-    .u-prosnake::after { content:''; position:absolute; z-index:-1; inset:var(--trace-bw,1.5px); background:var(--trace-bg,#0f1622); border-radius:inherit; }
+    .u-prosnake { position:relative; z-index:0; display:inline-flex; align-items:center; gap:.55em; background:var(--trace-bg,#0f1622); color:var(--trace-fg,#fff); font-weight:700; border-radius:999px; padding:.4em 1.15em .4em .4em; font-size:.8rem; --spd:1.8s; }
+    .u-prosnake::before { content:''; position:absolute; z-index:-1; inset:calc(-1 * var(--trace-blur,4px)); border-radius:inherit; padding:calc(var(--trace-bw,2px) + var(--trace-blur,4px)); background:var(--trace-grad, repeating-conic-gradient(from var(--uang), transparent 0deg, transparent 328deg, #34d399 356deg, transparent 360deg)); filter:blur(var(--trace-blur,4px)); -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude; animation:uprotrace var(--spd) linear infinite; pointer-events:none; }
     .u-prosnake .av { flex:0 0 auto; width:1.9em; height:1.9em; border-radius:50%; background:linear-gradient(135deg,#10b981,#34d399); position:relative; overflow:hidden; }
     .u-prosnake .av::before { content:''; position:absolute; left:50%; top:20%; width:34%; height:34%; border-radius:50%; background:#fff; transform:translateX(-50%); }
     .u-prosnake .av::after { content:''; position:absolute; left:50%; bottom:-10%; width:64%; height:50%; border-radius:50% 50% 42% 42%; background:#fff; transform:translateX(-50%); }
@@ -1115,7 +1116,7 @@
       const a0 = (period - lightW).toFixed(2);
       const a1 = (period - lightW/2).toFixed(2);
       const a2 = period.toFixed(2);
-      return `repeating-conic-gradient(from 0deg, transparent 0deg, transparent ${a0}deg, ${color} ${a1}deg, transparent ${a2}deg)`;
+      return `repeating-conic-gradient(from var(--uang), transparent 0deg, transparent ${a0}deg, ${color} ${a1}deg, transparent ${a2}deg)`;
     }
 
     function applyToPreview() {
@@ -1249,6 +1250,11 @@
         if (strokeW) wk.push('-webkit-text-stroke: ' + strokeW + ' ' + (r.style.getPropertyValue('-webkit-text-stroke-color') || 'currentColor') + ';');
         const wclip = r.style.getPropertyValue('-webkit-clip-path');
         if (wclip) wk.push('-webkit-clip-path: ' + wclip + ';');
+        // cssText も -webkit-mask / -webkit-mask-composite を落とすことがあるので補う
+        ['-webkit-mask', '-webkit-mask-composite'].forEach(p => {
+          const val = r.style.getPropertyValue(p);
+          if (val && !new RegExp(p + '\\s*:').test(t)) wk.push(p + ': ' + val + ';');
+        });
         if (wk.length) t = t.replace('{', '{ ' + wk.join(' '));
         effectCss += t + '\n';
       });
@@ -1256,7 +1262,12 @@
 
       const inner = ((kind === 'telop' || kind === 'anim' || kind === 'profile') && current.previewEl) ? current.previewEl.innerHTML : current.inner;
       const html = `<${tagFor(kind)} class="fx">${inner}</${tagFor(kind)}>`;
-      const css = colors + '\n\n' + base + '\n\n' + effectCss + kfCss.trim();
+      // @property（--uang 等）も拾ってコードに含める（角度補間に必須）
+      const bodyCss = base + '\n\n' + effectCss + kfCss.trim();
+      const propCss = all
+        .filter(r => r.constructor && r.constructor.name === 'CSSPropertyRule' && bodyCss.includes(r.name))
+        .map(r => r.cssText).join('\n');
+      const css = (propCss ? propCss + '\n\n' : '') + colors + '\n\n' + bodyCss;
       let out = html + '\n\n<style>\n' + css + '\n</style>';
 
       if (isJs(cls)) {
