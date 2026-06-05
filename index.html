@@ -222,9 +222,9 @@
 
     /* ===== プロフィール / アカウントチップ（枠線をなぞる Trace 案） ===== */
     /* アバター＋アカウント名のピル。枠線を光がぐるっとなぞる。文字＝アカウント名を編集可 */
-    .u-protrace { position:relative; overflow:hidden; z-index:0; display:inline-flex; align-items:center; gap:.55em; background:transparent; color:#fff; font-weight:700; border-radius:999px; padding:.4em 1.15em .4em .4em; font-size:.8rem; --spd:2.6s; }
+    .u-protrace { position:relative; overflow:hidden; z-index:0; display:inline-flex; align-items:center; gap:.55em; background:transparent; color:var(--trace-fg,#fff); font-weight:700; border-radius:999px; padding:.4em 1.15em .4em .4em; font-size:.8rem; --spd:2.6s; }
     .u-protrace::before { content:''; position:absolute; z-index:-2; left:50%; top:50%; width:48em; height:48em; background:var(--trace-grad, conic-gradient(from 0deg, transparent 0deg 290deg, #60a5fa 338deg, #a78bfa 360deg)); filter:blur(var(--trace-blur,0px)); animation:uprotrace var(--spd) linear infinite; }
-    .u-protrace::after { content:''; position:absolute; z-index:-1; inset:2px; background:#161b26; border-radius:inherit; }
+    .u-protrace::after { content:''; position:absolute; z-index:-1; inset:var(--trace-bw,2px); background:var(--trace-bg,#161b26); border-radius:inherit; }
     @keyframes uprotrace { from{transform:translate(-50%,-50%) rotate(0)} to{transform:translate(-50%,-50%) rotate(360deg)} }
     .u-protrace .av { flex:0 0 auto; width:1.9em; height:1.9em; border-radius:50%; background:linear-gradient(135deg,#60a5fa,#a78bfa); position:relative; overflow:hidden; }
     .u-protrace .av::before { content:''; position:absolute; left:50%; top:20%; width:34%; height:34%; border-radius:50%; background:#fff; transform:translateX(-50%); }
@@ -232,9 +232,9 @@
     .u-protrace .txt { white-space:nowrap; line-height:1.1; }
 
     /* 彗星バージョン：細い光が一周（緑） */
-    .u-prosnake { position:relative; overflow:hidden; z-index:0; display:inline-flex; align-items:center; gap:.55em; background:transparent; color:#fff; font-weight:700; border-radius:999px; padding:.4em 1.15em .4em .4em; font-size:.8rem; --spd:1.8s; }
+    .u-prosnake { position:relative; overflow:hidden; z-index:0; display:inline-flex; align-items:center; gap:.55em; background:transparent; color:var(--trace-fg,#fff); font-weight:700; border-radius:999px; padding:.4em 1.15em .4em .4em; font-size:.8rem; --spd:1.8s; }
     .u-prosnake::before { content:''; position:absolute; z-index:-2; left:50%; top:50%; width:48em; height:48em; background:var(--trace-grad, conic-gradient(from 0deg, transparent 0deg 328deg, #34d399 356deg, transparent 360deg)); filter:blur(var(--trace-blur,0px)); animation:uprotrace var(--spd) linear infinite; }
-    .u-prosnake::after { content:''; position:absolute; z-index:-1; inset:1.5px; background:#0f1622; border-radius:inherit; }
+    .u-prosnake::after { content:''; position:absolute; z-index:-1; inset:var(--trace-bw,1.5px); background:var(--trace-bg,#0f1622); border-radius:inherit; }
     .u-prosnake .av { flex:0 0 auto; width:1.9em; height:1.9em; border-radius:50%; background:linear-gradient(135deg,#10b981,#34d399); position:relative; overflow:hidden; }
     .u-prosnake .av::before { content:''; position:absolute; left:50%; top:20%; width:34%; height:34%; border-radius:50%; background:#fff; transform:translateX(-50%); }
     .u-prosnake .av::after { content:''; position:absolute; left:50%; bottom:-10%; width:64%; height:50%; border-radius:50% 50% 42% 42%; background:#fff; transform:translateX(-50%); }
@@ -796,7 +796,10 @@
         <div class="ctrl-row" data-kinds="telop" id="arRow"><label>画面比</label><div class="ar-toggle"><button type="button" class="ar-btn active" data-ar="169">16:9</button><button type="button" class="ar-btn" data-ar="916">9:16</button></div><span></span></div>
         <div class="ctrl-row" data-kinds="profile"><label>光の数</label><input type="range" id="cLights" min="1" max="6" value="1" step="1"><span class="ctrl-val" id="vLights">1</span></div>
         <div class="ctrl-row" data-kinds="profile"><label>ボカシ</label><input type="range" id="cBlur" min="0" max="32" value="4" step="1"><span class="ctrl-val" id="vBlur">4px</span></div>
-        <div class="ctrl-row" data-kinds="profile"><label>色</label><input type="color" id="cColor" value="#a78bfa"><span class="ctrl-val" id="vColor">#a78bfa</span></div>
+        <div class="ctrl-row" data-kinds="profile"><label>枠幅</label><input type="range" id="cBorder" min="1" max="10" value="2" step="1"><span class="ctrl-val" id="vBorder">2px</span></div>
+        <div class="ctrl-row" data-kinds="profile"><label>光の色</label><input type="color" id="cColor" value="#a78bfa"><span class="ctrl-val" id="vColor">#a78bfa</span></div>
+        <div class="ctrl-row" data-kinds="profile"><label>文字色</label><input type="color" id="cFg" value="#ffffff"><span class="ctrl-val" id="vFg">#ffffff</span></div>
+        <div class="ctrl-row" data-kinds="profile"><label>背景色</label><input type="color" id="cBg" value="#161b26"><span class="ctrl-val" id="vBg">#161b26</span></div>
       </div>
 
       <div class="text-row" id="textRow">
@@ -842,6 +845,7 @@
       font:['cFont','vFont'], letter:['cLetter','vLetter'], weight:['cWeight','vWeight'],
       radius:['cRadius','vRadius'], size:['cSize','vSize'], count:['cCount','vCount'],
       lights:['cLights','vLights'], blur:['cBlur','vBlur'], color:['cColor','vColor'],
+      border:['cBorder','vBorder'], fg:['cFg','vFg'], bg:['cBg','vBg'],
     };
     const el = {}; const val = {};
     for (const k in S) { el[k] = document.getElementById(S[k][0]); val[k] = document.getElementById(S[k][1]); }
@@ -1037,8 +1041,10 @@
       el.width.value = 146; el.height.value = 50; el.radius.value = 10;
       el.letter.value = 0; el.weight.value = 700;
       el.size.value = 48;
-      el.lights.value = 1; el.blur.value = 4;
+      el.lights.value = 1; el.blur.value = 4; el.border.value = 2;
+      el.fg.value = '#ffffff';
       el.color.value = (cls === 'u-prosnake') ? '#34d399' : '#a78bfa';
+      el.bg.value = (cls === 'u-prosnake') ? '#0f1622' : '#161b26';
       // 数スライダーの範囲は効果ごとに
       if (REPEAT[cls]) { const R = REPEAT[cls]; el.count.min = R.min; el.count.max = R.max; el.count.step = 1; el.count.value = R.def; }
       else { el.count.min = 4; el.count.max = 16; el.count.step = 1; el.count.value = 16; }
@@ -1097,6 +1103,7 @@
         letter:+el.letter.value, weight:+el.weight.value,
         radius:+el.radius.value, size:+el.size.value, count:+el.count.value,
         lights:+el.lights.value, blur:+el.blur.value, color:el.color.value,
+        border:+el.border.value, fg:el.fg.value, bg:el.bg.value,
       };
     }
 
@@ -1125,6 +1132,9 @@
       val.lights.textContent = v.lights;
       val.blur.textContent = v.blur + 'px';
       val.color.textContent = v.color;
+      val.border.textContent = v.border + 'px';
+      val.fg.textContent = v.fg;
+      val.bg.textContent = v.bg;
 
       const pv = current.previewEl; if (!pv) return;
       pv.style.setProperty('--spd', v.dur + 's');
@@ -1143,6 +1153,9 @@
         pv.style.fontSize = v.font + 'px';
         pv.style.setProperty('--trace-grad', traceGradient(v.lights, v.color));
         pv.style.setProperty('--trace-blur', v.blur + 'px');
+        pv.style.setProperty('--trace-bw', v.border + 'px');
+        pv.style.setProperty('--trace-fg', v.fg);
+        pv.style.setProperty('--trace-bg', v.bg);
       } else {
         pv.style.setProperty('--size', v.size+'px');
       }
@@ -1219,8 +1232,8 @@
         base = `.fx{display:inline-block;font-family:inherit;font-size:${v.font}px;--spd:${v.dur}s;}`;
         strip = /(--spd|font-size)\s*:[^;}]*;?/g;
       } else if (kind === 'profile') {
-        base = `.fx{display:inline-flex;align-items:center;font-family:inherit;font-size:${v.font}px;--spd:${v.dur}s;--trace-grad:${traceGradient(v.lights, v.color)};--trace-blur:${v.blur}px;}`;
-        strip = /(--spd|--trace-grad|--trace-blur|font-size)\s*:[^;}]*;?/g;
+        base = `.fx{display:inline-flex;align-items:center;font-family:inherit;font-size:${v.font}px;--spd:${v.dur}s;--trace-grad:${traceGradient(v.lights, v.color)};--trace-blur:${v.blur}px;--trace-bw:${v.border}px;--trace-fg:${v.fg};--trace-bg:${v.bg};}`;
+        strip = /(--spd|--trace-grad|--trace-blur|--trace-bw|--trace-fg|--trace-bg|font-size)\s*:[^;}]*;?/g;
       } else {
         base = `.fx{--size:${v.size}px;--spd:${v.dur}s;}`;
         strip = /(--spd|--size)\s*:[^;}]*;?/g;
