@@ -1318,6 +1318,15 @@
       }
     })();
 
+    // アクセスするたびに、最初に開くタブ（ボタン／文字／アニメ／テロップ）を
+    // ランダムに選ぶ
+    (function randomTab(){
+      const tabs = [...document.querySelectorAll('.tab')];
+      if (!tabs.length) return;
+      const pick = tabs[Math.floor(Math.random() * tabs.length)];
+      pick.click(); // タブ切替の既存処理（active 付け替え＋ざわ…配置など）を流用
+    })();
+
     // start JS-driven text effects in the gallery
     JS_CLASSES.forEach(cls => {
       document.querySelectorAll('.' + cls).forEach(node => {
