@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>プロフィールアイコン アニメーションカタログ</title>
+    <!-- Tailwind CSS (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* CSS変数による動的スタイル管理 */
+        :root {
+            --border-width: 4px;
+            --shadow-intensity: 10px;
+            --effect-blur: 0px;
+            --icon-color: #3b82f6;
+            --speed: 1.8s; /* 時間差を際立たせるための基準速度 */
+            --line-thickness: 3px;
+        }
+
+        /* プレビューアイコン共通スタイル */
+        .avatar-preview-element {
+            border-width: var(--border-width) !important;
+            border-color: var(--icon-color) !important;
+            filter: blur(var(--effect-blur)) !important;
+            box-shadow: 0 0 var(--shadow-intensity) var(--icon-color) !important;
+            animation-duration: var(--speed) !important;
+            --shadow-color: var(--icon-color);
+        }
+
+        /* プレビュー用の横線に背景色を確実に設定 */
+        .name-line-el {
+            background-color: var(--icon-color) !important;
+            height: var(--line-thickness) !important;
+        }
+
+        /* ==========================================
+           1. 出現（In）パターン：写真出現してから横線と名前がポップアップ
+           ========================================== */
+        @keyframes nameLineIn {
+            0%, 40% { width: 0; opacity: 0; }
+            70%, 100% { width: 100%; opacity: 1; }
+        }
+        @keyframes nameTextIn {
+            0%, 62% { opacity: 0; transform: translateY(12px); }
+            82%, 100% { opacity: 1; transform: translateY(0); }
+        }
+
+        /* アバター個別出現 */
+        @keyframes fadeIn { 0% { opacity: 0; } 40%, 100% { opacity: 1; } }
+        @keyframes scaleIn { 0% { transform: scale(0); opacity: 0; } 40%, 100% { transform: scale(1); opacity: 1; } }
+        @keyframes slideUp { 0% { transform: translateY(40px); opacity: 0; } 40%, 100% { transform: translateY(0); opacity: 1; } }
+        @keyframes slideDown { 0% { transform: translateY(-40px); opacity: 0; } 40%, 100% { transform: translateY(0); opacity: 1; } }
+        @keyframes slideLeft { 0% { transform: translateX(40px); opacity: 0; } 40%, 100% { transform: translateX(0); opacity: 1; } }
+        @keyframes slideRight { 0% { transform: translateX(-40px); opacity: 0; } 40%, 100% { transform: translateX(0); opacity: 1; } }
+        @keyframes rotateIn { 0% { transform: rotate(-180deg) scale(0); opacity: 0; } 45%, 100% { transform: rotate(0) scale(1); opacity: 1; } }
+        @keyframes flipInX { 0% { transform: perspective(400px) rotateX(90deg); opacity: 0; } 45%, 100% { transform: perspective(400px) rotateX(0); opacity: 1; } }
+        @keyframes flipInY { 0% { transform: perspective(400px) rotateY(90deg); opacity: 0; } 45%, 100% { transform: perspective(400px) rotateY(0); opacity: 1; } }
+        @keyframes bounceIn { 0% { transform: scale(0.3); opacity: 0; } 25% { transform: scale(1.08); } 35% { transform: scale(0.9); } 45%, 100% { transform: scale(1); opacity: 1; } }
+        @keyframes rollIn { 0% { transform: translateX(-100%) rotate(-120deg); opacity: 0; } 45%, 100% { transform: translateX(0px) rotate(0deg); opacity: 1; } }
+        @keyframes blurIn { 0% { filter: blur(15px); opacity: 0; } 40%, 100% { filter: blur(0); opacity: 1; } }
+        /* P13. Pop Bounce In (ポップアップしながら跳ねて着地) */
+        @keyframes popBounceIn { 0% { transform: scale(0) translateY(20px); opacity: 0; } 20% { transform: scale(1.15) translateY(-10px); opacity: 1; } 30% { transform: scale(0.92) translateY(0); } 38% { transform: scale(1.04) translateY(-4px); } 45%, 100% { transform: scale(1) translateY(0); opacity: 1; } }
+
+        /* ==========================================
+           2. 表示中（Loop）パターン：枠線、横線、名前が同じ動きで100%同調
+           ========================================== */
+
+        /* P1. Pulse */
+        @keyframes loopPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+        /* P2. Float */
+        @keyframes loopFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        /* P3. Wobble (よろめき・横揺れと傾き) */
+        @keyframes loopWobble {
+            0%, 100% { transform: translateX(0) rotate(0deg); }
+            15% { transform: translateX(-9px) rotate(-5deg); }
+            30% { transform: translateX(7px) rotate(4deg); }
+            45% { transform: translateX(-5px) rotate(-3deg); }
+            60% { transform: translateX(3px) rotate(2deg); }
+            75% { transform: translateX(-2px) rotate(-1deg); }
+        }
+        /* P4. Bounce */
+        @keyframes loopBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-14px); }
+        }
+        /* P5. Breathe (ゆっくりした呼吸スケール) */
+        @keyframes loopBreathe {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.07); opacity: 1; }
+        }
+        /* P6. Tada */
+        @keyframes loopTada {
+            0% { transform: scale(1); }
+            10%, 20% { transform: scale(0.9) rotate(-3deg); }
+            30%, 50%, 70%, 90% { transform: scale(1.08) rotate(3deg); }
+            40%, 60%, 80% { transform: scale(1.08) rotate(-3deg); }
+            100% { transform: scale(1) rotate(0); }
+        }
+        /* P7. Heartbeat */
+        @keyframes loopHeartbeat {
+            0%, 100% { transform: scale(1); }
+            14% { transform: scale(1.12); }
+            28% { transform: scale(1); }
+            42% { transform: scale(1.12); }
+            70% { transform: scale(1); }
+        }
+        /* P8. Jello */
+        @keyframes loopJello {
+            11.1% { transform: skewX(-12.5deg) skewY(-12.5deg); }
+            22.2% { transform: skewX(6.25deg) skewY(6.25deg); }
+            33.3% { transform: skewX(-3.125deg) skewY(-3.125deg); }
+            44.4% { transform: skewX(1.5625deg) skewY(1.5625deg); }
+            55.5% { transform: skewX(-0.78125deg) skewY(-0.78125deg); }
+            66.6% { transform: skewX(0.390625deg) skewY(0.390625deg); }
+            77.7% { transform: skewX(-0.1953125deg) skewY(-0.1953125deg); }
+            88.8% { transform: skewX(0.09765625deg) skewY(0.09765625deg); }
+            100% { transform: skewX(0) skewY(0); }
+        }
+        /* P9. Flash */
+        @keyframes loopFlash {
+            0%, 50%, 100% { opacity: 1; }
+            25%, 75% { opacity: 0.2; }
+        }
+        /* P10. Tilt (3D Y軸旋回) */
+        @keyframes loopTilt {
+            0%, 100% { transform: perspective(400px) rotateY(0deg); }
+            50% { transform: perspective(400px) rotateY(28deg); }
+        }
+        /* P11. Wiggle (小刻みな回転ジッター) */
+        @keyframes loopWiggle {
+            0%, 100% { transform: rotate(0deg); }
+            20% { transform: rotate(-8deg); }
+            40% { transform: rotate(8deg); }
+            60% { transform: rotate(-5deg); }
+            80% { transform: rotate(4deg); }
+        }
+        /* P12. Glow (光彩明滅) */
+        @keyframes loopGlow {
+            0%, 100% { box-shadow: 0 0 4px var(--shadow-color), inset 0 0 4px var(--shadow-color); filter: brightness(1); }
+            50% { box-shadow: 0 0 24px var(--shadow-color), inset 0 0 12px var(--shadow-color); filter: brightness(1.2); }
+        }
+
+        /* ==========================================
+           3. 消滅（Out）パターン：先に名前と横線が消えた瞬間にプロフ写真が消える
+           ========================================== */
+        @keyframes nameTextOut {
+            0% { opacity: 1; transform: translateY(0); }
+            25%, 100% { opacity: 0; transform: translateY(12px); }
+        }
+        @keyframes nameLineOut {
+            0% { width: 100%; opacity: 1; }
+            30% { width: 100%; opacity: 1; }
+            58%, 100% { width: 0; opacity: 0; }
+        }
+
+        /* アバター個別消滅（45%まで待機、その後消滅） */
+        @keyframes fadeOut { 0%, 45% { opacity: 1; } 75%, 100% { opacity: 0; } }
+        @keyframes scaleOut { 0%, 45% { transform: scale(1); opacity: 1; } 75%, 100% { transform: scale(0); opacity: 0; } }
+        @keyframes slideUpOut { 0%, 45% { transform: translateY(0); opacity: 1; } 75%, 100% { transform: translateY(-40px); opacity: 0; } }
+        @keyframes slideDownOut { 0%, 45% { transform: translateY(0); opacity: 1; } 75%, 100% { transform: translateY(40px); opacity: 0; } }
+        @keyframes rotateOut { 0%, 45% { transform: rotate(0) scale(1); opacity: 1; } 75%, 100% { transform: rotate(180deg) scale(0); opacity: 0; } }
+        @keyframes flipOutX { 0%, 45% { transform: perspective(400px) rotateX(0); opacity: 1; } 75%, 100% { transform: perspective(400px) rotateX(90deg); opacity: 0; } }
+        @keyframes flipOutY { 0%, 45% { transform: perspective(400px) rotateY(0); opacity: 1; } 75%, 100% { transform: perspective(400px) rotateY(90deg); opacity: 0; } }
+        @keyframes bounceOut { 0%, 45% { transform: scale(1); opacity: 1; } 52% { transform: scale(1.15); opacity: 1; } 75%, 100% { transform: scale(0.3); opacity: 0; } }
+        @keyframes rollOut { 0%, 45% { transform: translateX(0px) rotate(0deg); opacity: 1; } 75%, 100% { transform: translateX(100%) rotate(120deg); opacity: 0; } }
+        @keyframes blurOut { 0%, 45% { filter: blur(0); opacity: 1; } 75%, 100% { filter: blur(15px); opacity: 0; } }
+        @keyframes dropOut { 0%, 45% { transform: translateY(0) rotate(0); opacity: 1; } 58% { transform: translateY(-22px) rotate(-4deg); opacity: 1; } 75%, 100% { transform: translateY(420px) rotate(16deg); opacity: 0; } }
+        @keyframes zoomOutLeft { 0%, 45% { opacity: 1; transform: scale(1) translateX(0); } 52% { opacity: 1; transform: scale3d(0.475, 0.475, 0.475) translateX(42px); } 75%, 100% { opacity: 0; transform: scale(0.1) translateX(-1000px); transform-origin: left center; } }
+
+        /* ==========================================
+           4. コンテナバインディングによる同期クラス割り当て
+           ========================================= */
+
+        /* 出現（In）同期 */
+        .ani-in-1 .avatar-preview-element { animation: fadeIn var(--speed) infinite ease-in-out; }
+        .ani-in-2 .avatar-preview-element { animation: scaleIn var(--speed) infinite cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .ani-in-3 .avatar-preview-element { animation: slideUp var(--speed) infinite ease-out; }
+        .ani-in-4 .avatar-preview-element { animation: slideDown var(--speed) infinite ease-out; }
+        .ani-in-5 .avatar-preview-element { animation: slideLeft var(--speed) infinite ease-out; }
+        .ani-in-6 .avatar-preview-element { animation: slideRight var(--speed) infinite ease-out; }
+        .ani-in-7 .avatar-preview-element { animation: rotateIn var(--speed) infinite ease-out; }
+        .ani-in-8 .avatar-preview-element { animation: flipInX var(--speed) infinite ease-in-out; }
+        .ani-in-9 .avatar-preview-element { animation: flipInY var(--speed) infinite ease-in-out; }
+        .ani-in-10 .avatar-preview-element { animation: bounceIn var(--speed) infinite ease-in-out; }
+        .ani-in-11 .avatar-preview-element { animation: rollIn var(--speed) infinite ease-in-out; }
+        .ani-in-12 .avatar-preview-element { animation: blurIn var(--speed) infinite ease-in-out; }
+        .ani-in-13 .avatar-preview-element { animation: popBounceIn var(--speed) infinite cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+        .ani-in-parent .name-line-el { animation: nameLineIn var(--speed) infinite ease-in-out; }
+        .ani-in-parent .name-text-el { animation: nameTextIn var(--speed) infinite ease-in-out; }
+
+        /* 表示中（Loop）完全同調：親コンテナ全体にアニメーションを適用 */
+        .ani-loop-parent-1 { animation: loopPulse var(--speed) infinite ease-in-out; }
+        .ani-loop-parent-2 { animation: loopFloat var(--speed) infinite ease-in-out; }
+        .ani-loop-parent-3 { animation: loopWobble var(--speed) infinite ease-in-out; }
+        .ani-loop-parent-4 { animation: loopBounce var(--speed) infinite ease-in-out; }
+        .ani-loop-parent-5 { animation: loopBreathe var(--speed) infinite ease-in-out; }
+        .ani-loop-parent-6 { animation: loopTada var(--speed) infinite ease-in-out; }
+        .ani-loop-parent-7 { animation: loopHeartbeat var(--speed) infinite ease-in-out; }
+        .ani-loop-parent-8 { animation: loopJello var(--speed) infinite ease-in-out; }
+        .ani-loop-parent-9 { animation: loopFlash var(--speed) infinite ease-in-out; }
+        .ani-loop-parent-10 { animation: loopTilt var(--speed) infinite ease-in-out; }
+        .ani-loop-parent-11 { animation: loopWiggle var(--speed) infinite ease-in-out; }
+        .ani-loop-12 .avatar-preview-element { animation: loopGlow var(--speed) infinite ease-in-out; }
+        .ani-loop-parent-12 .name-line-el { animation: loopFlash var(--speed) infinite ease-in-out; }
+        .ani-loop-parent-12 .name-text-el { animation: loopFlash var(--speed) infinite ease-in-out; }
+
+        /* 消滅（Out）同期 */
+        .ani-out-1 .avatar-preview-element { animation: fadeOut var(--speed) infinite ease-in-out; }
+        .ani-out-2 .avatar-preview-element { animation: scaleOut var(--speed) infinite ease-in-out; }
+        .ani-out-3 .avatar-preview-element { animation: slideUpOut var(--speed) infinite ease-in-out; }
+        .ani-out-4 .avatar-preview-element { animation: slideDownOut var(--speed) infinite ease-in-out; }
+        .ani-out-5 .avatar-preview-element { animation: rotateOut var(--speed) infinite ease-in-out; }
+        .ani-out-6 .avatar-preview-element { animation: flipOutX var(--speed) infinite ease-in-out; }
+        .ani-out-7 .avatar-preview-element { animation: flipOutY var(--speed) infinite ease-in-out; }
+        .ani-out-8 .avatar-preview-element { animation: bounceOut var(--speed) infinite ease-in-out; }
+        .ani-out-9 .avatar-preview-element { animation: rollOut var(--speed) infinite ease-in-out; }
+        .ani-out-10 .avatar-preview-element { animation: blurOut var(--speed) infinite ease-in-out; }
+        .ani-out-11 .avatar-preview-element { animation: dropOut var(--speed) infinite ease-in-out; }
+        .ani-out-12 .avatar-preview-element { animation: zoomOutLeft var(--speed) infinite ease-in-out; }
+
+        .ani-out-parent .name-line-el { animation: nameLineOut var(--speed) infinite ease-in-out; }
+        .ani-out-parent .name-text-el { animation: nameTextOut var(--speed) infinite ease-in-out; }
+
+        /* スクロールバー装飾 */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen selection:bg-blue-500/30 selection:text-blue-200">
+
+    <header class="border-b border-slate-900 p-6 bg-slate-950/80 backdrop-blur-md sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+            <div>
+                <h1 class="text-2xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 animate-pulse">
+                    AVATAR ANIMATION CATALOG
+                </h1>
+                <p class="text-xs text-slate-400 mt-1 font-medium">出現・同調・時間差消滅シンクロエフェクト（バニラJS完全盤）</p>
+            </div>
+
+            <!-- タブボタン -->
+            <div class="flex bg-slate-900 p-1 rounded-2xl border border-slate-800 shadow-inner">
+                <button onclick="switchTab('in')" id="tab-btn-in" class="px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 cursor-pointer bg-blue-600 text-white shadow-md">
+                    出現時 (In)
+                </button>
+                <button onclick="switchTab('loop')" id="tab-btn-loop" class="px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 cursor-pointer text-slate-400 hover:text-slate-200">
+                    表示中 (Loop)
+                </button>
+                <button onclick="switchTab('out')" id="tab-btn-out" class="px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 cursor-pointer text-slate-400 hover:text-slate-200">
+                    消滅時 (Out)
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto p-6 space-y-8">
+
+        <!-- カタロググリッド部分（横4列 縦3列、常時カード下部に番号とエフェクト名を表示） -->
+        <div>
+            <!-- 出現（In）グリッド -->
+            <div id="grid-in" class="grid grid-cols-2 sm:grid-cols-4 gap-4"></div>
+
+            <!-- 表示中（Loop）グリッド -->
+            <div id="grid-loop" class="grid grid-cols-2 sm:grid-cols-4 gap-4 hidden"></div>
+
+            <!-- 消滅（Out）グリッド -->
+            <div id="grid-out" class="grid grid-cols-2 sm:grid-cols-4 gap-4 hidden"></div>
+        </div>
+
+        <!-- 下部：選択されたら「すぐ下」にぬるっと展開するカスタマイザー＆コピーパネル -->
+        <div id="customizer-container" class="transition-all duration-500 ease-out origin-top transform scale-y-95 opacity-0 h-0 overflow-hidden">
+            <div class="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 backdrop-blur-md shadow-2xl grid grid-cols-1 md:grid-cols-2 gap-8">
+
+                <!-- 左側：各種調整スライダー -->
+                <div class="space-y-6">
+                    <h2 class="text-lg font-bold flex items-center gap-2.5 border-b border-slate-800 pb-3">
+                        <span class="relative flex h-3 w-3">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
+                        </span>
+                        <span>カスタマイザー</span>
+                    </h2>
+
+                    <!-- ネームプレート設定 -->
+                    <div class="p-4 bg-slate-950/60 border border-slate-800/80 rounded-2xl">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-xs font-bold text-slate-300">右側ネームプレート演出</span>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="nameplate-toggle" onchange="toggleNameplate(this.checked)" class="sr-only peer" checked>
+                                <div class="w-11 h-6 bg-slate-800 rounded-full peer peer-focus:ring-2 peer-focus:ring-blue-500/30 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-slate-400 after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600 peer-checked:after:bg-white"></div>
+                            </label>
+                        </div>
+
+                        <div id="nameplate-input-area" class="space-y-3">
+                            <div>
+                                <label for="nameplate-text" class="text-[10px] text-slate-500 font-bold block mb-1">表示名（Name）</label>
+                                <input id="nameplate-text" type="text" value="User Name" oninput="setNameplateText(this.value)" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-sm font-bold focus:outline-none focus:border-blue-500 text-slate-100">
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-[10px] text-slate-500 font-bold mb-1">
+                                    <label for="line-thickness-range">下太線の太さ</label>
+                                    <span id="val-thickness" class="font-mono text-blue-400">3px</span>
+                                </div>
+                                <input id="line-thickness-range" type="range" min="1" max="8" value="3" oninput="updateStyle('lineThickness', this.value)" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-500">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- アバター表示設定 -->
+                    <div>
+                        <span class="text-xs text-slate-400 block mb-2 font-medium">アバター表示タイプ</span>
+                        <div class="grid grid-cols-4 gap-2 bg-slate-950 p-1 rounded-xl border border-slate-800">
+                            <button onclick="setAvatarType('icon')" id="type-btn-icon" class="py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer bg-slate-800 text-blue-400">
+                                デフォルト
+                            </button>
+                            <button onclick="setAvatarType('emoji')" id="type-btn-emoji" class="py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer text-slate-400 hover:text-slate-200">
+                                絵文字
+                            </button>
+                            <button onclick="setAvatarType('text')" id="type-btn-text" class="py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer text-slate-400 hover:text-slate-200">
+                                イニシャル
+                            </button>
+                            <button onclick="setAvatarType('photo')" id="type-btn-photo" class="py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer text-slate-400 hover:text-slate-200">
+                                写真
+                            </button>
+                        </div>
+
+                        <div id="emoji-settings" class="mt-3 hidden flex gap-2 items-center">
+                            <span class="text-xs text-slate-500">絵文字:</span>
+                            <div class="flex gap-2">
+                                <button onclick="setEmoji('🐱')" class="text-lg hover:scale-125 transition-transform">🐱</button>
+                                <button onclick="setEmoji('🦊')" class="text-lg hover:scale-125 transition-transform">🦊</button>
+                                <button onclick="setEmoji('🚀')" class="text-lg hover:scale-125 transition-transform">🚀</button>
+                                <button onclick="setEmoji('🌟')" class="text-lg hover:scale-125 transition-transform">🌟</button>
+                                <button onclick="setEmoji('🍩')" class="text-lg hover:scale-125 transition-transform">🍩</button>
+                                <button onclick="setEmoji('🎮')" class="text-lg hover:scale-125 transition-transform">🎮</button>
+                            </div>
+                        </div>
+
+                        <div id="text-settings" class="mt-3 hidden flex gap-2 items-center">
+                            <label for="text-input" class="text-xs text-slate-500">テキスト変更:</label>
+                            <input id="text-input" type="text" maxlength="3" value="AI" oninput="setText(this.value)" class="bg-slate-950 border border-slate-800 rounded px-2 py-0.5 text-xs text-center w-16 font-bold focus:outline-none focus:border-blue-500 text-slate-200">
+                        </div>
+
+                        <div id="photo-settings" class="mt-3 hidden">
+                            <label class="flex items-center gap-2">
+                                <span class="text-xs text-slate-500 shrink-0">写真:</span>
+                                <input type="file" accept="image/*" onchange="handlePhotoUpload(event)" class="block w-full text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-blue-600 file:text-white hover:file:bg-blue-500 file:cursor-pointer cursor-pointer">
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- 各種微調整コントロール -->
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between text-xs mb-1 text-slate-400 font-bold">
+                                <label for="border-range">枠線の太さ (Border)</label>
+                                <span id="val-border" class="font-mono text-blue-400">4px</span>
+                            </div>
+                            <input id="border-range" type="range" min="0" max="12" value="4" oninput="updateStyle('borderWidth', this.value)" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-500">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-xs mb-1 text-slate-400 font-bold">
+                                <label for="shadow-range">グロー強度 (Shadow)</label>
+                                <span id="val-shadow" class="font-mono text-blue-400">10px</span>
+                            </div>
+                            <input id="shadow-range" type="range" min="0" max="30" value="10" oninput="updateStyle('shadowIntensity', this.value)" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-500">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-xs mb-1 text-slate-400 font-bold">
+                                <label for="blur-range">ぼかし効果 (Blur)</label>
+                                <span id="val-blur" class="font-mono text-blue-400">0px</span>
+                            </div>
+                            <input id="blur-range" type="range" min="0" max="10" value="0" oninput="updateStyle('effectBlur', this.value)" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-500">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-xs mb-1 text-slate-400 font-bold">
+                                <label for="speed-range">アニメーション速度 (Speed)</label>
+                                <span id="val-speed" class="font-mono text-blue-400">1.8s</span>
+                            </div>
+                            <input id="speed-range" type="range" min="0.5" max="4" step="0.1" value="1.8" oninput="updateStyle('speed', this.value)" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-500">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-xs mb-1 text-slate-400 font-bold">
+                                <label for="color-picker">メインカラー (Color)</label>
+                                <span id="val-color" class="font-mono text-blue-400 uppercase">#3b82f6</span>
+                            </div>
+                            <div class="flex gap-3 items-center">
+                                <input id="color-picker" type="color" value="#3b82f6" oninput="updateStyle('iconColor', this.value)" class="w-8 h-8 rounded-full border border-slate-800 bg-transparent cursor-pointer p-0">
+                                <div class="flex gap-2 flex-wrap">
+                                    <button onclick="setPresetColor('#3b82f6')" class="w-4 h-4 rounded-full border border-white/10 hover:scale-125 transition-transform bg-[#3b82f6]"></button>
+                                    <button onclick="setPresetColor('#f43f5e')" class="w-4 h-4 rounded-full border border-white/10 hover:scale-125 transition-transform bg-[#f43f5e]"></button>
+                                    <button onclick="setPresetColor('#10b981')" class="w-4 h-4 rounded-full border border-white/10 hover:scale-125 transition-transform bg-[#10b981]"></button>
+                                    <button onclick="setPresetColor('#fbbf24')" class="w-4 h-4 rounded-full border border-white/10 hover:scale-125 transition-transform bg-[#fbbf24]"></button>
+                                    <button onclick="setPresetColor('#d946ef')" class="w-4 h-4 rounded-full border border-white/10 hover:scale-125 transition-transform bg-[#d946ef]"></button>
+                                    <button onclick="setPresetColor('#8b5cf6')" class="w-4 h-4 rounded-full border border-white/10 hover:scale-125 transition-transform bg-[#8b5cf6]"></button>
+                                    <button onclick="setPresetColor('#ffffff')" class="w-4 h-4 rounded-full border border-white/10 hover:scale-125 transition-transform bg-[#ffffff]"></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 右側：コード生成 & コピーエリア -->
+                <div class="space-y-6 flex flex-col justify-between">
+                    <h2 class="text-lg font-bold flex items-center justify-between border-b border-slate-800 pb-3">
+                        <span id="selected-title" class="text-blue-400 font-bold tracking-wider font-mono uppercase">Fade In</span>
+                        <button onclick="copyToClipboard()" class="text-xs bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl font-bold transition-all duration-150 flex items-center gap-1 cursor-pointer shadow-lg shadow-blue-500/20">
+                            <span id="copy-btn-text">コードをコピー</span>
+                        </button>
+                    </h2>
+
+                    <!-- 選択中アニメーションのライブプレビュー（カスタマイザーを開いても選んだカードが常に見える） -->
+                    <div class="rounded-2xl border border-slate-800 bg-slate-950/60 py-5 px-4 flex items-center justify-center overflow-hidden min-h-[96px] relative">
+                        <span class="absolute top-2 left-3 text-[9px] font-mono text-slate-600 tracking-wider">PREVIEW</span>
+                        <div id="selected-preview"></div>
+                    </div>
+
+                    <div class="border border-slate-800 bg-slate-950 rounded-2xl overflow-hidden shadow-inner flex-1 flex flex-col min-h-[220px]">
+                        <pre class="p-4 overflow-x-auto text-[11px] font-mono text-emerald-400 whitespace-pre leading-relaxed select-all flex-1"><code id="code-output"></code></pre>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <footer class="border-t border-slate-900 py-8 text-center text-xs text-slate-600 mt-12">
+        <p>© 2026 Avatar Animation Catalog. All rights reserved.</p>
+    </footer>
+
+    <!-- ネイティブJavaScriptロジック -->
+    <script>
+        // アプリケーション状態
+        const state = {
+            currentTab: 'in',
+            borderWidth: 4,
+            effectBlur: 0,
+            iconColor: '#3b82f6',
+            shadowIntensity: 10,
+            speed: 1.8,
+            avatarType: 'icon',
+            avatarEmoji: '🐱',
+            avatarText: 'AI',
+            avatarPhoto: '',
+            selectedId: 1,
+            selectedName: 'Fade In',
+            selectedKeyframe: 'fadeIn',
+            selectedClass: 'ani-in-1',
+            // ネームプレート状態
+            showNameplate: true,
+            nameplateText: 'User Name',
+            lineThickness: 3,
+            hasFirstSelection: false // 初回の選択フラグ
+        };
+
+        // アニメーションデータマスター
+        const patterns = {
+            in: [
+                { id: 1, name: 'Fade In', class: 'ani-in-1', keyframe: 'fadeIn', def: '0% { opacity: 0; } 40%, 100% { opacity: 1; }' },
+                { id: 2, name: 'Scale In', class: 'ani-in-2', keyframe: 'scaleIn', def: '0% { transform: scale(0); opacity: 0; } 40%, 100% { transform: scale(1); opacity: 1; }' },
+                { id: 3, name: 'Slide Up', class: 'ani-in-3', keyframe: 'slideUp', def: '0% { transform: translateY(40px); opacity: 0; } 40%, 100% { transform: translateY(0); opacity: 1; }' },
+                { id: 4, name: 'Slide Down', class: 'ani-in-4', keyframe: 'slideDown', def: '0% { transform: translateY(-40px); opacity: 0; } 40%, 100% { transform: translateY(0); opacity: 1; }' },
+                { id: 5, name: 'Slide Left', class: 'ani-in-5', keyframe: 'slideLeft', def: '0% { transform: translateX(40px); opacity: 0; } 40%, 100% { transform: translateX(0); opacity: 1; }' },
+                { id: 6, name: 'Slide Right', class: 'ani-in-6', keyframe: 'slideRight', def: '0% { transform: translateX(-40px); opacity: 0; } 40%, 100% { transform: translateX(0); opacity: 1; }' },
+                { id: 7, name: 'Rotate In', class: 'ani-in-7', keyframe: 'rotateIn', def: '0% { transform: rotate(-180deg) scale(0); opacity: 0; } 45%, 100% { transform: rotate(0) scale(1); opacity: 1; }' },
+                { id: 8, name: 'Flip In X', class: 'ani-in-8', keyframe: 'flipInX', def: '0% { transform: perspective(400px) rotateX(90deg); opacity: 0; } 45%, 100% { transform: perspective(400px) rotateX(0); opacity: 1; }' },
+                { id: 9, name: 'Flip In Y', class: 'ani-in-9', keyframe: 'flipInY', def: '0% { transform: perspective(400px) rotateY(90deg); opacity: 0; } 45%, 100% { transform: perspective(400px) rotateY(0); opacity: 1; }' },
+                { id: 10, name: 'Bounce In', class: 'ani-in-10', keyframe: 'bounceIn', def: '0% { transform: scale(0.3); opacity: 0; } 25% { transform: scale(1.08); } 35% { transform: scale(0.9); } 45%, 100% { transform: scale(1); opacity: 1; }' },
+                { id: 11, name: 'Roll In', class: 'ani-in-11', keyframe: 'rollIn', def: '0% { transform: translateX(-100%) rotate(-120deg); opacity: 0; } 45%, 100% { transform: translateX(0px) rotate(0deg); opacity: 1; }' },
+                { id: 12, name: 'Blur In', class: 'ani-in-12', keyframe: 'blurIn', def: '0% { filter: blur(15px); opacity: 0; } 40%, 100% { filter: blur(0); opacity: 1; }' },
+                { id: 13, name: 'Pop Bounce In', class: 'ani-in-13', keyframe: 'popBounceIn', def: '0% { transform: scale(0) translateY(20px); opacity: 0; } 20% { transform: scale(1.15) translateY(-10px); opacity: 1; } 30% { transform: scale(0.92) translateY(0); } 38% { transform: scale(1.04) translateY(-4px); } 45%, 100% { transform: scale(1) translateY(0); opacity: 1; }' }
+            ],
+            loop: [
+                { id: 1, name: 'Pulse (パルス)', class: 'ani-loop-1', keyframe: 'loopPulse', def: '0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); }' },
+                { id: 2, name: 'Float (浮遊)', class: 'ani-loop-2', keyframe: 'loopFloat', def: '0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); }' },
+                { id: 3, name: 'Wobble (よろめき)', class: 'ani-loop-3', keyframe: 'loopWobble', def: '0%, 100% { transform: translateX(0) rotate(0deg); } 15% { transform: translateX(-9px) rotate(-5deg); } 30% { transform: translateX(7px) rotate(4deg); } 45% { transform: translateX(-5px) rotate(-3deg); } 60% { transform: translateX(3px) rotate(2deg); } 75% { transform: translateX(-2px) rotate(-1deg); }' },
+                { id: 4, name: 'Bounce (跳ね)', class: 'ani-loop-4', keyframe: 'loopBounce', def: '0%, 100% { transform: translateY(0); } 50% { transform: translateY(-14px); }' },
+                { id: 5, name: 'Breathe (呼吸)', class: 'ani-loop-5', keyframe: 'loopBreathe', def: '0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.07); opacity: 1; }' },
+                { id: 6, name: 'Tada (ジャーン)', class: 'ani-loop-6', keyframe: 'loopTada', def: '0% { transform: scale(1); } 10%, 20% { transform: scale(0.9) rotate(-3deg); } 30%, 50%, 70%, 90% { transform: scale(1.08) rotate(3deg); } 40%, 60%, 80% { transform: scale(1.08) rotate(-3deg); } 100% { transform: scale(1) rotate(0); }' },
+                { id: 7, name: 'Heartbeat (鼓動)', class: 'ani-loop-7', keyframe: 'loopHeartbeat', def: '0%, 100% { transform: scale(1); } 14% { transform: scale(1.12); } 28% { transform: scale(1); } 42% { transform: scale(1.12); } 70% { transform: scale(1); }' },
+                { id: 8, name: 'Jello (揺れる)', class: 'ani-loop-8', keyframe: 'loopJello', def: '11.1% { transform: skewX(-12.5deg) skewY(-12.5deg); } 22.2% { transform: skewX(6.25deg) skewY(6.25deg); } 33.3% { transform: skewX(-3.125deg) skewY(-3.125deg); } 44.4% { transform: skewX(1.5625deg) skewY(1.5625deg); } 55.5% { transform: skewX(-0.78125deg) skewY(-0.78125deg); } 66.6% { transform: skewX(0.390625deg) skewY(0.390625deg); } 77.7% { transform: skewX(-0.1953125deg) skewY(-0.1953125deg); } 88.8% { transform: skewX(0.09765625deg) skewY(0.09765625deg); } 100% { transform: skewX(0) skewY(0); }' },
+                { id: 9, name: 'Flash (点滅)', class: 'ani-loop-9', keyframe: 'loopFlash', def: '0%, 50%, 100% { opacity: 1; } 25%, 75% { opacity: 0.2; }' },
+                { id: 10, name: 'Tilt (3D旋回)', class: 'ani-loop-10', keyframe: 'loopTilt', def: '0%, 100% { transform: perspective(400px) rotateY(0deg); } 50% { transform: perspective(400px) rotateY(28deg); }' },
+                { id: 11, name: 'Wiggle (小刻み回転)', class: 'ani-loop-11', keyframe: 'loopWiggle', def: '0%, 100% { transform: rotate(0deg); } 20% { transform: rotate(-8deg); } 40% { transform: rotate(8deg); } 60% { transform: rotate(-5deg); } 80% { transform: rotate(4deg); }' },
+                { id: 12, name: 'Glow (光彩)', class: 'ani-loop-12', keyframe: 'loopGlow', def: '0%, 100% { box-shadow: 0 0 4px var(--shadow-color), inset 0 0 4px var(--shadow-color); filter: brightness(1); } 50% { box-shadow: 0 0 24px var(--shadow-color), inset 0 0 12px var(--shadow-color); filter: brightness(1.2); }' }
+            ],
+            out: [
+                { id: 1, name: 'Fade Out', class: 'ani-out-1', keyframe: 'fadeOut', def: '0%, 45% { opacity: 1; } 75%, 100% { opacity: 0; }' },
+                { id: 2, name: 'Scale Out', class: 'ani-out-2', keyframe: 'scaleOut', def: '0%, 45% { transform: scale(1); opacity: 1; } 75%, 100% { transform: scale(0); opacity: 0; }' },
+                { id: 3, name: 'Slide Up Out', class: 'ani-out-3', keyframe: 'slideUpOut', def: '0%, 45% { transform: translateY(0); opacity: 1; } 75%, 100% { transform: translateY(-40px); opacity: 0; }' },
+                { id: 4, name: 'Slide Down Out', class: 'ani-out-4', keyframe: 'slideDownOut', def: '0%, 45% { transform: translateY(0); opacity: 1; } 75%, 100% { transform: translateY(40px); opacity: 0; }' },
+                { id: 5, name: 'Rotate Out', class: 'ani-out-5', keyframe: 'rotateOut', def: '0%, 45% { transform: rotate(0) scale(1); opacity: 1; } 75%, 100% { transform: rotate(180deg) scale(0); opacity: 0; }' },
+                { id: 6, name: 'Flip Out X', class: 'ani-out-6', keyframe: 'flipOutX', def: '0%, 45% { transform: perspective(400px) rotateX(0); opacity: 1; } 75%, 100% { transform: perspective(400px) rotateX(90deg); opacity: 0; }' },
+                { id: 7, name: 'Flip Out Y', class: 'ani-out-7', keyframe: 'flipOutY', def: '0%, 45% { transform: perspective(400px) rotateY(0); opacity: 1; } 75%, 100% { transform: perspective(400px) rotateY(90deg); opacity: 0; }' },
+                { id: 8, name: 'Bounce Out', class: 'ani-out-8', keyframe: 'bounceOut', def: '0%, 45% { transform: scale(1); opacity: 1; } 52% { transform: scale(1.15); opacity: 1; } 75%, 100% { transform: scale(0.3); opacity: 0; }' },
+                { id: 9, name: 'Roll Out', class: 'ani-out-9', keyframe: 'rollOut', def: '0%, 45% { transform: translateX(0px) rotate(0deg); opacity: 1; } 75%, 100% { transform: translateX(100%) rotate(120deg); opacity: 0; }' },
+                { id: 10, name: 'Blur Out', class: 'ani-out-10', keyframe: 'blurOut', def: '0%, 45% { filter: blur(0); opacity: 1; } 75%, 100% { filter: blur(15px); opacity: 0; }' },
+                { id: 11, name: 'Drop Out (落下)', class: 'ani-out-11', keyframe: 'dropOut', def: '0%, 45% { transform: translateY(0) rotate(0); opacity: 1; } 58% { transform: translateY(-22px) rotate(-4deg); opacity: 1; } 75%, 100% { transform: translateY(420px) rotate(16deg); opacity: 0; }' },
+                { id: 12, name: 'Zoom Out Left', class: 'ani-out-12', keyframe: 'zoomOutLeft', def: '0%, 45% { opacity: 1; transform: scale(1) translateX(0); } 52% { opacity: 1; transform: scale3d(0.475, 0.475, 0.475) translateX(42px); } 75%, 100% { opacity: 0; transform: scale(0.1) translateX(-1000px); transform-origin: left center; }' }
+            ]
+        };
+
+        // 初期ロード
+        window.addEventListener('DOMContentLoaded', () => {
+            renderGrid('in');
+            renderGrid('loop');
+            renderGrid('out');
+            updateStyleCSS();
+        });
+
+        // グリッド描画（横4列 縦3列）
+        function renderGrid(tab) {
+            const container = document.getElementById(`grid-${tab}`);
+            container.innerHTML = '';
+
+            patterns[tab].forEach(item => {
+                const card = document.createElement('div');
+                card.id = `card-${tab}-${item.id}`;
+                card.onclick = () => selectItem(item.id, item.keyframe, item.class, item.name);
+
+                const isSelected = (state.currentTab === tab && state.selectedId === item.id && state.hasFirstSelection);
+                const borderClass = isSelected
+                    ? 'border-blue-500 bg-slate-900/90 ring-4 ring-blue-500/20'
+                    : 'border-slate-900 bg-slate-900/30 hover:border-slate-800 hover:bg-slate-900/50';
+
+                // 出現/消滅タブにおける連動親クラス判定
+                let syncParentClass = '';
+                if (state.currentTab === 'in') {
+                    syncParentClass = 'ani-in-parent';
+                } else if (state.currentTab === 'out') {
+                    syncParentClass = 'ani-out-parent';
+                } else if (state.currentTab === 'loop') {
+                    // 表示中（Loop）は親コンテナにアニメーションクラスを持たせて完全一体化
+                    syncParentClass = `ani-loop-parent-${item.id}`;
+                }
+
+                // ボタン自体の高さを h-32 に固定して下部に名前・番号情報を常時表示
+                card.className = `card-element ${item.class} ${syncParentClass} border rounded-2xl p-4 flex flex-col justify-between cursor-pointer transition-all duration-300 group relative overflow-hidden ${borderClass} w-full h-32`;
+
+                const syncLineAnim = state.currentTab === 'in' ? 'nameLineIn' : (state.currentTab === 'loop' ? 'none' : 'nameLineOut');
+                const syncTextAnim = state.currentTab === 'in' ? 'nameTextIn' : (state.currentTab === 'loop' ? 'none' : 'nameTextOut');
+
+                card.innerHTML = `
+                    <div class="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:16px_16px] opacity-10 pointer-events-none"></div>
+
+                    <!-- 上部：アバタープレビュー（下枠中心起点レイアウト） -->
+                    <div class="relative w-full h-14 flex items-center">
+                        <div class="w-14 h-14 flex items-center justify-center relative z-10 shrink-0">
+                            <div class="avatar-preview-element w-14 h-14 rounded-full border-solid flex items-center justify-center bg-slate-900 relative overflow-hidden transition-all duration-150">
+                                <div class="avatar-render-target"></div>
+                            </div>
+                        </div>
+
+                        <!-- 右側ネームプレート（左から28px＝アバター中心の下から這い出るように線が走る） -->
+                        <div class="nameplate-preview-area absolute left-7 bottom-0 right-0 z-0 h-14 flex flex-col justify-end min-w-0 pr-2 ${state.showNameplate ? '' : 'hidden'}">
+                            <div class="name-text-el font-bold text-slate-200 tracking-wide text-xs sm:text-sm truncate leading-none pb-1.5 origin-bottom pl-9"
+                                 style="${syncTextAnim !== 'none' ? `animation-name: ${syncTextAnim};` : ''}">
+                                ${state.nameplateText}
+                            </div>
+                            <div class="name-line-el rounded-full"
+                                 style="height: var(--line-thickness); background-color: var(--icon-color); transform-origin: left; width: 100%; ${syncLineAnim !== 'none' ? `animation-name: ${syncLineAnim};` : ''}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 下部：パターン番号 ＆ エフェクト名（常時表示、ネームプレートON/OFF影響なし） -->
+                    <div class="w-full pt-1.5 border-t border-slate-800/80 flex justify-between items-center text-[10px] font-bold text-slate-400 mt-2 relative z-20">
+                        <span class="tracking-wider text-slate-500 font-mono">P-${String(item.id).padStart(2, '0')}</span>
+                        <span class="text-[11px] text-slate-300 truncate pl-2 group-hover:text-blue-400 transition-colors">${item.name}</span>
+                    </div>
+
+                    <div class="select-badge absolute top-1 right-2 bg-blue-500 text-[8px] text-white font-black px-1 py-0.5 rounded ${isSelected ? '' : 'hidden'}">SELECTED</div>
+                `;
+
+                container.appendChild(card);
+            });
+            updateAvatarVisuals();
+        }
+
+        // タブ切り替え
+        function switchTab(tab) {
+            state.currentTab = tab;
+
+            ['in', 'loop', 'out'].forEach(t => {
+                const el = document.getElementById(`grid-${t}`);
+                const btn = document.getElementById(`tab-btn-${t}`);
+                if (t === tab) {
+                    el.classList.remove('hidden');
+                    btn.className = "px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 cursor-pointer bg-blue-600 text-white shadow-md";
+                } else {
+                    el.classList.add('hidden');
+                    btn.className = "px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 cursor-pointer text-slate-400 hover:text-slate-200";
+                }
+            });
+
+            if (state.hasFirstSelection) {
+                const activePattern = patterns[tab].find(p => p.id === state.selectedId) || patterns[tab][0];
+                selectItem(activePattern.id, activePattern.keyframe, activePattern.class, activePattern.name);
+            } else {
+                renderGrid(tab);
+            }
+        }
+
+        // アイコン選択（すぐ真下に展開＆スクロール）
+        function selectItem(id, keyframe, className, name) {
+            state.selectedId = id;
+            state.selectedKeyframe = keyframe;
+            state.selectedClass = className;
+            state.selectedName = name;
+
+            if (!state.hasFirstSelection) {
+                state.hasFirstSelection = true;
+                renderGrid(state.currentTab);
+            }
+
+            // カード選択ハイライトリセット
+            document.querySelectorAll('.card-element').forEach(el => {
+                el.classList.remove('border-blue-500', 'bg-slate-900/90', 'ring-4', 'ring-blue-500/20');
+                el.classList.add('border-slate-900', 'bg-slate-900/30');
+                const badge = el.querySelector('.select-badge');
+                if (badge) badge.classList.add('hidden');
+            });
+
+            const activeCard = document.getElementById(`card-${state.currentTab}-${id}`);
+            if (activeCard) {
+                activeCard.classList.remove('border-slate-900', 'bg-slate-900/30');
+                activeCard.classList.add('border-blue-500', 'bg-slate-900/90', 'ring-4', 'ring-blue-500/20');
+                const badge = activeCard.querySelector('.select-badge');
+                if (badge) badge.classList.remove('hidden');
+            }
+
+            // カスタマイザーパネル展開
+            const panel = document.getElementById('customizer-container');
+            panel.classList.remove('h-0', 'opacity-0', 'scale-y-95');
+            panel.classList.add('h-auto', 'opacity-100', 'scale-y-100', 'mt-8');
+
+            // 展開後、見やすいように自動スムーズスクロール
+            setTimeout(() => {
+                panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 100);
+
+            document.getElementById('selected-title').innerText = name;
+            renderSelectedPreview();
+            updateCodeOutput();
+        }
+
+        // スライダー調整更新
+        function updateStyle(property, value) {
+            state[property] = value;
+
+            if (property === 'borderWidth') document.getElementById('val-border').innerText = value + 'px';
+            if (property === 'shadowIntensity') document.getElementById('val-shadow').innerText = value + 'px';
+            if (property === 'effectBlur') document.getElementById('val-blur').innerText = value + 'px';
+            if (property === 'speed') {
+                document.getElementById('val-speed').innerText = value + 's';
+                renderGrid('in');
+                renderGrid('loop');
+                renderGrid('out');
+            }
+            if (property === 'lineThickness') {
+                document.getElementById('val-thickness').innerText = value + 'px';
+                renderGrid('in');
+                renderGrid('loop');
+                renderGrid('out');
+            }
+            if (property === 'iconColor') {
+                document.getElementById('val-color').innerText = value;
+                document.getElementById('color-picker').value = value;
+                renderGrid('in');
+                renderGrid('loop');
+                renderGrid('out');
+            }
+
+            updateStyleCSS();
+            updateCodeOutput();
+        }
+
+        function setPresetColor(color) {
+            updateStyle('iconColor', color);
+        }
+
+        function updateStyleCSS() {
+            const root = document.documentElement;
+            root.style.setProperty('--border-width', `${state.borderWidth}px`);
+            root.style.setProperty('--shadow-intensity', `${state.shadowIntensity}px`);
+            root.style.setProperty('--effect-blur', `${state.effectBlur}px`);
+            root.style.setProperty('--icon-color', state.iconColor);
+            root.style.setProperty('--speed', `${state.speed}s`);
+            root.style.setProperty('--line-thickness', `${state.lineThickness}px`);
+        }
+
+        function toggleNameplate(checked) {
+            state.showNameplate = checked;
+            document.getElementById('nameplate-input-area').classList.toggle('hidden', !checked);
+
+            renderGrid('in');
+            renderGrid('loop');
+            renderGrid('out');
+            renderSelectedPreview();
+            updateCodeOutput();
+        }
+
+        function setNameplateText(value) {
+            state.nameplateText = value || 'User Name';
+            document.querySelectorAll('.name-text-el').forEach(el => {
+                el.innerText = state.nameplateText;
+            });
+            updateCodeOutput();
+        }
+
+        function setAvatarType(type) {
+            state.avatarType = type;
+
+            ['icon', 'emoji', 'text', 'photo'].forEach(t => {
+                const btn = document.getElementById(`type-btn-${t}`);
+                if (t === type) {
+                    btn.className = "py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer bg-slate-800 text-blue-400";
+                } else {
+                    btn.className = "py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer text-slate-400 hover:text-slate-200";
+                }
+            });
+
+            document.getElementById('emoji-settings').classList.toggle('hidden', type !== 'emoji');
+            document.getElementById('text-settings').classList.toggle('hidden', type !== 'text');
+            document.getElementById('photo-settings').classList.toggle('hidden', type !== 'photo');
+
+            updateAvatarVisuals();
+            updateCodeOutput();
+        }
+
+        function setEmoji(emoji) {
+            state.avatarEmoji = emoji;
+            updateAvatarVisuals();
+            updateCodeOutput();
+        }
+
+        function setText(text) {
+            state.avatarText = text;
+            updateAvatarVisuals();
+            updateCodeOutput();
+        }
+
+        // プロフィール写真アップロード（枠内に収める）
+        function handlePhotoUpload(event) {
+            const file = event.target.files && event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                state.avatarPhoto = e.target.result;
+                updateAvatarVisuals();
+                updateCodeOutput();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // カスタマイザー内の選択中アニメーション ライブプレビュー
+        function renderSelectedPreview() {
+            const preview = document.getElementById('selected-preview');
+            if (!preview) return;
+            const item = patterns[state.currentTab].find(p => p.id === state.selectedId);
+            if (!item) { preview.innerHTML = ''; preview.className = ''; return; }
+
+            let syncParentClass = '';
+            if (state.currentTab === 'in') syncParentClass = 'ani-in-parent';
+            else if (state.currentTab === 'out') syncParentClass = 'ani-out-parent';
+            else syncParentClass = `ani-loop-parent-${item.id}`;
+
+            const syncLineAnim = state.currentTab === 'in' ? 'nameLineIn' : (state.currentTab === 'loop' ? 'none' : 'nameLineOut');
+            const syncTextAnim = state.currentTab === 'in' ? 'nameTextIn' : (state.currentTab === 'loop' ? 'none' : 'nameTextOut');
+
+            preview.className = `${item.class} ${syncParentClass} relative`;
+            preview.style.width = '240px';
+            preview.innerHTML = `
+                <div class="relative w-full h-14 flex items-center">
+                    <div class="w-14 h-14 flex items-center justify-center relative z-10 shrink-0">
+                        <div class="avatar-preview-element w-14 h-14 rounded-full border-solid flex items-center justify-center bg-slate-900 relative overflow-hidden transition-all duration-150">
+                            <div class="avatar-render-target"></div>
+                        </div>
+                    </div>
+                    <div class="nameplate-preview-area absolute left-7 bottom-0 right-0 z-0 h-14 flex flex-col justify-end min-w-0 pr-2 ${state.showNameplate ? '' : 'hidden'}">
+                        <div class="name-text-el font-bold text-slate-200 tracking-wide text-sm truncate leading-none pb-1.5 origin-bottom pl-9"
+                             style="${syncTextAnim !== 'none' ? `animation-name: ${syncTextAnim};` : ''}">${state.nameplateText}</div>
+                        <div class="name-line-el rounded-full"
+                             style="height: var(--line-thickness); background-color: var(--icon-color); transform-origin: left; width: 100%; ${syncLineAnim !== 'none' ? `animation-name: ${syncLineAnim};` : ''}"></div>
+                    </div>
+                </div>`;
+            updateAvatarVisuals();
+        }
+
+        function updateAvatarVisuals() {
+            document.querySelectorAll('.avatar-render-target').forEach(el => {
+                if (state.avatarType === 'icon') {
+                    el.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="color: var(--icon-color)">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                    `;
+                } else if (state.avatarType === 'emoji') {
+                    el.innerHTML = `<span class="text-xl">${state.avatarEmoji}</span>`;
+                } else if (state.avatarType === 'text') {
+                    el.innerHTML = `<span class="font-extrabold text-sm tracking-wider" style="color: var(--icon-color)">${state.avatarText}</span>`;
+                } else if (state.avatarType === 'photo') {
+                    if (state.avatarPhoto) {
+                        el.innerHTML = `<img src="${state.avatarPhoto}" alt="profile" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;">`;
+                    } else {
+                        el.innerHTML = `<span class="text-[9px] text-slate-500 font-bold text-center leading-tight px-1">写真<br>未選択</span>`;
+                    }
+                }
+            });
+        }
+
+        // コピー用HTML/CSS生成
+        function updateCodeOutput() {
+            const activePattern = patterns[state.currentTab].find(p => p.id === state.selectedId) || patterns[state.currentTab][0];
+            const safeClassName = `profile-animation-${activePattern.keyframe}`;
+            const glowShadow = `0 0 ${state.shadowIntensity}px ${state.iconColor}`;
+
+            let avatarContent = '';
+            if (state.avatarType === 'icon') {
+                avatarContent = `    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="${state.iconColor}" stroke-width="2" style="width: 28px; height: 28px;">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+    </svg>`;
+            } else if (state.avatarType === 'emoji') {
+                avatarContent = `    <span style="font-size: 20px;">${state.avatarEmoji}</span>`;
+            } else if (state.avatarType === 'photo') {
+                avatarContent = `    <img src="${state.avatarPhoto || ''}" alt="profile" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;">`;
+            } else {
+                avatarContent = `    <span style="font-size: 14px; font-weight: 800; color: ${state.iconColor};">${state.avatarText}</span>`;
+            }
+
+            let nameplateHTML = '';
+            let nameplateCSS = '';
+
+            if (state.showNameplate) {
+                const syncLineAnim = state.currentTab === 'in' ? 'nameLineIn' : (state.currentTab === 'loop' ? 'none' : 'nameLineOut');
+                const syncTextAnim = state.currentTab === 'in' ? 'nameTextIn' : (state.currentTab === 'loop' ? 'none' : 'nameTextOut');
+
+                nameplateHTML = `
+  <!-- ネームプレート領域 (アバターの中心最下点から生える) -->
+  <div class="profile-nameplate">
+    <div class="profile-name-text">${state.nameplateText}</div>
+    <div class="profile-name-line"></div>
+  </div>`;
+
+                let containerAnimCSS = '';
+                if (state.currentTab === 'loop') {
+                    // 表示中タブは Glow 以外を親コンテナ全体で完全同調させる
+                    if (activePattern.keyframe !== 'loopGlow') {
+                        containerAnimCSS = `\n  animation: ${activePattern.keyframe} ${state.speed}s infinite ease-in-out;`;
+                    }
+                }
+
+                let lineKeyframeDef = '';
+                let textKeyframeDef = '';
+
+                if (state.currentTab === 'in') {
+                    lineKeyframeDef = `@keyframes nameLineIn {
+  0%, 40% { width: 0; opacity: 0; }
+  70%, 100% { width: 100%; opacity: 1; }
+}`;
+                    textKeyframeDef = `@keyframes nameTextIn {
+  0%, 62% { opacity: 0; transform: translateY(12px); }
+  82%, 100% { opacity: 1; transform: translateY(0); }
+}`;
+                } else if (state.currentTab === 'out') {
+                    lineKeyframeDef = `@keyframes nameLineOut {
+  0% { width: 100%; opacity: 1; }
+  30% { width: 100%; opacity: 1; }
+  58%, 100% { width: 0; opacity: 0; }
+}`;
+                    textKeyframeDef = `@keyframes nameTextOut {
+  0% { opacity: 1; transform: translateY(0); }
+  25%, 100% { opacity: 0; transform: translateY(12px); }
+}`;
+                }
+
+                nameplateCSS = `
+/* --- 横線が中心最下部から伸びる一体同調レイアウト --- */
+.profile-card-container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 240px;
+  height: 56px;
+  perspective: 1000px;${containerAnimCSS}
+}
+
+.profile-nameplate {
+  position: absolute;
+  left: 28px;    /* 直径56pxの半分である28pxからラインをスタート */
+  bottom: 0px;   /* アバター最下部に完全に吸着 */
+  right: 0;
+  height: 56px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  z-index: 5;
+}
+
+.profile-name-text {
+  font-family: sans-serif;
+  font-weight: bold;
+  color: #e2e8f0;
+  font-size: 14px;
+  padding-left: 36px;  /* アバター右半分と被るのを防ぐ余白 */
+  padding-bottom: 6px;
+  ${state.currentTab !== 'loop' ? `animation: ${syncTextAnim} ${state.speed}s infinite ease-in-out;` : ''}
+}
+
+.profile-name-line {
+  height: ${state.lineThickness}px;
+  background-color: ${state.iconColor};
+  width: 100%;
+  transform-origin: left;
+  ${state.currentTab !== 'loop' ? `animation: ${syncLineAnim} ${state.speed}s infinite ease-in-out;` : ''}
+}
+
+${lineKeyframeDef}
+${textKeyframeDef}`;
+            } else {
+                nameplateCSS = `
+.profile-card-container {
+  display: inline-block;
+  perspective: 1000px;
+}`;
+            }
+
+            // 表示中かつ全体同調以外のアバター個別揺動アニメーション
+            let avatarAnimationLine = '';
+            if (state.currentTab === 'loop') {
+                if (activePattern.keyframe === 'loopGlow') {
+                    avatarAnimationLine = `animation: ${activePattern.keyframe} ${state.speed}s infinite ease-in-out;`;
+                } else {
+                    avatarAnimationLine = `/* 親コンテナでループアニメーションが同期動作するため、個別のアバター指定は不要です */`;
+                }
+            } else {
+                avatarAnimationLine = `animation: ${activePattern.keyframe} ${state.speed}s infinite ease-in-out;`;
+            }
+
+            const codeText = `<!-- HTML -->
+<div class="profile-card-container ${safeClassName}">
+  <!-- アイコン領域 (前面 z-index: 10) -->
+  <div class="profile-avatar">
+${avatarContent}
+  </div>${nameplateHTML}
+</div>
+
+<!-- CSS -->
+<style>${nameplateCSS}
+
+.profile-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #0f172a;
+  border: ${state.borderWidth}px solid ${state.iconColor};
+  filter: blur(${state.effectBlur}px);
+  box-shadow: ${glowShadow};
+  transition: all 0.2s ease-in-out;
+  overflow: hidden;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 10;
+  ${avatarAnimationLine}
+  --shadow-color: ${state.iconColor};
+}
+
+/* アバター個別・同調用アニメーション定義 */
+@keyframes ${activePattern.keyframe} {
+  ${activePattern.def}
+}
+</style>`;
+
+            document.getElementById('code-output').textContent = codeText;
+        }
+
+        // コピー処理
+        function copyToClipboard() {
+            const code = document.getElementById('code-output').textContent;
+            const textarea = document.createElement('textarea');
+            textarea.value = code;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+
+            try {
+                document.execCommand('copy');
+                const btn = document.getElementById('copy-btn-text');
+                btn.innerText = 'コピー完了！';
+                btn.parentElement.classList.remove('bg-blue-600', 'hover:bg-blue-500');
+                btn.parentElement.classList.add('bg-emerald-600', 'hover:bg-emerald-500');
+
+                setTimeout(() => {
+                    btn.innerText = 'コードをコピー';
+                    btn.parentElement.classList.remove('bg-emerald-600', 'hover:bg-emerald-500');
+                    btn.parentElement.classList.add('bg-blue-600', 'hover:bg-blue-500');
+                }, 2000);
+            } catch (err) {
+                console.error('Copy failed', err);
+            }
+            document.body.removeChild(textarea);
+        }
+    </script>
+</body>
+</html>
