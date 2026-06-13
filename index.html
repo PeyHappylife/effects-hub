@@ -858,6 +858,16 @@
       });
     });
 
+    // ハッシュ(#sec-xxx)で該当セクションを開く（avatar.html などからの遷移用）
+    function openSectionFromHash() {
+      const id = (location.hash || '').slice(1);
+      if (!id) return;
+      const tab = document.querySelector('.tab[data-target="' + id + '"]');
+      if (tab) tab.click();
+    }
+    window.addEventListener('hashchange', openSectionFromHash);
+    openSectionFromHash();
+
     // ----- Modal refs -----
     const overlay = document.getElementById('overlay');
     const stage = document.getElementById('stage');
