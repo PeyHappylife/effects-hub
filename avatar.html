@@ -719,6 +719,13 @@
         }
 
         // スライダー調整更新
+        // コード出力は文字列生成が重いので debounce（スライダー連打のたびに作り直さない）
+        let _codeOutputTimer = null;
+        function scheduleCodeOutput() {
+            clearTimeout(_codeOutputTimer);
+            _codeOutputTimer = setTimeout(updateCodeOutput, 120);
+        }
+
         function updateStyle(property, value) {
             state[property] = value;
 
@@ -726,28 +733,18 @@
             if (property === 'shadowIntensity') document.getElementById('val-shadow').innerText = value + 'px';
             if (property === 'effectBlur') document.getElementById('val-blur').innerText = value + 'px';
             if (property === 'nameFontSize') document.getElementById('val-fontsize').innerText = value + 'px';
-            if (property === 'speed') {
-                document.getElementById('val-speed').innerText = value + 's';
-                renderGrid('in');
-                renderGrid('loop');
-                renderGrid('out');
-            }
-            if (property === 'lineThickness') {
-                document.getElementById('val-thickness').innerText = value + 'px';
-                renderGrid('in');
-                renderGrid('loop');
-                renderGrid('out');
-            }
+            if (property === 'speed') document.getElementById('val-speed').innerText = value + 's';
+            if (property === 'lineThickness') document.getElementById('val-thickness').innerText = value + 'px';
             if (property === 'iconColor') {
                 document.getElementById('val-color').innerText = value;
                 document.getElementById('color-picker').value = value;
-                renderGrid('in');
-                renderGrid('loop');
-                renderGrid('out');
             }
 
+            // 色・太さ・速度・余白などは全て :root の CSS変数。変数を更新するだけで
+            // 全カード／プレビューに即反映されるため、グリッド全再構築（renderGrid×3）は不要。
+            // ← これがアップロード後にスライダーで固まっていた主因。
             updateStyleCSS();
-            updateCodeOutput();
+            scheduleCodeOutput();
         }
 
         function setPresetColor(color) {
@@ -822,9 +819,28 @@
             if (!file) return;
             const reader = new FileReader();
             reader.onload = (e) => {
-                state.avatarPhoto = e.target.result;
-                updateAvatarVisuals();
-                updateCodeOutput();
+                const img = new Image();
+                img.onload = () => {
+                    // 正方形 cover クロップ → 128px に縮小して圧縮。
+                    // 原寸の数MB base64 をそのまま使うと（全カードへの注入・無限アニメ・コード出力で）激重になるため、
+                    // 表示は最大56pxであることを踏まえ 128px / JPEG 品質0.85（≒数KB〜十数KB）へ落とす。
+                    const SIZE = 128;
+                    const side = Math.min(img.naturalWidth, img.naturalHeight) || SIZE;
+                    const sx = (img.naturalWidth - side) / 2;
+                    const sy = (img.naturalHeight - side) / 2;
+                    const canvas = document.createElement('canvas');
+                    canvas.width = SIZE;
+                    canvas.height = SIZE;
+                    const ctx = canvas.getContext('2d');
+                    ctx.imageSmoothingEnabled = true;
+                    ctx.imageSmoothingQuality = 'high';
+                    ctx.drawImage(img, sx, sy, side, side, 0, 0, SIZE, SIZE);
+                    state.avatarPhoto = canvas.toDataURL('image/jpeg', 0.85);
+                    updateAvatarVisuals();
+                    updateCodeOutput();
+                };
+                img.onerror = () => { alert('画像を読み込めませんでした。別の画像でお試しください。'); };
+                img.src = e.target.result;
             };
             reader.readAsDataURL(file);
         }
@@ -876,10 +892,17 @@
                 } else if (state.avatarType === 'text') {
                     el.innerHTML = `<span class="font-extrabold text-sm tracking-wider" style="color: var(--icon-color)">${state.avatarText}</span>`;
                 } else if (state.avatarType === 'photo') {
-                    if (state.avatarPhoto) {
-                        el.innerHTML = `<img src="${state.avatarPhoto}" alt="profile" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;">`;
-                    } else {
+                    const inPreview = !!el.closest('#selected-preview');
+                    if (inPreview && state.avatarPhoto) {
+                        el.innerHTML = `<img src="${state.avatarPhoto}" alt="profile" decoding="async" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;">`;
+                    } else if (inPreview) {
                         el.innerHTML = `<span class="text-[9px] text-slate-500 font-bold text-center leading-tight px-1">写真<br>未選択</span>`;
+                    } else {
+                        // 性能対策：グリッドの全カードには重い画像を入れず汎用アイコンで代用（実写真は上部プレビューのみ表示）
+                        el.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="color: var(--icon-color)">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>`;
                     }
                 }
             });
@@ -899,7 +922,7 @@
             } else if (state.avatarType === 'emoji') {
                 avatarContent = `    <span style="font-size: 20px;">${state.avatarEmoji}</span>`;
             } else if (state.avatarType === 'photo') {
-                avatarContent = `    <img src="${state.avatarPhoto || ''}" alt="profile" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;">`;
+                avatarContent = `    <img src="ここにアバター画像のURLを指定" alt="profile" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;">`;
             } else {
                 avatarContent = `    <span style="font-size: 14px; font-weight: 800; color: ${state.iconColor};">${state.avatarText}</span>`;
             }
