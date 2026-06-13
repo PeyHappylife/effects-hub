@@ -515,7 +515,13 @@
             nameplateText: 'User Name',
             lineThickness: 3,
             nameFontSize: 14,
-            hasFirstSelection: false // 初回の選択フラグ
+            hasFirstSelection: false, // 初回の選択フラグ
+            // 出現/表示中/消滅 それぞれ独立に選択を記憶（カスタマイザー設定は共通、選択中アニメだけタブ別）
+            selections: {
+                in:   { id: 1, keyframe: 'fadeIn',    class: 'ani-in-1',   name: 'Fade In' },
+                loop: { id: 1, keyframe: 'loopPulse',  class: 'ani-loop-1', name: 'Pulse (パルス)' },
+                out:  { id: 1, keyframe: 'fadeOut',    class: 'ani-out-1',  name: 'Fade Out' }
+            }
         };
 
         // アニメーションデータマスター
@@ -667,8 +673,8 @@
             });
 
             if (state.hasFirstSelection) {
-                const activePattern = patterns[tab].find(p => p.id === state.selectedId) || patterns[tab][0];
-                selectItem(activePattern.id, activePattern.keyframe, activePattern.class, activePattern.name);
+                const sel = state.selections[tab];
+                selectItem(sel.id, sel.keyframe, sel.class, sel.name);
             } else {
                 renderGrid(tab);
             }
@@ -680,6 +686,8 @@
             state.selectedKeyframe = keyframe;
             state.selectedClass = className;
             state.selectedName = name;
+            // 現在タブの選択を記憶（3つ並びプレビュー用）
+            state.selections[state.currentTab] = { id, keyframe, class: className, name };
 
             if (!state.hasFirstSelection) {
                 state.hasFirstSelection = true;
@@ -879,37 +887,50 @@
             reader.readAsArrayBuffer(file);
         }
 
-        // カスタマイザー内の選択中アニメーション ライブプレビュー
+        // カスタマイザー内のライブプレビュー（出現/表示中/消滅を横に3つ並べ、共通設定で同時表示）
+        function buildPhasePreview(tab, label) {
+            const sel = state.selections[tab];
+            const item = patterns[tab].find(p => p.id === sel.id) || patterns[tab][0];
+
+            let syncParentClass;
+            if (tab === 'in') syncParentClass = 'ani-in-parent';
+            else if (tab === 'out') syncParentClass = 'ani-out-parent';
+            else syncParentClass = `ani-loop-parent-${item.id}`;
+
+            const syncLineAnim = tab === 'in' ? 'nameLineIn' : (tab === 'loop' ? 'none' : 'nameLineOut');
+            const syncTextAnim = tab === 'in' ? 'nameTextIn' : (tab === 'loop' ? 'none' : 'nameTextOut');
+            const labelColor = state.currentTab === tab ? 'text-blue-400' : 'text-slate-500';
+
+            return `
+                <div class="flex flex-col items-center gap-2 shrink-0">
+                    <span class="text-[10px] font-bold tracking-wider ${labelColor}">${label}</span>
+                    <div class="${item.class} ${syncParentClass} relative" style="width: 168px;">
+                        <div class="relative w-full h-14 flex items-center">
+                            <div class="w-14 h-14 flex items-center justify-center relative z-30 shrink-0">
+                                <div class="avatar-preview-element w-14 h-14 rounded-full border-solid flex items-center justify-center bg-slate-900 relative overflow-hidden transition-all duration-150">
+                                    <div class="avatar-render-target"></div>
+                                </div>
+                            </div>
+                            <div class="nameplate-preview-area absolute left-7 bottom-0 z-0 h-14 flex flex-col justify-end min-w-0 pr-2 ${state.showNameplate ? '' : 'hidden'}" style="width: max-content; max-width: calc(100% - 28px);">
+                                <div class="name-text-el font-bold text-slate-200 tracking-wide truncate leading-none pb-1.5 origin-bottom pl-9"
+                                     style="font-size: var(--name-font-size); padding-right: 0.3em; ${syncTextAnim !== 'none' ? `animation-name: ${syncTextAnim};` : ''}">${state.nameplateText}</div>
+                                <div class="name-line-el rounded-full"
+                                     style="height: var(--line-thickness); background-color: var(--icon-color); transform-origin: left; width: 100%; ${syncLineAnim !== 'none' ? `animation-name: ${syncLineAnim};` : ''}"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+        }
+
         function renderSelectedPreview() {
             const preview = document.getElementById('selected-preview');
             if (!preview) return;
-            const item = patterns[state.currentTab].find(p => p.id === state.selectedId);
-            if (!item) { preview.innerHTML = ''; preview.className = ''; return; }
-
-            let syncParentClass = '';
-            if (state.currentTab === 'in') syncParentClass = 'ani-in-parent';
-            else if (state.currentTab === 'out') syncParentClass = 'ani-out-parent';
-            else syncParentClass = `ani-loop-parent-${item.id}`;
-
-            const syncLineAnim = state.currentTab === 'in' ? 'nameLineIn' : (state.currentTab === 'loop' ? 'none' : 'nameLineOut');
-            const syncTextAnim = state.currentTab === 'in' ? 'nameTextIn' : (state.currentTab === 'loop' ? 'none' : 'nameTextOut');
-
-            preview.className = `${item.class} ${syncParentClass} relative`;
-            preview.style.width = '240px';
-            preview.innerHTML = `
-                <div class="relative w-full h-14 flex items-center">
-                    <div class="w-14 h-14 flex items-center justify-center relative z-30 shrink-0">
-                        <div class="avatar-preview-element w-14 h-14 rounded-full border-solid flex items-center justify-center bg-slate-900 relative overflow-hidden transition-all duration-150">
-                            <div class="avatar-render-target"></div>
-                        </div>
-                    </div>
-                    <div class="nameplate-preview-area absolute left-7 bottom-0 z-0 h-14 flex flex-col justify-end min-w-0 pr-2 ${state.showNameplate ? '' : 'hidden'}" style="width: max-content; max-width: calc(100% - 28px);">
-                        <div class="name-text-el font-bold text-slate-200 tracking-wide truncate leading-none pb-1.5 origin-bottom pl-9"
-                             style="font-size: var(--name-font-size); padding-right: 0.3em; ${syncTextAnim !== 'none' ? `animation-name: ${syncTextAnim};` : ''}">${state.nameplateText}</div>
-                        <div class="name-line-el rounded-full"
-                             style="height: var(--line-thickness); background-color: var(--icon-color); transform-origin: left; width: 100%; ${syncLineAnim !== 'none' ? `animation-name: ${syncLineAnim};` : ''}"></div>
-                    </div>
-                </div>`;
+            preview.className = 'flex flex-wrap items-start justify-center gap-x-6 gap-y-4';
+            preview.style.width = '';
+            preview.innerHTML =
+                buildPhasePreview('in', '出現') +
+                buildPhasePreview('loop', '表示中') +
+                buildPhasePreview('out', '消滅');
             updateAvatarVisuals();
         }
 
