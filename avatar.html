@@ -15,6 +15,7 @@
             --icon-color: #3b82f6;
             --speed: 1.8s; /* 時間差を際立たせるための基準速度 */
             --line-thickness: 3px;
+            --name-font-size: 14px;
         }
 
         /* プレビューアイコン共通スタイル */
@@ -306,6 +307,13 @@
                             </div>
                             <div>
                                 <div class="flex justify-between text-[10px] text-slate-500 font-bold mb-1">
+                                    <label for="name-fontsize-range">名前の文字サイズ</label>
+                                    <span id="val-fontsize" class="font-mono text-blue-400">14px</span>
+                                </div>
+                                <input id="name-fontsize-range" type="range" min="10" max="24" value="14" oninput="updateStyle('nameFontSize', this.value)" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-500">
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-[10px] text-slate-500 font-bold mb-1">
                                     <label for="line-thickness-range">下太線の太さ</label>
                                     <span id="val-thickness" class="font-mono text-blue-400">3px</span>
                                 </div>
@@ -462,6 +470,7 @@
             showNameplate: true,
             nameplateText: 'User Name',
             lineThickness: 3,
+            nameFontSize: 14,
             hasFirstSelection: false // 初回の選択フラグ
         };
 
@@ -563,10 +572,10 @@
                             </div>
                         </div>
 
-                        <!-- 右側ネームプレート（左から28px＝アバター中心の下から這い出るように線が走る） -->
-                        <div class="nameplate-preview-area absolute left-7 bottom-0 right-0 z-0 h-14 flex flex-col justify-end min-w-0 pr-2 ${state.showNameplate ? '' : 'hidden'}">
-                            <div class="name-text-el font-bold text-slate-200 tracking-wide text-xs sm:text-sm truncate leading-none pb-1.5 origin-bottom pl-9"
-                                 style="${syncTextAnim !== 'none' ? `animation-name: ${syncTextAnim};` : ''}">
+                        <!-- 右側ネームプレート（左28px＝アバター中心から這い出る／幅は名前に合わせて縮む） -->
+                        <div class="nameplate-preview-area absolute left-7 bottom-0 z-0 h-14 flex flex-col justify-end min-w-0 pr-2 ${state.showNameplate ? '' : 'hidden'}" style="width: max-content; max-width: calc(100% - 28px);">
+                            <div class="name-text-el font-bold text-slate-200 tracking-wide truncate leading-none pb-1.5 origin-bottom pl-9"
+                                 style="font-size: var(--name-font-size); padding-right: 0.3em; ${syncTextAnim !== 'none' ? `animation-name: ${syncTextAnim};` : ''}">
                                 ${state.nameplateText}
                             </div>
                             <div class="name-line-el rounded-full"
@@ -663,6 +672,7 @@
             if (property === 'borderWidth') document.getElementById('val-border').innerText = value + 'px';
             if (property === 'shadowIntensity') document.getElementById('val-shadow').innerText = value + 'px';
             if (property === 'effectBlur') document.getElementById('val-blur').innerText = value + 'px';
+            if (property === 'nameFontSize') document.getElementById('val-fontsize').innerText = value + 'px';
             if (property === 'speed') {
                 document.getElementById('val-speed').innerText = value + 's';
                 renderGrid('in');
@@ -699,6 +709,7 @@
             root.style.setProperty('--icon-color', state.iconColor);
             root.style.setProperty('--speed', `${state.speed}s`);
             root.style.setProperty('--line-thickness', `${state.lineThickness}px`);
+            root.style.setProperty('--name-font-size', `${state.nameFontSize}px`);
         }
 
         function toggleNameplate(checked) {
@@ -789,9 +800,9 @@
                             <div class="avatar-render-target"></div>
                         </div>
                     </div>
-                    <div class="nameplate-preview-area absolute left-7 bottom-0 right-0 z-0 h-14 flex flex-col justify-end min-w-0 pr-2 ${state.showNameplate ? '' : 'hidden'}">
-                        <div class="name-text-el font-bold text-slate-200 tracking-wide text-sm truncate leading-none pb-1.5 origin-bottom pl-9"
-                             style="${syncTextAnim !== 'none' ? `animation-name: ${syncTextAnim};` : ''}">${state.nameplateText}</div>
+                    <div class="nameplate-preview-area absolute left-7 bottom-0 z-0 h-14 flex flex-col justify-end min-w-0 pr-2 ${state.showNameplate ? '' : 'hidden'}" style="width: max-content; max-width: calc(100% - 28px);">
+                        <div class="name-text-el font-bold text-slate-200 tracking-wide truncate leading-none pb-1.5 origin-bottom pl-9"
+                             style="font-size: var(--name-font-size); padding-right: 0.3em; ${syncTextAnim !== 'none' ? `animation-name: ${syncTextAnim};` : ''}">${state.nameplateText}</div>
                         <div class="name-line-el rounded-full"
                              style="height: var(--line-thickness); background-color: var(--icon-color); transform-origin: left; width: 100%; ${syncLineAnim !== 'none' ? `animation-name: ${syncLineAnim};` : ''}"></div>
                     </div>
@@ -901,7 +912,9 @@
   position: absolute;
   left: 28px;    /* 直径56pxの半分である28pxからラインをスタート */
   bottom: 0px;   /* アバター最下部に完全に吸着 */
-  right: 0;
+  right: auto;
+  width: max-content;             /* 名前の幅に合わせて縮める */
+  max-width: calc(100% - 28px);
   height: 56px;
   display: flex;
   flex-direction: column;
@@ -913,8 +926,9 @@
   font-family: sans-serif;
   font-weight: bold;
   color: #e2e8f0;
-  font-size: 14px;
+  font-size: ${state.nameFontSize}px;
   padding-left: 36px;  /* アバター右半分と被るのを防ぐ余白 */
+  padding-right: 0.3em; /* 名前の右に半角スペース1個分 */
   padding-bottom: 6px;
   ${state.currentTab !== 'loop' ? `animation: ${syncTextAnim} ${state.speed}s infinite ease-in-out;` : ''}
 }
@@ -922,7 +936,7 @@
 .profile-name-line {
   height: ${state.lineThickness}px;
   background-color: ${state.iconColor};
-  width: 100%;
+  width: 100%;        /* 親が名前幅に縮むので、線も名前＋半角スペース分になる */
   transform-origin: left;
   ${state.currentTab !== 'loop' ? `animation: ${syncLineAnim} ${state.speed}s infinite ease-in-out;` : ''}
 }
