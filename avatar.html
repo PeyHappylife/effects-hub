@@ -814,35 +814,69 @@
         }
 
         // プロフィール写真アップロード（枠内に収める）
+        // アップロード画像がアニメーション（GIF / APNG / アニメWebP）かを判定。
+        // これらは縮小（canvas化）すると1コマに固定されてしまうので、原本のまま表示して動かす。
+        function isAnimatedImage(bytes, type) {
+            const sigAt = (str, off) => {
+                for (let j = 0; j < str.length; j++) if (bytes[off + j] !== str.charCodeAt(j)) return false;
+                return true;
+            };
+            const hasSig = (str, limit) => {
+                const max = Math.min(bytes.length - str.length, limit);
+                for (let i = 0; i <= max; i++) if (sigAt(str, i)) return true;
+                return false;
+            };
+            const isGif  = type === 'image/gif'  || sigAt('GIF8', 0);
+            const isPng  = type === 'image/png'  || sigAt('\x89PNG', 0);
+            const isWebp = type === 'image/webp' || (sigAt('RIFF', 0) && sigAt('WEBP', 8));
+            if (isGif)  return true;                    // GIFはアニメ前提で原本保持
+            if (isPng)  return hasSig('acTL', 300000);  // APNGのアニメ制御チャンク
+            if (isWebp) return hasSig('ANMF', 300000);  // アニメWebPのフレームチャンク
+            return false;
+        }
+
+        let _photoObjectUrl = null;
         function handlePhotoUpload(event) {
             const file = event.target.files && event.target.files[0];
             if (!file) return;
             const reader = new FileReader();
-            reader.onload = (e) => {
-                const img = new Image();
-                img.onload = () => {
-                    // 正方形 cover クロップ → 128px に縮小して圧縮。
-                    // 原寸の数MB base64 をそのまま使うと（全カードへの注入・無限アニメ・コード出力で）激重になるため、
-                    // 表示は最大56pxであることを踏まえ 128px / JPEG 品質0.85（≒数KB〜十数KB）へ落とす。
-                    const SIZE = 128;
-                    const side = Math.min(img.naturalWidth, img.naturalHeight) || SIZE;
-                    const sx = (img.naturalWidth - side) / 2;
-                    const sy = (img.naturalHeight - side) / 2;
-                    const canvas = document.createElement('canvas');
-                    canvas.width = SIZE;
-                    canvas.height = SIZE;
-                    const ctx = canvas.getContext('2d');
-                    ctx.imageSmoothingEnabled = true;
-                    ctx.imageSmoothingQuality = 'high';
-                    ctx.drawImage(img, sx, sy, side, side, 0, 0, SIZE, SIZE);
-                    state.avatarPhoto = canvas.toDataURL('image/jpeg', 0.85);
+            reader.onload = (ev) => {
+                const bytes = new Uint8Array(ev.target.result);
+                if (isAnimatedImage(bytes, file.type)) {
+                    // アニメGIF/APNG/アニメWebP：縮小せず原本をそのまま表示（base64肥大を避けBlobURLを使用）。
+                    // 写真は上部プレビュー1枚にしか出さない（グリッドはアイコン）ので、原寸でも重くならない。
+                    if (_photoObjectUrl) URL.revokeObjectURL(_photoObjectUrl);
+                    _photoObjectUrl = URL.createObjectURL(file);
+                    state.avatarPhoto = _photoObjectUrl;
                     updateAvatarVisuals();
                     updateCodeOutput();
-                };
-                img.onerror = () => { alert('画像を読み込めませんでした。別の画像でお試しください。'); };
-                img.src = e.target.result;
+                } else {
+                    // 静止画：従来どおり正方形cover → 128px / JPEG0.85 に縮小圧縮（軽量化）。
+                    const tmpUrl = URL.createObjectURL(file);
+                    const img = new Image();
+                    img.onload = () => {
+                        const SIZE = 128;
+                        const side = Math.min(img.naturalWidth, img.naturalHeight) || SIZE;
+                        const sx = (img.naturalWidth - side) / 2;
+                        const sy = (img.naturalHeight - side) / 2;
+                        const canvas = document.createElement('canvas');
+                        canvas.width = SIZE;
+                        canvas.height = SIZE;
+                        const ctx = canvas.getContext('2d');
+                        ctx.imageSmoothingEnabled = true;
+                        ctx.imageSmoothingQuality = 'high';
+                        ctx.drawImage(img, sx, sy, side, side, 0, 0, SIZE, SIZE);
+                        if (_photoObjectUrl) { URL.revokeObjectURL(_photoObjectUrl); _photoObjectUrl = null; }
+                        state.avatarPhoto = canvas.toDataURL('image/jpeg', 0.85);
+                        URL.revokeObjectURL(tmpUrl);
+                        updateAvatarVisuals();
+                        updateCodeOutput();
+                    };
+                    img.onerror = () => { URL.revokeObjectURL(tmpUrl); alert('画像を読み込めませんでした。別の画像でお試しください。'); };
+                    img.src = tmpUrl;
+                }
             };
-            reader.readAsDataURL(file);
+            reader.readAsArrayBuffer(file);
         }
 
         // カスタマイザー内の選択中アニメーション ライブプレビュー
