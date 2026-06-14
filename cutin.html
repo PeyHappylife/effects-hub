@@ -737,9 +737,46 @@
     22%, 82% { transform: scale(1); opacity: 1; }
     90%, 100% { opacity: 0; transform: scale(0.8); }
   }
+
+  /* ===== Effects Hub ナビ（全ページ共通の6ボタン） ===== */
+  .hub-tabs { display: flex; justify-content: center; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin: 0 auto 2.4rem; max-width: 760px; }
+  .hub-tab {
+    padding: 0.5rem 1rem; background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1); border-radius: 10px;
+    color: #aaa; cursor: pointer; font-size: 0.82rem; font-weight: 600;
+    text-decoration: none; white-space: nowrap; transition: all 0.2s;
+    display: inline-flex; align-items: center;
+  }
+  .hub-tab:hover { color: #fff; border-color: rgba(96,165,250,0.4); }
+  .hub-tab.active {
+    background: linear-gradient(120deg, rgba(96,165,250,0.25), rgba(167,139,250,0.25));
+    border-color: rgba(96,165,250,0.6); color: #fff;
+  }
+  .hub-tab-avatar {
+    flex: 0 0 auto; width: 38px; height: 38px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, rgba(96,165,250,0.20), rgba(236,72,153,0.20));
+    border: 1px solid rgba(255,255,255,0.14); color: #e0e0e0;
+    text-decoration: none; transition: all 0.2s;
+  }
+  .hub-tab-avatar:hover { color: #fff; transform: translateY(-2px) scale(1.06); border-color: rgba(167,139,250,0.7); box-shadow: 0 0 16px rgba(167,139,250,0.55); }
+  .hub-tab-avatar svg { width: 21px; height: 21px; }
 </style>
 </head>
 <body>
+
+<nav class="hub-tabs">
+  <a class="hub-tab" href="index.html#sec-button">🔘 ボタン</a>
+  <a class="hub-tab" href="index.html#sec-text">🔤 文字</a>
+  <a class="hub-tab" href="index.html#sec-anim">🎬 アニメーション</a>
+  <a class="hub-tab" href="index.html#sec-telop">📺 テロップ</a>
+  <a class="hub-tab-avatar" href="avatar.html" title="アバターアニメーション" aria-label="アバターアニメーション">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+    </svg>
+  </a>
+  <a class="hub-tab active" href="cutin.html" title="カットインエフェクト一覧（現在のページ）" aria-current="page">✂️ カットイン</a>
+</nav>
 
 <h1>⚡ カットインエフェクト一覧</h1>
 <p class="subtitle">全17種 — CSS純粋実装 / クラス名 .c-{name} / --spd で速度調整可</p>

@@ -41,7 +41,7 @@
       padding: 0.6rem 1.4rem;
       background: rgba(255,255,255,0.04);
       border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 10px; color: #aaa; cursor: pointer;
+      border-radius: 10px; color: #aaa; cursor: pointer; text-decoration: none;
       font-size: 0.9rem; font-weight: 600; font-family: inherit;
       transition: all 0.2s;
     }
@@ -656,6 +656,7 @@
         <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
       </svg>
     </a>
+    <a class="tab" href="cutin.html" style="display:inline-flex;align-items:center;" title="カットインエフェクト一覧（17種）">✂️ カットイン</a>
   </div>
 
   <!-- Buttons -->
@@ -847,6 +848,7 @@
     // ----- Tabs -----
     document.querySelectorAll('.tab').forEach(tab => {
       tab.addEventListener('click', () => {
+        if (!tab.dataset.target) return;
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         tab.classList.add('active');
