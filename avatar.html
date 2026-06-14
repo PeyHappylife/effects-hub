@@ -538,13 +538,19 @@
                         </button>
 
                         <div class="grid grid-cols-2 gap-2 pt-1">
-                            <button onclick="exportMedia('gif')" id="gif-btn" title="出現→表示中→消滅をGIFアニメで書き出し" class="text-xs bg-fuchsia-600 hover:bg-fuchsia-500 text-white px-3 py-2.5 rounded-xl font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-lg shadow-fuchsia-500/20 disabled:opacity-50">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 5a2 2 0 012-2h12a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V5z"/><path stroke-linecap="round" stroke-linejoin="round" d="M8 3v18M16 3v18M4 9h4M4 15h4M16 9h4M16 15h4"/></svg>
-                                <span id="gif-btn-text">GIFで保存</span>
+                            <button onclick="exportMedia('gif')" id="gif-btn" title="出現→表示中→消滅をGIFアニメで書き出し（容量は大きめ・互換性は最高）" class="bg-fuchsia-600 hover:bg-fuchsia-500 text-white px-3 py-2 rounded-xl font-bold transition-all flex flex-col items-center justify-center gap-0.5 cursor-pointer shadow-lg shadow-fuchsia-500/20 disabled:opacity-50">
+                                <span class="flex items-center gap-1.5 text-xs">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 5a2 2 0 012-2h12a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V5z"/><path stroke-linecap="round" stroke-linejoin="round" d="M8 3v18M16 3v18M4 9h4M4 15h4M16 9h4M16 15h4"/></svg>
+                                    <span id="gif-btn-text">GIFで保存</span>
+                                </span>
+                                <span id="gif-size-est" class="text-[9px] font-bold text-amber-100/90 leading-none">容量大</span>
                             </button>
-                            <button onclick="exportMedia('webm')" id="webm-btn" title="出現→表示中→消滅を動画(WebM)で書き出し" class="text-xs bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2.5 rounded-xl font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-lg shadow-indigo-500/20 disabled:opacity-50">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 6h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2z"/></svg>
-                                <span id="webm-btn-text">動画(WebM)</span>
+                            <button onclick="exportMedia('webm')" id="webm-btn" title="出現→表示中→消滅を動画(WebM)で書き出し（容量は小さめ・軽量）" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded-xl font-bold transition-all flex flex-col items-center justify-center gap-0.5 cursor-pointer shadow-lg shadow-indigo-500/20 disabled:opacity-50">
+                                <span class="flex items-center gap-1.5 text-xs">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 6h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2z"/></svg>
+                                    <span id="webm-btn-text">動画(WebM)</span>
+                                </span>
+                                <span id="webm-size-est" class="text-[9px] font-bold text-emerald-100/90 leading-none">容量小</span>
                             </button>
                         </div>
                         <div id="export-progress" class="text-[10px] text-fuchsia-300 font-bold leading-none min-h-[12px]"></div>
@@ -566,6 +572,40 @@
                             </button>
                         </div>
                     </h2>
+
+                    <!-- 出現/表示中/消滅 を個別に DL・コピー -->
+                    <div class="grid grid-cols-3 gap-2">
+                        <div class="bg-slate-900/40 border border-slate-800 rounded-xl p-2 flex flex-col gap-1.5">
+                            <span class="text-[10px] font-bold text-sky-400 tracking-wider text-center">出現 (In)</span>
+                            <div class="grid grid-cols-2 gap-1">
+                                <button onclick="downloadPhase('in')" title="出現を単体HTMLでダウンロード" class="text-[10px] bg-emerald-700/80 hover:bg-emerald-600 text-white py-1.5 rounded-lg font-bold transition-all cursor-pointer flex items-center justify-center gap-0.5">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"/></svg>
+                                    <span id="dl-in-text">DL</span>
+                                </button>
+                                <button onclick="copyPhase('in')" title="出現のコードをコピー" class="text-[10px] bg-slate-700 hover:bg-slate-600 text-white py-1.5 rounded-lg font-bold transition-all cursor-pointer"><span id="copy-in-text">コピー</span></button>
+                            </div>
+                        </div>
+                        <div class="bg-slate-900/40 border border-slate-800 rounded-xl p-2 flex flex-col gap-1.5">
+                            <span class="text-[10px] font-bold text-violet-400 tracking-wider text-center">表示中 (Loop)</span>
+                            <div class="grid grid-cols-2 gap-1">
+                                <button onclick="downloadPhase('loop')" title="表示中を単体HTMLでダウンロード" class="text-[10px] bg-emerald-700/80 hover:bg-emerald-600 text-white py-1.5 rounded-lg font-bold transition-all cursor-pointer flex items-center justify-center gap-0.5">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"/></svg>
+                                    <span id="dl-loop-text">DL</span>
+                                </button>
+                                <button onclick="copyPhase('loop')" title="表示中のコードをコピー" class="text-[10px] bg-slate-700 hover:bg-slate-600 text-white py-1.5 rounded-lg font-bold transition-all cursor-pointer"><span id="copy-loop-text">コピー</span></button>
+                            </div>
+                        </div>
+                        <div class="bg-slate-900/40 border border-slate-800 rounded-xl p-2 flex flex-col gap-1.5">
+                            <span class="text-[10px] font-bold text-rose-400 tracking-wider text-center">消滅 (Out)</span>
+                            <div class="grid grid-cols-2 gap-1">
+                                <button onclick="downloadPhase('out')" title="消滅を単体HTMLでダウンロード" class="text-[10px] bg-emerald-700/80 hover:bg-emerald-600 text-white py-1.5 rounded-lg font-bold transition-all cursor-pointer flex items-center justify-center gap-0.5">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"/></svg>
+                                    <span id="dl-out-text">DL</span>
+                                </button>
+                                <button onclick="copyPhase('out')" title="消滅のコードをコピー" class="text-[10px] bg-slate-700 hover:bg-slate-600 text-white py-1.5 rounded-lg font-bold transition-all cursor-pointer"><span id="copy-out-text">コピー</span></button>
+                            </div>
+                        </div>
+                    </div>
 
                     <!-- ライブプレビューは上部固定バー(#preview-sticky)へ移動 -->
 
@@ -682,6 +722,7 @@
             renderGrid('out');
             updateStyleCSS();
             syncStickyTop();
+            updateSizeEstimate();
             loadSavedConfig();   // 共有URL(#c=)または前回の保存設定を復元
             window.addEventListener('beforeunload', autosaveConfig);
             window.addEventListener('pagehide', autosaveConfig);
@@ -853,6 +894,7 @@
             // ← これがアップロード後にスライダーで固まっていた主因。
             updateStyleCSS();
             scheduleCodeOutput();
+            if (property === 'speed' || property === 'shadowIntensity') updateSizeEstimate();
         }
 
         function setPresetColor(color) {
@@ -898,6 +940,7 @@
                 const el = document.getElementById(labels[prop][0]);
                 if (el) el.innerText = labels[prop][1];
             }
+            updateSizeEstimate();
         }
 
         function setExportBg(value) {
@@ -983,6 +1026,7 @@
             const area = document.getElementById('nameplate-input-area');
             if (area) area.classList.toggle('hidden', !state.showNameplate);
             updateStyleCSS();
+            updateSizeEstimate();
         }
 
         function applyConfig(cfg) {
@@ -1257,7 +1301,12 @@
         // コピー用HTML/CSS生成
         function updateCodeOutput() {
             const activePattern = patterns[state.currentTab].find(p => p.id === state.selectedId) || patterns[state.currentTab][0];
-            const safeClassName = `profile-animation-${activePattern.keyframe}`;
+            document.getElementById('code-output').textContent = buildPhaseSnippet(state.currentTab, activePattern);
+        }
+
+        // 指定フェーズ(tab='in'|'loop'|'out')の HTML+CSS スニペットを生成（現在表示・個別コピー共用）
+        function buildPhaseSnippet(tab, pattern) {
+            const safeClassName = `profile-animation-${pattern.keyframe}`;
             const glowShadow = `0 0 ${state.shadowIntensity}px ${state.iconColor}`;
 
             let avatarContent = '';
@@ -1277,8 +1326,8 @@
             let nameplateCSS = '';
 
             if (state.showNameplate) {
-                const syncLineAnim = state.currentTab === 'in' ? 'nameLineIn' : (state.currentTab === 'loop' ? 'none' : 'nameLineOut');
-                const syncTextAnim = state.currentTab === 'in' ? 'nameTextIn' : (state.currentTab === 'loop' ? 'none' : 'nameTextOut');
+                const syncLineAnim = tab === 'in' ? 'nameLineIn' : (tab === 'loop' ? 'none' : 'nameLineOut');
+                const syncTextAnim = tab === 'in' ? 'nameTextIn' : (tab === 'loop' ? 'none' : 'nameTextOut');
 
                 nameplateHTML = `
   <!-- ネームプレート領域 (アバターの中心最下点から生える) -->
@@ -1288,17 +1337,17 @@
   </div>`;
 
                 let containerAnimCSS = '';
-                if (state.currentTab === 'loop') {
+                if (tab === 'loop') {
                     // 表示中タブは Glow 以外を親コンテナ全体で完全同調させる
-                    if (activePattern.keyframe !== 'loopGlow') {
-                        containerAnimCSS = `\n  animation: ${activePattern.keyframe} ${state.speed}s infinite ease-in-out;`;
+                    if (pattern.keyframe !== 'loopGlow') {
+                        containerAnimCSS = `\n  animation: ${pattern.keyframe} ${state.speed}s infinite ease-in-out;`;
                     }
                 }
 
                 let lineKeyframeDef = '';
                 let textKeyframeDef = '';
 
-                if (state.currentTab === 'in') {
+                if (tab === 'in') {
                     lineKeyframeDef = `@keyframes nameLineIn {
   0%, 40% { width: 0; opacity: 0; }
   70%, 100% { width: 100%; opacity: 1; }
@@ -1307,7 +1356,7 @@
   0%, 62% { opacity: 0; transform: translateY(12px); }
   82%, 100% { opacity: 1; transform: translateY(0); }
 }`;
-                } else if (state.currentTab === 'out') {
+                } else if (tab === 'out') {
                     lineKeyframeDef = `@keyframes nameLineOut {
   0% { width: 100%; opacity: 1; }
   20% { width: 100%; opacity: 1; }
@@ -1352,7 +1401,7 @@
   padding-left: 36px;  /* アバター右半分と被るのを防ぐ余白 */
   padding-right: 0.3em; /* 名前の右に半角スペース1個分 */
   padding-bottom: 6px;
-  ${state.currentTab !== 'loop' ? `animation: ${syncTextAnim} ${state.speed}s infinite ease-in-out;` : ''}
+  ${tab !== 'loop' ? `animation: ${syncTextAnim} ${state.speed}s infinite ease-in-out;` : ''}
 }
 
 .profile-name-line {
@@ -1360,7 +1409,7 @@
   background-color: ${state.iconColor};
   width: 100%;        /* 親が名前幅に縮むので、線も名前＋半角スペース分になる */
   transform-origin: left;
-  ${state.currentTab !== 'loop' ? `animation: ${syncLineAnim} ${state.speed}s infinite ease-in-out;` : ''}
+  ${tab !== 'loop' ? `animation: ${syncLineAnim} ${state.speed}s infinite ease-in-out;` : ''}
 }
 
 ${lineKeyframeDef}
@@ -1375,17 +1424,17 @@ ${textKeyframeDef}`;
 
             // 表示中かつ全体同調以外のアバター個別揺動アニメーション
             let avatarAnimationLine = '';
-            if (state.currentTab === 'loop') {
-                if (activePattern.keyframe === 'loopGlow') {
-                    avatarAnimationLine = `animation: ${activePattern.keyframe} ${state.speed}s infinite ease-in-out;`;
+            if (tab === 'loop') {
+                if (pattern.keyframe === 'loopGlow') {
+                    avatarAnimationLine = `animation: ${pattern.keyframe} ${state.speed}s infinite ease-in-out;`;
                 } else {
                     avatarAnimationLine = `/* 親コンテナでループアニメーションが同期動作するため、個別のアバター指定は不要です */`;
                 }
             } else {
-                avatarAnimationLine = `animation: ${activePattern.keyframe} ${state.speed}s infinite ease-in-out;`;
+                avatarAnimationLine = `animation: ${pattern.keyframe} ${state.speed}s infinite ease-in-out;`;
             }
 
-            const codeText = `<!-- HTML -->
+            return `<!-- HTML -->
 <div class="profile-card-container ${safeClassName}">
   <!-- アイコン領域 (最前面 z-index: 30) -->
   <div class="profile-avatar">
@@ -1417,16 +1466,15 @@ ${avatarContent}
 }
 
 /* アバター個別・同調用アニメーション定義 */
-@keyframes ${activePattern.keyframe} {
-  ${activePattern.def}
+@keyframes ${pattern.keyframe} {
+  ${pattern.def}
 }
 </style>`;
-
-            document.getElementById('code-output').textContent = codeText;
         }
 
-        // 選択中の3つ（出現/表示中/消滅）を1つの完結HTMLにまとめて生成
-        function buildCombinedHTML(photoSrcOverride) {
+        // 選択中の3つ（出現/表示中/消滅）を1つの完結HTMLに生成。
+        // only='in'|'loop'|'out' を渡すと、そのフェーズ単体の完結HTMLを生成する。
+        function buildCombinedHTML(photoSrcOverride, only) {
             const pIn   = patterns.in.find(p => p.id === state.selections.in.id)     || patterns.in[0];
             const pLoop = patterns.loop.find(p => p.id === state.selections.loop.id) || patterns.loop[0];
             const pOut  = patterns.out.find(p => p.id === state.selections.out.id)   || patterns.out[0];
@@ -1498,57 +1546,71 @@ ${avatarContent}
     @keyframes nameLineOut { 0%{ width:100%; opacity:1; } 20%{ width:100%; opacity:1; } 52%,100%{ width:0; opacity:0; } }
     @keyframes nameTextOut { 0%{ opacity:1; transform:translateY(0); } 25%,100%{ opacity:0; transform:translateY(12px); } }` : '';
 
-            return `<!DOCTYPE html>
-<html lang="ja">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>アバターアニメーション 出現→表示中→消滅</title>
-<!--
-  プロフィールアバターの一連の演出を1ファイルにまとめたものです。
-  出現(${pIn.name}) → 表示中(${pLoop.name}) → 消滅(${pOut.name})${repeat ? ' を自動で繰り返します。' : ' を1回再生します。'}
-  自分のアプリに組み込む場合は、コンテナ要素のクラスを次のように付け替えてください:
+            // フェーズ別ルール/キーフレーム
+            const inRule  = `.phase-in .profile-avatar  { animation: ${pIn.keyframe} ${speed}s ease both; }`;
+            const outRule = `.phase-out .profile-avatar { animation: ${pOut.keyframe} ${speed}s ease both; }`;
+            const kfIn   = `@keyframes ${pIn.keyframe} { ${pIn.def} }`;
+            const kfLoop = `@keyframes ${pLoop.keyframe} { ${pLoop.def} }`;
+            const kfOut  = `@keyframes ${pOut.keyframe} { ${pOut.def} }`;
+
+            const single = (only === 'in' || only === 'loop' || only === 'out') ? only : null;
+            let phaseRulesCSS, keyframesCSS, bodyPhaseClass, headDesc, integrationNote, sequencerJS;
+
+            if (single === 'in') {
+                phaseRulesCSS = `    /* 出現 */\n    ${inRule}`;
+                keyframesCSS = `    ${kfIn}`;
+                bodyPhaseClass = 'phase-in';
+                headDesc = `  プロフィールアバターの「出現」演出(${pIn.name})${repeat ? ' を繰り返し再生します。' : ' を1回再生します。'}`;
+            } else if (single === 'loop') {
+                phaseRulesCSS = `    /* 表示中 */\n    ${containerLoopCSS}`;
+                keyframesCSS = `    ${kfLoop}`;
+                bodyPhaseClass = 'phase-loop';
+                headDesc = `  プロフィールアバターの「表示中」演出(${pLoop.name}) を無限ループ再生します。`;
+            } else if (single === 'out') {
+                phaseRulesCSS = `    /* 消滅 */\n    ${outRule}`;
+                keyframesCSS = `    ${kfOut}`;
+                bodyPhaseClass = 'phase-out';
+                headDesc = `  プロフィールアバターの「消滅」演出(${pOut.name})${repeat ? ' を繰り返し再生します。' : ' を1回再生します。'}`;
+            } else {
+                phaseRulesCSS = `    /* 出現 */\n    ${inRule}\n    /* 表示中 */\n    ${containerLoopCSS}\n    /* 消滅 */\n    ${outRule}`;
+                keyframesCSS = `    ${kfIn}\n    ${kfLoop}\n    ${kfOut}`;
+                bodyPhaseClass = 'phase-in';
+                headDesc = `  プロフィールアバターの一連の演出を1ファイルにまとめたものです。\n  出現(${pIn.name}) → 表示中(${pLoop.name}) → 消滅(${pOut.name})${repeat ? ' を自動で繰り返します。' : ' を1回再生します。'}`;
+            }
+
+            integrationNote = single
+                ? `  組み込み時はコンテナに class="profile-card-container ${bodyPhaseClass}" を付与してください。`
+                : `  自分のアプリに組み込む場合は、コンテナ要素のクラスを次のように付け替えてください:
     出現: class="profile-card-container phase-in"
     表示中: class="profile-card-container phase-loop"
-    消滅: class="profile-card-container phase-out"
--->
-<style>
-    * { box-sizing: border-box; }
-    body { margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; background: ${bg}; }
+    消滅: class="profile-card-container phase-out"`;
 
-    .profile-card-container {
-      position: relative; display: inline-flex; align-items: center;
-      width: ${cw}px; height: ${sz}px; perspective: 1000px;
-    }
-    .profile-avatar {
-      width: ${sz}px; height: ${sz}px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      background-color: ${bg}; border: ${state.borderWidth}px solid ${state.iconColor};
-      filter: blur(${state.effectBlur}px); box-shadow: ${glow};
-      overflow: hidden; flex-shrink: 0; position: relative; z-index: 30;
-      --shadow-color: ${state.iconColor};
-    }${nameplateCSS}
-
-    /* 出現 */
-    .phase-in .profile-avatar  { animation: ${pIn.keyframe} ${speed}s ease both; }
-    /* 表示中 */
-    ${containerLoopCSS}
-    /* 消滅 */
-    .phase-out .profile-avatar { animation: ${pOut.keyframe} ${speed}s ease both; }
-
-    @keyframes ${pIn.keyframe} { ${pIn.def} }
-    @keyframes ${pLoop.keyframe} { ${pLoop.def} }
-    @keyframes ${pOut.keyframe} { ${pOut.def} }
-</style>
-</head>
-<body>
-  <div class="profile-card-container phase-in">
-    <div class="profile-avatar">
-${avatarContent}
-    </div>${nameplateHTML}
-  </div>
-
-  <script>
+            if (single === 'loop') {
+                sequencerJS = `  <!-- 表示中はCSSの無限ループのみ。JSは不要です -->`;
+            } else if (single === 'in' || single === 'out') {
+                const ph = 'phase-' + single;
+                const jName = single === 'in' ? '出現' : '消滅';
+                sequencerJS = `  <script>
+    // 「${jName}」を${repeat ? '一定間隔で繰り返し' : '1回'}再生
+    (function () {
+      var SPEED = ${speed};   // 秒
+      var GAP = ${gapMs};     // 繰り返しの待ち(ms)
+      var REPEAT = ${repeat};
+      var el = document.querySelector('.profile-card-container');
+      function run() {
+        el.className = 'profile-card-container ${ph}';
+        if (REPEAT) {
+          setTimeout(function () {
+            el.className = 'profile-card-container';
+            setTimeout(run, GAP);
+          }, SPEED * 1000);
+        }
+      }
+      run();
+    })();
+  <\/script>`;
+            } else {
+                sequencerJS = `  <script>
     // 出現 → 表示中(${loopTimes}回) → 消滅${repeat ? ` → ${gapMs}ms待って繰り返し` : '（1回のみ）'}
     (function () {
       var SPEED = ${speed};   // 秒
@@ -1571,7 +1633,53 @@ ${avatarContent}
       }
       run();
     })();
-  <\/script>
+  <\/script>`;
+            }
+
+            const titleText = single
+                ? (single === 'in' ? 'アバターアニメーション 出現' : single === 'loop' ? 'アバターアニメーション 表示中' : 'アバターアニメーション 消滅')
+                : 'アバターアニメーション 出現→表示中→消滅';
+
+            return `<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>${titleText}</title>
+<!--
+${headDesc}
+${integrationNote}
+-->
+<style>
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; background: ${bg}; }
+
+    .profile-card-container {
+      position: relative; display: inline-flex; align-items: center;
+      width: ${cw}px; height: ${sz}px; perspective: 1000px;
+    }
+    .profile-avatar {
+      width: ${sz}px; height: ${sz}px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      background-color: ${bg}; border: ${state.borderWidth}px solid ${state.iconColor};
+      filter: blur(${state.effectBlur}px); box-shadow: ${glow};
+      overflow: hidden; flex-shrink: 0; position: relative; z-index: 30;
+      --shadow-color: ${state.iconColor};
+    }${nameplateCSS}
+
+${phaseRulesCSS}
+
+${keyframesCSS}
+</style>
+</head>
+<body>
+  <div class="profile-card-container ${bodyPhaseClass}">
+    <div class="profile-avatar">
+${avatarContent}
+    </div>${nameplateHTML}
+  </div>
+
+${sequencerJS}
 </body>
 </html>`;
         }
@@ -1619,6 +1727,38 @@ ${avatarContent}
             }
         }
 
+        // 出現/表示中/消滅 を1フェーズ単体の完結HTMLとしてダウンロード
+        async function downloadPhase(phase) {
+            const labelId = { in: 'dl-in-text', loop: 'dl-loop-text', out: 'dl-out-text' }[phase];
+            const t = document.getElementById(labelId);
+            let photoSrc = null;
+            if (state.avatarType === 'photo' && _animatedPhotoFile) {
+                if (t) t.innerText = '…';
+                try { photoSrc = await fileToDataURL(_animatedPhotoFile); } catch (e) {}
+            }
+            const html = buildCombinedHTML(photoSrc, phase);
+            _downloadBlob(new Blob([html], { type: 'text/html;charset=utf-8' }), `avatar-${phase}.html`);
+            if (t) { t.innerText = '✓'; setTimeout(() => { t.innerText = 'DL'; }, 1400); }
+        }
+
+        // 出現/表示中/消滅 のコードスニペットを個別にコピー
+        function copyPhase(phase) {
+            const pattern = patterns[phase].find(p => p.id === state.selections[phase].id) || patterns[phase][0];
+            const code = buildPhaseSnippet(phase, pattern);
+            const labelId = { in: 'copy-in-text', loop: 'copy-loop-text', out: 'copy-out-text' }[phase];
+            const t = document.getElementById(labelId);
+            const ta = document.createElement('textarea');
+            ta.value = code; ta.style.position = 'fixed'; ta.style.opacity = '0';
+            document.body.appendChild(ta); ta.select();
+            try {
+                document.execCommand('copy');
+                if (t) { t.innerText = '✓'; setTimeout(() => { t.innerText = 'コピー'; }, 1400); }
+            } catch (e) {
+                if (navigator.clipboard) navigator.clipboard.writeText(code);
+            }
+            document.body.removeChild(ta);
+        }
+
         // ===== 動画 / GIF 書き出し（出現→表示中→消滅を1サイクル）=====
         // CSSアニメを animation-delay 負値 + paused で1フレームずつ確定させ html2canvas で取得 → GIF/WebM に符号化。
         const EXPORT_FPS = 15;
@@ -1630,6 +1770,34 @@ ${avatarContent}
         function _exportProgress(msg) {
             const el = document.getElementById('export-progress');
             if (el) el.innerText = msg || '';
+        }
+
+        function _fmtBytes(b) {
+            if (b >= 1024 * 1024) return (b / 1048576).toFixed(b >= 10485760 ? 0 : 1) + 'MB';
+            if (b >= 1024) return Math.round(b / 1024) + 'KB';
+            return Math.round(b) + 'B';
+        }
+
+        // GIF/WebM の推定容量をボタンに表示（実測値ベースの粗い目安）。設定変更時に呼ぶ。
+        function updateSizeEstimate() {
+            const speed = +state.speed || 1.8;
+            const loopTimes = Math.max(1, parseInt(state.loopTimes, 10) || 3);
+            const sz = parseInt(state.avatarSize, 10) || 56;
+            const pad = Math.max(16, (+state.shadowIntensity || 0) + 14);
+            const W = ((sz + 184) + pad * 2) * 2, H = (sz + pad * 2) * 2; // 書き出し解像度(scale2)
+            const perPhase = Math.max(2, Math.round(speed * EXPORT_FPS));
+            const nFrames = perPhase * (2 + loopTimes);
+            const duration = speed * (2 + loopTimes);
+            const gifBytes = W * H * nFrames * 0.025;  // ≈0.025B/px/frame
+            const webmBytes = duration * 48 * 1024;    // ≈48KB/s
+            const g = document.getElementById('gif-size-est');
+            const w = document.getElementById('webm-size-est');
+            const gifBigger = gifBytes >= webmBytes;
+            // 現在の設定で「多い方／少ない方」を動的に表示（単純なアバターでは拮抗するため）
+            const more = '・多い', less = '・少ない';
+            const cMore = '#fde68a', cLess = '#a7f3d0'; // amber-200 / emerald-200
+            if (g) { g.innerText = '〜' + _fmtBytes(gifBytes) + (gifBigger ? more : less); g.style.color = gifBigger ? cMore : cLess; }
+            if (w) { w.innerText = '〜' + _fmtBytes(webmBytes) + (gifBigger ? less : more); w.style.color = gifBigger ? cLess : cMore; }
         }
 
         // 書き出し用ステージ（自動再生スクリプトを除いた静的HTML）
