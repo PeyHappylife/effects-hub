@@ -537,6 +537,18 @@
                             <span id="share-btn-text">設定を保存して共有URLをコピー</span>
                         </button>
 
+                        <div class="pt-1">
+                            <div class="flex justify-between text-xs mb-1 text-slate-400 font-bold">
+                                <label>動画/GIF 書き出し範囲</label>
+                            </div>
+                            <div class="grid grid-cols-4 gap-1 bg-slate-800/60 p-1 rounded-xl">
+                                <button id="range-btn-all" onclick="setExportRange('all')" class="text-[11px] px-1 py-1.5 rounded-lg font-bold transition-all bg-slate-700 text-blue-400">通し</button>
+                                <button id="range-btn-in" onclick="setExportRange('in')" class="text-[11px] px-1 py-1.5 rounded-lg font-bold transition-all text-slate-400 hover:text-white">出現</button>
+                                <button id="range-btn-loop" onclick="setExportRange('loop')" class="text-[11px] px-1 py-1.5 rounded-lg font-bold transition-all text-slate-400 hover:text-white">表示中</button>
+                                <button id="range-btn-out" onclick="setExportRange('out')" class="text-[11px] px-1 py-1.5 rounded-lg font-bold transition-all text-slate-400 hover:text-white">消滅</button>
+                            </div>
+                        </div>
+
                         <div class="grid grid-cols-2 gap-2 pt-1">
                             <button onclick="exportMedia('gif')" id="gif-btn" title="出現→表示中→消滅をGIFアニメで書き出し（容量は大きめ・互換性は最高）" class="bg-fuchsia-600 hover:bg-fuchsia-500 text-white px-3 py-2 rounded-xl font-bold transition-all flex flex-col items-center justify-center gap-0.5 cursor-pointer shadow-lg shadow-fuchsia-500/20 disabled:opacity-50">
                                 <span class="flex items-center gap-1.5 text-xs">
@@ -658,7 +670,8 @@
             avatarSize: 56,        // 書き出しアバター径(px)
             loopTimes: 3,          // 表示中ループ回数
             cycleGap: 0.7,         // サイクル間の待ち(秒)
-            playMode: 'loop'       // 'loop'=無限 / 'once'=1回だけ
+            playMode: 'loop',      // 'loop'=無限 / 'once'=1回だけ
+            exportRange: 'all'     // 動画/GIF書き出し範囲 'all'|'in'|'loop'|'out'
         };
 
         // アニメーションデータマスター
@@ -958,6 +971,13 @@
         function setPlayMode(mode) {
             state.playMode = mode;
             _segActivate(['play-btn-loop', 'play-btn-once'], mode === 'once' ? 'play-btn-once' : 'play-btn-loop');
+        }
+
+        // 動画/GIFの書き出し範囲（通し / 出現 / 表示中 / 消滅）
+        function setExportRange(range) {
+            state.exportRange = range;
+            _segActivate(['range-btn-all', 'range-btn-in', 'range-btn-loop', 'range-btn-out'], 'range-btn-' + range);
+            updateSizeEstimate();
         }
 
         // ===== 設定の保存・共有（共有URL / localStorage） =====
@@ -1786,8 +1806,11 @@ ${sequencerJS}
             const pad = Math.max(16, (+state.shadowIntensity || 0) + 14);
             const W = ((sz + 184) + pad * 2) * 2, H = (sz + pad * 2) * 2; // 書き出し解像度(scale2)
             const perPhase = Math.max(2, Math.round(speed * EXPORT_FPS));
-            const nFrames = perPhase * (2 + loopTimes);
-            const duration = speed * (2 + loopTimes);
+            // 書き出し範囲：単体フェーズは1サイクル分、通しは 出現+表示中×loopTimes+消滅
+            const single = (state.exportRange && state.exportRange !== 'all') ? state.exportRange : null;
+            const cycles = single ? 1 : (2 + loopTimes);
+            const nFrames = perPhase * cycles;
+            const duration = speed * cycles;
             const gifBytes = W * H * nFrames * 0.025;  // ≈0.025B/px/frame
             const webmBytes = duration * 48 * 1024;    // ≈48KB/s
             const g = document.getElementById('gif-size-est');
@@ -1811,7 +1834,8 @@ ${sequencerJS}
 
         // 各フェーズを html2canvas で取得。表示中は1サイクルだけ取得し、組み立て時に loopTimes 回くり返す
         // （取得回数が loopTimes に依存しなくなり高速＆GIFループもシームレス）。
-        async function _captureFrames() {
+        async function _captureFrames(only) {
+            const single = (only === 'in' || only === 'loop' || only === 'out') ? only : null;
             const pLoop = patterns.loop.find(p => p.id === state.selections.loop.id) || patterns.loop[0];
             const loopOnContainer = (pLoop.keyframe !== 'loopGlow');
             const speed = +state.speed;
@@ -1838,7 +1862,8 @@ ${sequencerJS}
             const allEls = [container, avatar, nameText, nameLine].filter(Boolean);
 
             const perPhase = Math.max(2, Math.round(speed * EXPORT_FPS));
-            const totalGrabs = perPhase * 3;
+            const phasesToGrab = single ? [single] : ['in', 'loop', 'out'];
+            const totalGrabs = perPhase * phasesToGrab.length;
             let grabbed = 0;
 
             // 指定フェーズの local 時刻でアニメを確定させ1フレーム取得
@@ -1859,17 +1884,23 @@ ${sequencerJS}
             const inEls = [avatar, nameText, nameLine].filter(Boolean);
             const loopEls = [loopOnContainer ? container : avatar].filter(Boolean);
 
-            const inFrames = [], loopFrames = [], outFrames = [];
-            for (let k = 0; k < perPhase; k++) inFrames.push(await grab('phase-in', (k / perPhase) * speed, inEls));
-            for (let k = 0; k < perPhase; k++) loopFrames.push(await grab('phase-loop', (k / perPhase) * speed, loopEls));
-            for (let k = 0; k < perPhase; k++) outFrames.push(await grab('phase-out', (k / perPhase) * speed, inEls));
+            const cap = { in: [], loop: [], out: [] };
+            if (phasesToGrab.includes('in'))   for (let k = 0; k < perPhase; k++) cap.in.push(await grab('phase-in', (k / perPhase) * speed, inEls));
+            if (phasesToGrab.includes('loop')) for (let k = 0; k < perPhase; k++) cap.loop.push(await grab('phase-loop', (k / perPhase) * speed, loopEls));
+            if (phasesToGrab.includes('out'))  for (let k = 0; k < perPhase; k++) cap.out.push(await grab('phase-out', (k / perPhase) * speed, inEls));
 
             iframe.remove();
 
-            // 組み立て：出現 + 表示中サイクル×loopTimes + 消滅
-            let frames = inFrames.slice();
-            for (let r = 0; r < loopTimes; r++) frames = frames.concat(loopFrames);
-            frames = frames.concat(outFrames);
+            // 組み立て：単体フェーズは1サイクルのみ（動画自体がループ）。通しは 出現 + 表示中×loopTimes + 消滅
+            let frames;
+            if (single === 'in') frames = cap.in.slice();
+            else if (single === 'loop') frames = cap.loop.slice();
+            else if (single === 'out') frames = cap.out.slice();
+            else {
+                frames = cap.in.slice();
+                for (let r = 0; r < loopTimes; r++) frames = frames.concat(cap.loop);
+                frames = frames.concat(cap.out);
+            }
 
             return { frames, fps: EXPORT_FPS, bg, width: W * S, height: H * S };
         }
@@ -1950,12 +1981,14 @@ ${sequencerJS}
             if (labelEl) labelEl.innerText = '生成中…';
             try {
                 _exportProgress('準備中…');
-                const cap = await _captureFrames();
+                const only = (state.exportRange && state.exportRange !== 'all') ? state.exportRange : null;
+                const cap = await _captureFrames(only);
                 if (!cap.frames.length) throw new Error('フレームを取得できませんでした');
+                const base = only ? `avatar-${only}` : 'avatar-animation';
                 if (format === 'gif') {
-                    _downloadBlob(await _encodeGIF(cap), 'avatar-animation.gif');
+                    _downloadBlob(await _encodeGIF(cap), base + '.gif');
                 } else {
-                    _downloadBlob(await _encodeWebM(cap), 'avatar-animation.webm');
+                    _downloadBlob(await _encodeWebM(cap), base + '.webm');
                 }
                 _exportProgress('完了！');
                 setTimeout(() => _exportProgress(''), 2500);
