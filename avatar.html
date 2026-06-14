@@ -6,6 +6,9 @@
     <title>プロフィールアイコン アニメーションカタログ</title>
     <!-- Tailwind CSS (CDN) -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 動画/GIF書き出し用ライブラリ（CDN・読み込めない環境では該当機能のみ無効化） -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.js"></script>
     <style>
         /* CSS変数による動的スタイル管理 */
         :root {
@@ -465,6 +468,88 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- 書き出し設定（まとめてDL / 動画書き出し用） -->
+                    <div class="space-y-4 pt-5 mt-1 border-t border-slate-800">
+                        <h3 class="text-xs font-bold tracking-wider text-emerald-400 uppercase flex items-center gap-1.5">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"/></svg>
+                            書き出し設定 (Export)
+                        </h3>
+
+                        <!-- 背景 -->
+                        <div>
+                            <div class="flex justify-between text-xs mb-1 text-slate-400 font-bold">
+                                <label>背景 (Background)</label>
+                                <span id="val-exportBg" class="font-mono text-blue-400 uppercase">#0F172A</span>
+                            </div>
+                            <div class="flex gap-2 items-center">
+                                <div class="flex gap-1 bg-slate-800/60 p-1 rounded-xl">
+                                    <button id="bg-btn-transparent" onclick="setExportBg('transparent')" class="text-xs px-3 py-1.5 rounded-lg font-bold transition-all text-slate-400 hover:text-white">透過</button>
+                                    <button id="bg-btn-dark" onclick="setExportBg('#0f172a')" class="text-xs px-3 py-1.5 rounded-lg font-bold transition-all bg-slate-700 text-blue-400">ダーク</button>
+                                    <button id="bg-btn-white" onclick="setExportBg('#ffffff')" class="text-xs px-3 py-1.5 rounded-lg font-bold transition-all text-slate-400 hover:text-white">白</button>
+                                </div>
+                                <input id="export-bg-picker" type="color" value="#0f172a" oninput="setExportBg(this.value)" class="w-8 h-8 rounded-full border border-slate-800 bg-transparent cursor-pointer p-0">
+                            </div>
+                        </div>
+
+                        <!-- アバターサイズ -->
+                        <div>
+                            <div class="flex justify-between text-xs mb-1 text-slate-400 font-bold">
+                                <label for="size-range">アバターサイズ (Size)</label>
+                                <span id="val-size" class="font-mono text-blue-400">56px</span>
+                            </div>
+                            <input id="size-range" type="range" min="32" max="128" step="4" value="56" oninput="updateExport('avatarSize', this.value)" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-500">
+                        </div>
+
+                        <!-- 表示中ループ回数 -->
+                        <div>
+                            <div class="flex justify-between text-xs mb-1 text-slate-400 font-bold">
+                                <label for="loop-range">表示中ループ回数 (Loop)</label>
+                                <span id="val-loop" class="font-mono text-blue-400">3回</span>
+                            </div>
+                            <input id="loop-range" type="range" min="1" max="10" step="1" value="3" oninput="updateExport('loopTimes', this.value)" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-500">
+                        </div>
+
+                        <!-- サイクル間の待ち -->
+                        <div>
+                            <div class="flex justify-between text-xs mb-1 text-slate-400 font-bold">
+                                <label for="gap-range">繰り返し待ち (Gap)</label>
+                                <span id="val-gap" class="font-mono text-blue-400">0.7s</span>
+                            </div>
+                            <input id="gap-range" type="range" min="0" max="2" step="0.1" value="0.7" oninput="updateExport('cycleGap', this.value)" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-500">
+                        </div>
+
+                        <!-- 再生モード -->
+                        <div>
+                            <div class="flex justify-between text-xs mb-1 text-slate-400 font-bold">
+                                <label>再生モード (Play)</label>
+                            </div>
+                            <div class="flex gap-1 bg-slate-800/60 p-1 rounded-xl w-max">
+                                <button id="play-btn-loop" onclick="setPlayMode('loop')" class="text-xs px-3 py-1.5 rounded-lg font-bold transition-all bg-slate-700 text-blue-400">🔁 繰り返し</button>
+                                <button id="play-btn-once" onclick="setPlayMode('once')" class="text-xs px-3 py-1.5 rounded-lg font-bold transition-all text-slate-400 hover:text-white">1回だけ</button>
+                            </div>
+                        </div>
+
+                        <p class="text-[10px] text-slate-500 leading-relaxed">※ 書き出し設定は「3つまとめてDL」「動画で書き出し」したファイルに反映されます（プレビュー・単体コピーは変わりません）。</p>
+
+                        <button onclick="shareConfig()" title="現在の選択・設定を共有URLにしてコピー（次回この端末で開くと自動復元）" class="w-full mt-1 text-xs bg-slate-800 hover:bg-slate-700 text-slate-100 px-4 py-2.5 rounded-xl font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer border border-slate-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101M10.172 13.828a4 4 0 005.656 0l4-4a4 4 0 10-5.656-5.656l-1.1 1.1"/></svg>
+                            <span id="share-btn-text">設定を保存して共有URLをコピー</span>
+                        </button>
+
+                        <div class="grid grid-cols-2 gap-2 pt-1">
+                            <button onclick="exportMedia('gif')" id="gif-btn" title="出現→表示中→消滅をGIFアニメで書き出し" class="text-xs bg-fuchsia-600 hover:bg-fuchsia-500 text-white px-3 py-2.5 rounded-xl font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-lg shadow-fuchsia-500/20 disabled:opacity-50">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 5a2 2 0 012-2h12a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V5z"/><path stroke-linecap="round" stroke-linejoin="round" d="M8 3v18M16 3v18M4 9h4M4 15h4M16 9h4M16 15h4"/></svg>
+                                <span id="gif-btn-text">GIFで保存</span>
+                            </button>
+                            <button onclick="exportMedia('webm')" id="webm-btn" title="出現→表示中→消滅を動画(WebM)で書き出し" class="text-xs bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2.5 rounded-xl font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-lg shadow-indigo-500/20 disabled:opacity-50">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 6h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2z"/></svg>
+                                <span id="webm-btn-text">動画(WebM)</span>
+                            </button>
+                        </div>
+                        <div id="export-progress" class="text-[10px] text-fuchsia-300 font-bold leading-none min-h-[12px]"></div>
+                        <p class="text-[10px] text-slate-500 leading-relaxed">GIF/動画はグロー・ぼかし・3D傾きが簡略化される場合があります。生成に数十秒かかることがあります（速度・ループ回数が大きいほど長くなります）。</p>
+                    </div>
                 </div>
 
                 <!-- 右側：コード生成 & コピーエリア -->
@@ -527,7 +612,13 @@
                 in:   { id: 1, keyframe: 'fadeIn',    class: 'ani-in-1',   name: 'Fade In' },
                 loop: { id: 1, keyframe: 'loopPulse',  class: 'ani-loop-1', name: 'Pulse (パルス)' },
                 out:  { id: 1, keyframe: 'fadeOut',    class: 'ani-out-1',  name: 'Fade Out' }
-            }
+            },
+            // 書き出し設定（まとめてDL / 動画用）
+            exportBg: '#0f172a',   // 背景色（'transparent' で透過）
+            avatarSize: 56,        // 書き出しアバター径(px)
+            loopTimes: 3,          // 表示中ループ回数
+            cycleGap: 0.7,         // サイクル間の待ち(秒)
+            playMode: 'loop'       // 'loop'=無限 / 'once'=1回だけ
         };
 
         // アニメーションデータマスター
@@ -591,6 +682,9 @@
             renderGrid('out');
             updateStyleCSS();
             syncStickyTop();
+            loadSavedConfig();   // 共有URL(#c=)または前回の保存設定を復元
+            window.addEventListener('beforeunload', autosaveConfig);
+            window.addEventListener('pagehide', autosaveConfig);
         });
 
         // グリッド描画（横4列 縦3列）
@@ -774,6 +868,194 @@
             root.style.setProperty('--speed', `${state.speed}s`);
             root.style.setProperty('--line-thickness', `${state.lineThickness}px`);
             root.style.setProperty('--name-font-size', `${state.nameFontSize}px`);
+        }
+
+        // ===== 書き出し設定（まとめてDL / 動画用） =====
+        function _segActivate(ids, activeId) {
+            ids.forEach(id => {
+                const b = document.getElementById(id);
+                if (!b) return;
+                if (id === activeId) {
+                    b.classList.add('bg-slate-700', 'text-blue-400');
+                    b.classList.remove('text-slate-400', 'hover:text-white');
+                } else {
+                    b.classList.remove('bg-slate-700', 'text-blue-400');
+                    b.classList.add('text-slate-400', 'hover:text-white');
+                }
+            });
+        }
+
+        function updateExport(prop, value) {
+            if (prop === 'avatarSize' || prop === 'loopTimes') value = parseInt(value, 10);
+            else if (prop === 'cycleGap') value = parseFloat(value);
+            state[prop] = value;
+            const labels = {
+                avatarSize: ['val-size', value + 'px'],
+                loopTimes:  ['val-loop', value + '回'],
+                cycleGap:   ['val-gap', value + 's']
+            };
+            if (labels[prop]) {
+                const el = document.getElementById(labels[prop][0]);
+                if (el) el.innerText = labels[prop][1];
+            }
+        }
+
+        function setExportBg(value) {
+            state.exportBg = value;
+            const lbl = document.getElementById('val-exportBg');
+            if (lbl) lbl.innerText = (value === 'transparent') ? '透過' : value;
+            const map = { 'transparent': 'bg-btn-transparent', '#0f172a': 'bg-btn-dark', '#ffffff': 'bg-btn-white' };
+            _segActivate(['bg-btn-transparent', 'bg-btn-dark', 'bg-btn-white'], map[value] || null);
+            if (value !== 'transparent') {
+                const picker = document.getElementById('export-bg-picker');
+                if (picker) picker.value = value;
+            }
+        }
+
+        function setPlayMode(mode) {
+            state.playMode = mode;
+            _segActivate(['play-btn-loop', 'play-btn-once'], mode === 'once' ? 'play-btn-once' : 'play-btn-loop');
+        }
+
+        // ===== 設定の保存・共有（共有URL / localStorage） =====
+        const _LS_KEY = 'avatarCatalogConfig';
+
+        // 現在の選択＋全設定をコンパクトなオブジェクトに（写真はサイズが大きいため含めない）
+        function serializeConfig() {
+            return {
+                v: 1,
+                t: state.currentTab,
+                sel: { i: state.selections.in.id, l: state.selections.loop.id, o: state.selections.out.id },
+                st: {
+                    c: state.iconColor, sp: state.speed, bw: state.borderWidth, sh: state.shadowIntensity,
+                    bl: state.effectBlur, lt: state.lineThickness, nf: state.nameFontSize,
+                    np: state.showNameplate ? 1 : 0, nt: state.nameplateText,
+                    at: state.avatarType, em: state.avatarEmoji, tx: state.avatarText
+                },
+                ex: {
+                    bg: state.exportBg, sz: state.avatarSize, lp: state.loopTimes,
+                    gp: state.cycleGap, pm: state.playMode
+                }
+            };
+        }
+
+        function b64urlEncode(str) {
+            return btoa(unescape(encodeURIComponent(str))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        }
+        function b64urlDecode(s) {
+            s = s.replace(/-/g, '+').replace(/_/g, '/');
+            while (s.length % 4) s += '=';
+            return decodeURIComponent(escape(atob(s)));
+        }
+
+        // state の値を各UIコントロール（スライダー/ピッカー/ラベル/トグル/セグメント）へ反映
+        function syncControlsFromState() {
+            const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v; };
+            setVal('border-range', state.borderWidth);
+            setVal('shadow-range', state.shadowIntensity);
+            setVal('blur-range', state.effectBlur);
+            setVal('speed-range', state.speed);
+            setVal('name-fontsize-range', state.nameFontSize);
+            setVal('line-thickness-range', state.lineThickness);
+            setVal('color-picker', state.iconColor);
+            setVal('nameplate-text', state.nameplateText);
+            setVal('text-input', state.avatarText);
+            setVal('size-range', state.avatarSize);
+            setVal('loop-range', state.loopTimes);
+            setVal('gap-range', state.cycleGap);
+            const tog = document.getElementById('nameplate-toggle'); if (tog) tog.checked = state.showNameplate;
+
+            const setTxt = (id, t) => { const el = document.getElementById(id); if (el) el.innerText = t; };
+            setTxt('val-border', state.borderWidth + 'px');
+            setTxt('val-shadow', state.shadowIntensity + 'px');
+            setTxt('val-blur', state.effectBlur + 'px');
+            setTxt('val-speed', state.speed + 's');
+            setTxt('val-fontsize', state.nameFontSize + 'px');
+            setTxt('val-thickness', state.lineThickness + 'px');
+            setTxt('val-color', state.iconColor);
+            setTxt('val-size', state.avatarSize + 'px');
+            setTxt('val-loop', state.loopTimes + '回');
+            setTxt('val-gap', state.cycleGap + 's');
+
+            setExportBg(state.exportBg);
+            setPlayMode(state.playMode);
+            setAvatarType(state.avatarType);
+            const area = document.getElementById('nameplate-input-area');
+            if (area) area.classList.toggle('hidden', !state.showNameplate);
+            updateStyleCSS();
+        }
+
+        function applyConfig(cfg) {
+            if (!cfg) return;
+            try {
+                if (cfg.sel) {
+                    [['in', 'i'], ['loop', 'l'], ['out', 'o']].forEach(([tab, key]) => {
+                        const p = patterns[tab].find(x => x.id === cfg.sel[key]);
+                        if (p) state.selections[tab] = { id: p.id, keyframe: p.keyframe, class: p.class, name: p.name };
+                    });
+                }
+                const st = cfg.st || {};
+                if (st.c  != null) state.iconColor = st.c;
+                if (st.sp != null) state.speed = +st.sp;
+                if (st.bw != null) state.borderWidth = +st.bw;
+                if (st.sh != null) state.shadowIntensity = +st.sh;
+                if (st.bl != null) state.effectBlur = +st.bl;
+                if (st.lt != null) state.lineThickness = +st.lt;
+                if (st.nf != null) state.nameFontSize = +st.nf;
+                if (st.np != null) state.showNameplate = !!st.np;
+                if (st.nt != null) state.nameplateText = st.nt;
+                if (st.at != null) state.avatarType = st.at;
+                if (st.em != null) state.avatarEmoji = st.em;
+                if (st.tx != null) state.avatarText = st.tx;
+                const ex = cfg.ex || {};
+                if (ex.bg != null) state.exportBg = ex.bg;
+                if (ex.sz != null) state.avatarSize = +ex.sz;
+                if (ex.lp != null) state.loopTimes = +ex.lp;
+                if (ex.gp != null) state.cycleGap = +ex.gp;
+                if (ex.pm != null) state.playMode = ex.pm;
+
+                syncControlsFromState();
+
+                // 選択タブを復元し、そのアニメを選択状態にしてカスタマイザーを開く
+                const tab = cfg.t || 'in';
+                state.currentTab = tab;
+                state.hasFirstSelection = true;
+                switchTab(tab);
+            } catch (e) { console.warn('applyConfig failed', e); }
+        }
+
+        function buildShareURL() {
+            const code = b64urlEncode(JSON.stringify(serializeConfig()));
+            return location.origin + location.pathname + '#c=' + code;
+        }
+
+        function autosaveConfig() {
+            try { localStorage.setItem(_LS_KEY, JSON.stringify(serializeConfig())); } catch (e) {}
+        }
+
+        function shareConfig() {
+            const url = buildShareURL();
+            autosaveConfig();
+            const btn = document.getElementById('share-btn-text');
+            const done = () => { if (btn) { const o = btn.innerText; btn.innerText = '✓ コピーしました！'; setTimeout(() => { btn.innerText = o; }, 1600); } };
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(url).then(done).catch(() => window.prompt('共有URL（コピーしてください）', url));
+            } else {
+                window.prompt('共有URL（コピーしてください）', url);
+            }
+        }
+
+        // 読み込み時：URL の #c= を最優先、なければ localStorage の保存設定を復元
+        function loadSavedConfig() {
+            const m = location.hash.match(/[#&]c=([^&]+)/);
+            if (m) {
+                try { applyConfig(JSON.parse(b64urlDecode(m[1]))); return true; } catch (e) { console.warn('share decode failed', e); }
+            }
+            try {
+                const saved = localStorage.getItem(_LS_KEY);
+                if (saved) { applyConfig(JSON.parse(saved)); return true; }
+            } catch (e) {}
+            return false;
         }
 
         function toggleNameplate(checked) {
@@ -1152,21 +1434,32 @@ ${avatarContent}
             const glow = `0 0 ${state.shadowIntensity}px ${state.iconColor}`;
             const loopOnContainer = (pLoop.keyframe !== 'loopGlow'); // Glow以外は親コンテナ全体で同調
 
+            // 書き出し設定（背景・サイズ・タイミング）
+            const sz = parseInt(state.avatarSize, 10) || 56;
+            const half = Math.round(sz / 2);
+            const pad = Math.round(sz * 0.64);
+            const cw = sz + 184;                                   // コンテナ幅（名前領域ぶん）
+            const bg = (state.exportBg === 'transparent') ? 'transparent' : state.exportBg;
+            const loopTimes = Math.max(1, parseInt(state.loopTimes, 10) || 3);
+            const gapMs = Math.round((state.cycleGap != null ? state.cycleGap : 0.7) * 1000);
+            const repeat = (state.playMode !== 'once');
+
             let avatarContent;
             if (state.avatarType === 'icon') {
+                const iconSz = Math.round(sz * 0.5);
                 avatarContent =
-`      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="${state.iconColor}" stroke-width="2" style="width:28px;height:28px;">
+`      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="${state.iconColor}" stroke-width="2" style="width:${iconSz}px;height:${iconSz}px;">
         <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
       </svg>`;
             } else if (state.avatarType === 'emoji') {
-                avatarContent = `      <span style="font-size:20px;">${state.avatarEmoji}</span>`;
+                avatarContent = `      <span style="font-size:${Math.round(sz * 0.36)}px;">${state.avatarEmoji}</span>`;
             } else if (state.avatarType === 'photo') {
                 // 自己完結ファイルにするため画像は埋め込む。静止画はdata:、アニメGIF等はDL時に原本をbase64化して渡す(photoSrcOverride)。
                 const photoSrc = photoSrcOverride
                     || ((state.avatarPhoto && state.avatarPhoto.startsWith('data:')) ? state.avatarPhoto : 'ここにアバター画像のURLを指定');
                 avatarContent = `      <img src="${photoSrc}" alt="profile" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">`;
             } else {
-                avatarContent = `      <span style="font-size:14px;font-weight:800;color:${state.iconColor};">${state.avatarText}</span>`;
+                avatarContent = `      <span style="font-size:${Math.round(sz * 0.25)}px;font-weight:800;color:${state.iconColor};">${state.avatarText}</span>`;
             }
 
             const showNP = state.showNameplate;
@@ -1184,13 +1477,13 @@ ${avatarContent}
             const nameplateCSS = showNP ?
 `
     .profile-nameplate {
-      position: absolute; left: 28px; bottom: 0; right: auto;
-      width: max-content; max-width: calc(100% - 28px); height: 56px;
+      position: absolute; left: ${half}px; bottom: 0; right: auto;
+      width: max-content; max-width: calc(100% - ${half}px); height: ${sz}px;
       display: flex; flex-direction: column; justify-content: flex-end; z-index: 1;
     }
     .profile-name-text {
       font-family: sans-serif; font-weight: bold; color: #e2e8f0;
-      font-size: ${state.nameFontSize}px; padding-left: 36px; padding-right: 0.3em; padding-bottom: 6px;
+      font-size: ${state.nameFontSize}px; padding-left: ${pad}px; padding-right: 0.3em; padding-bottom: 6px;
     }
     .profile-name-line {
       height: ${state.lineThickness}px; background-color: ${state.iconColor};
@@ -1213,7 +1506,7 @@ ${avatarContent}
 <title>アバターアニメーション 出現→表示中→消滅</title>
 <!--
   プロフィールアバターの一連の演出を1ファイルにまとめたものです。
-  出現(${pIn.name}) → 表示中(${pLoop.name}) → 消滅(${pOut.name}) を自動で繰り返します。
+  出現(${pIn.name}) → 表示中(${pLoop.name}) → 消滅(${pOut.name})${repeat ? ' を自動で繰り返します。' : ' を1回再生します。'}
   自分のアプリに組み込む場合は、コンテナ要素のクラスを次のように付け替えてください:
     出現: class="profile-card-container phase-in"
     表示中: class="profile-card-container phase-loop"
@@ -1221,16 +1514,16 @@ ${avatarContent}
 -->
 <style>
     * { box-sizing: border-box; }
-    body { margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #0f172a; }
+    body { margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; background: ${bg}; }
 
     .profile-card-container {
       position: relative; display: inline-flex; align-items: center;
-      width: 240px; height: 56px; perspective: 1000px;
+      width: ${cw}px; height: ${sz}px; perspective: 1000px;
     }
     .profile-avatar {
-      width: 56px; height: 56px; border-radius: 50%;
+      width: ${sz}px; height: ${sz}px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
-      background-color: #0f172a; border: ${state.borderWidth}px solid ${state.iconColor};
+      background-color: ${bg}; border: ${state.borderWidth}px solid ${state.iconColor};
       filter: blur(${state.effectBlur}px); box-shadow: ${glow};
       overflow: hidden; flex-shrink: 0; position: relative; z-index: 30;
       --shadow-color: ${state.iconColor};
@@ -1256,10 +1549,12 @@ ${avatarContent}
   </div>
 
   <script>
-    // 出現 → 表示中(LOOP_TIMES回) → 消滅 → 少し待って繰り返し
+    // 出現 → 表示中(${loopTimes}回) → 消滅${repeat ? ` → ${gapMs}ms待って繰り返し` : '（1回のみ）'}
     (function () {
       var SPEED = ${speed};   // 秒
-      var LOOP_TIMES = 3;     // 表示中のループ回数
+      var LOOP_TIMES = ${loopTimes};
+      var GAP = ${gapMs};     // サイクル間の待ち(ms)
+      var REPEAT = ${repeat};
       var el = document.querySelector('.profile-card-container');
       function set(cls) { el.className = 'profile-card-container ' + cls; }
       function run() {
@@ -1268,7 +1563,9 @@ ${avatarContent}
           set('phase-loop');
           setTimeout(function () {
             set('phase-out');
-            setTimeout(function () { setTimeout(run, 700); }, SPEED * 1000);
+            if (REPEAT) {
+              setTimeout(function () { setTimeout(run, GAP); }, SPEED * 1000);
+            }
           }, SPEED * 1000 * LOOP_TIMES);
         }, SPEED * 1000);
       }
@@ -1319,6 +1616,188 @@ ${avatarContent}
             if (t) {
                 t.innerText = 'ダウンロード！';
                 setTimeout(() => { t.innerText = '3つまとめてDL'; }, 2000);
+            }
+        }
+
+        // ===== 動画 / GIF 書き出し（出現→表示中→消滅を1サイクル）=====
+        // CSSアニメを animation-delay 負値 + paused で1フレームずつ確定させ html2canvas で取得 → GIF/WebM に符号化。
+        const EXPORT_FPS = 15;
+
+        function _sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+        function _setExportBtnsDisabled(disabled) {
+            ['gif-btn', 'webm-btn'].forEach(id => { const b = document.getElementById(id); if (b) b.disabled = disabled; });
+        }
+        function _exportProgress(msg) {
+            const el = document.getElementById('export-progress');
+            if (el) el.innerText = msg || '';
+        }
+
+        // 書き出し用ステージ（自動再生スクリプトを除いた静的HTML）
+        async function _buildExportStageHTML() {
+            let photoSrc = null;
+            if (state.avatarType === 'photo' && _animatedPhotoFile) {
+                try { photoSrc = await fileToDataURL(_animatedPhotoFile); } catch (e) {}
+            }
+            return buildCombinedHTML(photoSrc).replace(/<script[\s\S]*?<\/script>/i, '');
+        }
+
+        // 各フェーズを html2canvas で取得。表示中は1サイクルだけ取得し、組み立て時に loopTimes 回くり返す
+        // （取得回数が loopTimes に依存しなくなり高速＆GIFループもシームレス）。
+        async function _captureFrames() {
+            const pLoop = patterns.loop.find(p => p.id === state.selections.loop.id) || patterns.loop[0];
+            const loopOnContainer = (pLoop.keyframe !== 'loopGlow');
+            const speed = +state.speed;
+            const loopTimes = Math.max(1, parseInt(state.loopTimes, 10) || 3);
+            const sz = parseInt(state.avatarSize, 10) || 56;
+            const bg = (state.exportBg === 'transparent') ? 'transparent' : state.exportBg;
+            const pad = Math.max(16, (+state.shadowIntensity || 0) + 14);
+            const W = (sz + 184) + pad * 2;   // ステージ幅
+            const H = sz + pad * 2;           // ステージ高さ
+            const S = 2;                      // 解像度倍率
+
+            const stageHTML = await _buildExportStageHTML();
+            const iframe = document.createElement('iframe');
+            iframe.style.cssText = `position:fixed;left:-99999px;top:0;border:0;width:${W}px;height:${H}px;`;
+            document.body.appendChild(iframe);
+            await new Promise(res => { iframe.onload = res; iframe.srcdoc = stageHTML; });
+            await _sleep(150); // フォント・画像の安定待ち
+
+            const doc = iframe.contentDocument;
+            const container = doc.querySelector('.profile-card-container');
+            const avatar = doc.querySelector('.profile-avatar');
+            const nameText = doc.querySelector('.profile-name-text');
+            const nameLine = doc.querySelector('.profile-name-line');
+            const allEls = [container, avatar, nameText, nameLine].filter(Boolean);
+
+            const perPhase = Math.max(2, Math.round(speed * EXPORT_FPS));
+            const totalGrabs = perPhase * 3;
+            let grabbed = 0;
+
+            // 指定フェーズの local 時刻でアニメを確定させ1フレーム取得
+            async function grab(phase, local, els) {
+                container.className = 'profile-card-container ' + phase;
+                allEls.forEach(el => { el.style.animationPlayState = ''; el.style.animationDelay = ''; });
+                els.forEach(el => { el.style.animationPlayState = 'paused'; el.style.animationDelay = (-local) + 's'; });
+                void container.offsetWidth; // リフローして確定
+                const canvas = await html2canvas(doc.body, {
+                    backgroundColor: bg === 'transparent' ? null : bg,
+                    width: W, height: H, scale: S, logging: false
+                });
+                _exportProgress(`フレーム取得中 ${++grabbed}/${totalGrabs}`);
+                await _sleep(0);
+                return canvas;
+            }
+
+            const inEls = [avatar, nameText, nameLine].filter(Boolean);
+            const loopEls = [loopOnContainer ? container : avatar].filter(Boolean);
+
+            const inFrames = [], loopFrames = [], outFrames = [];
+            for (let k = 0; k < perPhase; k++) inFrames.push(await grab('phase-in', (k / perPhase) * speed, inEls));
+            for (let k = 0; k < perPhase; k++) loopFrames.push(await grab('phase-loop', (k / perPhase) * speed, loopEls));
+            for (let k = 0; k < perPhase; k++) outFrames.push(await grab('phase-out', (k / perPhase) * speed, inEls));
+
+            iframe.remove();
+
+            // 組み立て：出現 + 表示中サイクル×loopTimes + 消滅
+            let frames = inFrames.slice();
+            for (let r = 0; r < loopTimes; r++) frames = frames.concat(loopFrames);
+            frames = frames.concat(outFrames);
+
+            return { frames, fps: EXPORT_FPS, bg, width: W * S, height: H * S };
+        }
+
+        function _downloadBlob(blob, filename) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = filename;
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(url), 1500);
+        }
+
+        // gif.js の worker はクロスオリジンだと new Worker できないため、fetch→Blob URL 化して渡す
+        let _gifWorkerURL = null;
+        async function _getGifWorkerURL() {
+            if (_gifWorkerURL) return _gifWorkerURL;
+            const res = await fetch('https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.worker.js');
+            const txt = await res.text();
+            _gifWorkerURL = URL.createObjectURL(new Blob([txt], { type: 'application/javascript' }));
+            return _gifWorkerURL;
+        }
+
+        async function _encodeGIF(cap) {
+            if (typeof GIF === 'undefined') throw new Error('gif.js 未読込');
+            const workerScript = await _getGifWorkerURL();
+            return new Promise((resolve, reject) => {
+                const gif = new GIF({
+                    workers: 2, quality: 10, width: cap.width, height: cap.height,
+                    workerScript,
+                    background: cap.bg === 'transparent' ? '#0f172a' : cap.bg
+                });
+                cap.frames.forEach(c => gif.addFrame(c, { delay: Math.round(1000 / cap.fps), copy: true }));
+                gif.on('progress', p => _exportProgress(`GIF生成中 ${Math.round(p * 100)}%`));
+                gif.on('finished', blob => resolve(blob));
+                gif.on('abort', () => reject(new Error('GIF生成が中断されました')));
+                gif.render();
+            });
+        }
+
+        async function _encodeWebM(cap) {
+            if (!window.MediaRecorder) throw new Error('MediaRecorder 非対応ブラウザ');
+            const rc = document.createElement('canvas');
+            rc.width = cap.width; rc.height = cap.height;
+            const ctx = rc.getContext('2d');
+            const stream = rc.captureStream(cap.fps);
+            const types = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm'];
+            const mimeType = types.find(t => MediaRecorder.isTypeSupported(t)) || 'video/webm';
+            const rec = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 6000000 });
+            const chunks = [];
+            rec.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
+            const done = new Promise(res => { rec.onstop = () => res(new Blob(chunks, { type: 'video/webm' })); });
+            rec.start();
+            const bgFill = cap.bg === 'transparent' ? '#0f172a' : cap.bg;
+            for (let i = 0; i < cap.frames.length; i++) {
+                ctx.clearRect(0, 0, rc.width, rc.height);
+                ctx.fillStyle = bgFill; ctx.fillRect(0, 0, rc.width, rc.height);
+                ctx.drawImage(cap.frames[i], 0, 0, rc.width, rc.height);
+                _exportProgress(`動画書き出し中 ${i + 1}/${cap.frames.length}`);
+                await _sleep(1000 / cap.fps);
+            }
+            await _sleep(150);
+            rec.stop();
+            return done;
+        }
+
+        async function exportMedia(format) {
+            if (typeof html2canvas === 'undefined') {
+                alert('書き出しライブラリ(html2canvas)を読み込めませんでした。オンライン環境で再読み込みしてお試しください。');
+                return;
+            }
+            if (format === 'gif' && typeof GIF === 'undefined') {
+                alert('GIFライブラリ(gif.js)を読み込めませんでした。オンライン環境で再読み込みしてお試しください。');
+                return;
+            }
+            _setExportBtnsDisabled(true);
+            const labelEl = document.getElementById(format === 'gif' ? 'gif-btn-text' : 'webm-btn-text');
+            const labelOrig = labelEl ? labelEl.innerText : '';
+            if (labelEl) labelEl.innerText = '生成中…';
+            try {
+                _exportProgress('準備中…');
+                const cap = await _captureFrames();
+                if (!cap.frames.length) throw new Error('フレームを取得できませんでした');
+                if (format === 'gif') {
+                    _downloadBlob(await _encodeGIF(cap), 'avatar-animation.gif');
+                } else {
+                    _downloadBlob(await _encodeWebM(cap), 'avatar-animation.webm');
+                }
+                _exportProgress('完了！');
+                setTimeout(() => _exportProgress(''), 2500);
+            } catch (e) {
+                console.error('exportMedia failed', e);
+                _exportProgress('');
+                alert('書き出しに失敗しました: ' + (e && e.message ? e.message : e));
+            } finally {
+                if (labelEl) labelEl.innerText = labelOrig;
+                _setExportBtnsDisabled(false);
             }
         }
 
