@@ -850,6 +850,7 @@
         }
 
         let _photoObjectUrl = null;
+        let _animatedPhotoFile = null; // DL時に原本をbase64で埋め込むためアニメ画像のFileを保持
         function handlePhotoUpload(event) {
             const file = event.target.files && event.target.files[0];
             if (!file) return;
@@ -862,6 +863,7 @@
                     if (_photoObjectUrl) URL.revokeObjectURL(_photoObjectUrl);
                     _photoObjectUrl = URL.createObjectURL(file);
                     state.avatarPhoto = _photoObjectUrl;
+                    _animatedPhotoFile = file; // DLでbase64埋め込みして動いたまま書き出す用
                     updateAvatarVisuals();
                     updateCodeOutput();
                 } else {
@@ -882,6 +884,7 @@
                         ctx.drawImage(img, sx, sy, side, side, 0, 0, SIZE, SIZE);
                         if (_photoObjectUrl) { URL.revokeObjectURL(_photoObjectUrl); _photoObjectUrl = null; }
                         state.avatarPhoto = canvas.toDataURL('image/jpeg', 0.85);
+                        _animatedPhotoFile = null; // 静止画なのでアニメ保持はクリア
                         URL.revokeObjectURL(tmpUrl);
                         updateAvatarVisuals();
                         updateCodeOutput();
@@ -1141,7 +1144,7 @@ ${avatarContent}
         }
 
         // 選択中の3つ（出現/表示中/消滅）を1つの完結HTMLにまとめて生成
-        function buildCombinedHTML() {
+        function buildCombinedHTML(photoSrcOverride) {
             const pIn   = patterns.in.find(p => p.id === state.selections.in.id)     || patterns.in[0];
             const pLoop = patterns.loop.find(p => p.id === state.selections.loop.id) || patterns.loop[0];
             const pOut  = patterns.out.find(p => p.id === state.selections.out.id)   || patterns.out[0];
@@ -1158,8 +1161,9 @@ ${avatarContent}
             } else if (state.avatarType === 'emoji') {
                 avatarContent = `      <span style="font-size:20px;">${state.avatarEmoji}</span>`;
             } else if (state.avatarType === 'photo') {
-                // 自己完結ファイルにするため静止画(data:)は埋め込む。アニメ(blob:)はセッション限定なのでプレースホルダ。
-                const photoSrc = (state.avatarPhoto && state.avatarPhoto.startsWith('data:')) ? state.avatarPhoto : 'ここにアバター画像のURLを指定';
+                // 自己完結ファイルにするため画像は埋め込む。静止画はdata:、アニメGIF等はDL時に原本をbase64化して渡す(photoSrcOverride)。
+                const photoSrc = photoSrcOverride
+                    || ((state.avatarPhoto && state.avatarPhoto.startsWith('data:')) ? state.avatarPhoto : 'ここにアバター画像のURLを指定');
                 avatarContent = `      <img src="${photoSrc}" alt="profile" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">`;
             } else {
                 avatarContent = `      <span style="font-size:14px;font-weight:800;color:${state.iconColor};">${state.avatarText}</span>`;
@@ -1275,9 +1279,33 @@ ${avatarContent}
 </html>`;
         }
 
-        // 3つまとめて1つのHTMLファイルとしてダウンロード
-        function downloadCombined() {
-            const html = buildCombinedHTML();
+        function fileToDataURL(file) {
+            return new Promise((resolve, reject) => {
+                const r = new FileReader();
+                r.onload = () => resolve(r.result);
+                r.onerror = reject;
+                r.readAsDataURL(file);
+            });
+        }
+
+        // 3つまとめて1つのHTMLファイルとしてダウンロード（アニメGIF等は原本をbase64埋め込みして動いたまま）
+        async function downloadCombined() {
+            const t = document.getElementById('download-btn-text');
+
+            // 写真がアニメGIF/APNG/アニメWebPなら原本をbase64化して埋め込む
+            let photoSrc = null;
+            if (state.avatarType === 'photo' && _animatedPhotoFile) {
+                if (t) t.innerText = '生成中…';
+                try {
+                    photoSrc = await fileToDataURL(_animatedPhotoFile);
+                } catch (e) {
+                    alert('画像の書き出しに失敗しました。別の画像でお試しください。');
+                    if (t) t.innerText = '3つまとめてDL';
+                    return;
+                }
+            }
+
+            const html = buildCombinedHTML(photoSrc);
             const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -1288,7 +1316,6 @@ ${avatarContent}
             document.body.removeChild(a);
             setTimeout(() => URL.revokeObjectURL(url), 1000);
 
-            const t = document.getElementById('download-btn-text');
             if (t) {
                 t.innerText = 'ダウンロード！';
                 setTimeout(() => { t.innerText = '3つまとめてDL'; }, 2000);
