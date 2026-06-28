@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3Dランダムバウンス・AI検索ランキングアニメーション</title>
+
+    <!-- Firebase SDK Compat (データの永続化用) -->
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-compat.js"></script>
+
+    <style>
+        /* 画面全体の基本設定 */
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: transparent; /* 背景を透過 */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+            transition: background-color 0.3s ease;
+        }
+
+        /* キャンバス：比率固定用のCSS設定 */
+        canvas {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: transparent;
+            z-index: 1;
+            display: block;
+            box-sizing: border-box;
+            transition: width 0.3s ease, height 0.3s ease;
+        }
+
+        /* 横画面 16:9 アスペクト比 */
+        canvas.landscape {
+            width: 100vw;
+            height: 56.25vw; /* 100 * 9 / 16 */
+            max-height: 100vh;
+            max-width: 177.78vh; /* 100 * 16 / 9 */
+        }
+
+        /* 縦画面 9:16 アスペクト比 */
+        canvas.portrait {
+            width: 56.25vh; /* 100 * 9 / 16 */
+            height: 100vh;
+            max-width: 100vw;
+            max-height: 177.78vw; /* 100 * 16 / 9 */
+        }
+
+        /* コントロールパネル（画面上部に配置） */
+        #control-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(20, 20, 20, 0.9);
+            color: #fff;
+            padding: 15px 20px;
+            border-radius: 12px;
+            z-index: 10;
+            font-size: 13px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(8px);
+            transition: opacity 0.3s, transform 0.3s;
+            width: 320px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+        }
+
+        #control-panel.hidden {
+            opacity: 0;
+            transform: translateY(-20px);
+            pointer-events: none;
+        }
+
+        .panel-row {
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .panel-row label {
+            font-weight: bold;
+            color: #ccc;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .slider-val {
+            width: 42px;
+            text-align: right;
+            font-weight: bold;
+            color: #00f3ff;
+        }
+
+        .btn {
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 11px;
+            transition: background 0.2s, color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-active {
+            background: #00f3ff !important;
+            color: #000 !important;
+            font-weight: bold;
+        }
+
+        .btn:disabled {
+            background: rgba(255, 255, 255, 0.05) !important;
+            color: rgba(255, 255, 255, 0.8) !important;
+            cursor: not-allowed;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        input[type="range"] {
+            width: 120px;
+            accent-color: #00f3ff;
+        }
+
+        /* お題入力フォームのスタイル */
+        input[type="text"] {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            color: #fff;
+            padding: 8px 10px;
+            font-size: 13px;
+            box-sizing: border-box;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #00f3ff;
+        }
+
+        /* ボタン内に埋め込まれるローディングスピナー */
+        .spinner {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #ffffff;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* エラー表示エリア */
+        #error-area {
+            display: none;
+            background: rgba(255, 51, 102, 0.15);
+            border: 1px solid rgba(255, 51, 102, 0.3);
+            color: #ff3366;
+            padding: 8px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            margin-top: 8px;
+            line-height: 1.4;
+        }
+
+        /* パネル非表示・表示用スイッチボタン（右上） */
+        #panel-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 11;
+            background: rgba(20, 20, 20, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #fff;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        /* ===== Effects Hub ナビ（全ページ共通） ===== */
+        #hub-nav {
+            position: fixed; top: 14px; left: 50%; transform: translateX(-50%);
+            z-index: 12; display: flex; justify-content: center; align-items: center;
+            gap: 0.5rem; flex-wrap: wrap; max-width: 760px;
+            padding: 6px 10px; border-radius: 12px;
+            background: rgba(20,20,20,0.55); backdrop-filter: blur(6px);
+            transition: opacity 0.3s, transform 0.3s;
+        }
+        #hub-nav.hidden { opacity: 0; transform: translateX(-50%) translateY(-20px); pointer-events: none; }
+        .hub-tab {
+            padding: 0.45rem 0.9rem; background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 10px;
+            color: #aaa; cursor: pointer; font-size: 0.8rem; font-weight: 600;
+            text-decoration: none; white-space: nowrap; transition: all 0.2s;
+            display: inline-flex; align-items: center;
+        }
+        .hub-tab:hover { color: #fff; border-color: rgba(96,165,250,0.4); }
+        .hub-tab.active {
+            background: linear-gradient(120deg, rgba(96,165,250,0.25), rgba(167,139,250,0.25));
+            border-color: rgba(96,165,250,0.6); color: #fff;
+        }
+        .hub-tab-avatar {
+            flex: 0 0 auto; width: 36px; height: 36px; border-radius: 50%;
+            display: inline-flex; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, rgba(96,165,250,0.20), rgba(236,72,153,0.20));
+            border: 1px solid rgba(255,255,255,0.14); color: #e0e0e0;
+            text-decoration: none; transition: all 0.2s;
+        }
+        .hub-tab-avatar:hover { color: #fff; transform: translateY(-2px) scale(1.06); border-color: rgba(167,139,250,0.7); box-shadow: 0 0 16px rgba(167,139,250,0.55); }
+        .hub-tab-avatar svg { width: 20px; height: 20px; }
+    </style>
+</head>
+<body>
+
+    <!-- Effects Hub ナビ（全ページ共通・ギアで設定パネルと一緒に表示切替） -->
+    <nav id="hub-nav">
+        <a class="hub-tab" href="index.html#sec-button">🔘 ボタン</a>
+        <a class="hub-tab" href="index.html#sec-text">🔤 文字</a>
+        <a class="hub-tab" href="index.html#sec-anim">🎬 アニメーション</a>
+        <a class="hub-tab" href="index.html#sec-telop">📺 テロップ</a>
+        <a class="hub-tab-avatar" href="avatar.html" title="アバターアニメーション" aria-label="アバターアニメーション">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+        </a>
+        <a class="hub-tab" href="cutin.html" title="カットインエフェクト一覧（17種）">✂️ カットイン</a>
+        <a class="hub-tab active" href="ranking.html" title="3Dランキングアニメーション（現在のページ）" aria-current="page">📊 ランキング</a>
+    </nav>
+
+    <!-- アニメーションステージ（デフォルト：横画面クラス付与） -->
+    <canvas id="stage" width="1920" height="1080" class="landscape"></canvas>
+
+    <!-- コントロールパネルの表示/非表示トグルボタン（右上） -->
+    <button id="panel-toggle" title="設定パネルの表示切替">⚙️</button>
+
+    <!-- コントロールパネル（左上） -->
+    <div id="control-panel">
+        <h4 style="margin: 0 0 12px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 6px; display: flex; justify-content: space-between;">
+            <span>AIリアルタイム検索設定</span>
+            <span style="font-size: 10px; color: #888;">3D Overlay</span>
+        </h4>
+
+        <!-- お題・ジャンル入力エリア -->
+        <div class="panel-row" style="flex-direction: column; align-items: stretch; gap: 6px;">
+            <label id="input-label">調べたいジャンル・トレンドお題</label>
+            <input type="text" id="genre-input" value="腸活" placeholder="例：腸活, 最新のキャンプギア">
+            <button class="btn btn-active" id="search-btn" style="position: relative; width: 100%; padding: 8px; font-weight: bold; font-size: 12px; height: 34px; overflow: hidden; border: 1px solid rgba(0, 243, 255, 0.2);">
+                <!-- ボタン内のプログレスゲージ背景層 -->
+                <span id="search-btn-bg" style="position: absolute; top: 0; left: 0; height: 100%; width: 0%; background: rgba(0, 243, 255, 0.35); transition: width 0.15s ease-out; z-index: 1;"></span>
+                <!-- ボタン内テキスト層 -->
+                <span id="search-btn-text" style="position: relative; z-index: 2; display: inline-flex; align-items: center; justify-content: center; width: 100%; height: 100%;">AIで検索してランキング生成</span>
+            </button>
+
+            <!-- エラーエリア -->
+            <div id="error-area"></div>
+        </div>
+
+        <!-- アスペクト比切り替えオプション -->
+        <div class="panel-row" style="margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;">
+            <label>画面の向き</label>
+            <div>
+                <button class="btn btn-active" id="aspect-landscape-btn">横画面 (16:9)</button>
+                <button class="btn" id="aspect-portrait-btn">縦画面 (9:16)</button>
+            </div>
+        </div>
+
+        <div class="panel-row" style="margin-top: 5px;">
+            <label>表示キーワード数</label>
+            <div class="slider-container">
+                <input type="range" id="rank-slider" min="1" max="20" value="20">
+                <span id="rank-slider-val" class="slider-val">20件</span>
+            </div>
+        </div>
+        <div class="panel-row">
+            <label>基準文字サイズ</label>
+            <div class="slider-container">
+                <input type="range" id="size-slider" min="40" max="150" value="40">
+                <span id="size-slider-val" class="slider-val">40px</span>
+            </div>
+        </div>
+        <div class="panel-row">
+            <label>移動スピード</label>
+            <div class="slider-container">
+                <input type="range" id="speed-slider" min="0" max="20" value="5">
+                <span id="speed-slider-val" class="slider-val">x0.5</span>
+            </div>
+        </div>
+        <div class="panel-row">
+            <label>背景プレビュー</label>
+            <div>
+                <button class="btn btn-active" onclick="setBg('transparent', this)">透過</button>
+                <button class="btn" onclick="setBg('#111', this)">ダーク</button>
+                <button class="btn" onclick="setBg('#eee', this)">ライト</button>
+            </div>
+        </div>
+        <div class="panel-row">
+            <label>シミュレーション</label>
+            <button class="btn" id="play-pause-btn" onclick="togglePlay()">一時停止</button>
+        </div>
+        <div style="font-size: 10px; color: #aaa; margin-top: 10px; text-align: center;">
+            ※配信ソフト等に重ねる際は「透過」のままギアアイコンでこの設定窓を消してください。
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('stage');
+        const ctx = canvas.getContext('2d');
+
+        // Gemini API 用の設定
+        const apiKey = "";
+
+        // アニメーション制御用グローバル変数（基準文字サイズ40px、スピードx0.5に変更）
+        let speedMultiplier = 0.5;
+        let maxRankDisplay = 20;
+        let baseSizeMultiplier = 40;
+        let isPlaying = true;
+        let particles = [];
+        let screenMode = "landscape";
+
+        // 初期ランキングデータを「腸活」に関連する代表的な最新トレンドワード20選に設定
+        let rankingData = [
+            { rank: 1, text: "発酵食品" },
+            { rank: 2, text: "乳酸菌" },
+            { rank: 3, text: "ビフィズス菌" },
+            { rank: 4, text: "食物繊維" },
+            { rank: 5, text: "オリゴ糖" },
+            { rank: 6, text: "腸内フローラ" },
+            { rank: 7, text: "プロバイオティクス" },
+            { rank: 8, text: "プレバイオティクス" },
+            { rank: 9, text: "酪酸菌" },
+            { rank: 10, text: "シンバイオティクス" },
+            { rank: 11, text: "善玉菌" },
+            { rank: 12, text: "腸脳相関" },
+            { rank: 13, text: "短鎖脂肪酸" },
+            { rank: 14, text: "温活" },
+            { rank: 15, text: "麹（こうじ）" },
+            { rank: 16, text: "納豆菌" },
+            { rank: 17, text: "オートミール" },
+            { rank: 18, text: "レジスタントスターチ" },
+            { rank: 19, text: "グルテンフリー" },
+            { rank: 20, text: "インナーケア" }
+        ];
+
+        // 3Dシミュレーション空間の設定
+        const FL = 800; // 焦点距離
+        let CENTER_X = 1920 / 2;
+        let CENTER_Y = 1080 / 2;
+
+        // 3D空間のZ軸（前後）境界
+        const BOX = {
+            minZ: 100,
+            maxZ: 1500
+        };
+
+        // スケール制限の事前計算
+        const MIN_SCALE = FL / (FL + BOX.maxZ);
+        const MAX_SCALE = FL / (FL + BOX.minZ);
+
+        // 明示的にDOM要素を取得しておく（安全な稼働のため）
+        const sizeSlider = document.getElementById('size-slider');
+        const sizeSliderVal = document.getElementById('size-slider-val');
+        const rankSlider = document.getElementById('rank-slider');
+        const rankSliderVal = document.getElementById('rank-slider-val');
+        const speedSlider = document.getElementById('speed-slider');
+        const speedSliderVal = document.getElementById('speed-slider-val');
+
+        // ==========================================
+        //  Firebase ＋ LocalStorage ハイブリッド自動復元システム
+        // ==========================================
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        let db = null;
+        let auth = null;
+        let currentUser = null;
+
+        // 【超高速ロード】LocalStorageから前回保存されたレイアウト設定ごと即座に復元
+        function loadFromLocalStorage() {
+            try {
+                const localData = localStorage.getItem('3d_ranking_keywords');
+                const localAspect = localStorage.getItem('3d_ranking_aspect_mode');
+                const localDisplayCount = localStorage.getItem('3d_ranking_display_count');
+                const localBaseSize = localStorage.getItem('3d_ranking_base_size');
+                const lastGenreInput = localStorage.getItem('3d_ranking_last_genre');
+
+                if (localBaseSize) {
+                    baseSizeMultiplier = parseInt(localBaseSize, 10);
+                    if (sizeSlider) {
+                        sizeSlider.value = baseSizeMultiplier;
+                        sizeSliderVal.innerText = `${baseSizeMultiplier}px`;
+                    }
+                }
+
+                if (localData) {
+                    const parsed = JSON.parse(localData);
+                    if (parsed && parsed.length > 0) {
+                        rankingData = parsed;
+
+                        if (lastGenreInput) {
+                            document.getElementById('genre-input').value = lastGenreInput;
+                        } else {
+                            document.getElementById('genre-input').value = "腸活";
+                        }
+
+                        // 表示数スライダーの復元
+                        if (localDisplayCount) {
+                            maxRankDisplay = Math.min(parseInt(localDisplayCount, 10), rankingData.length);
+                        } else {
+                            maxRankDisplay = rankingData.length;
+                        }
+
+                        if (rankSlider) {
+                            rankSlider.max = rankingData.length;
+                            rankSlider.value = maxRankDisplay;
+                            rankSliderVal.innerText = `${maxRankDisplay}件`;
+                        }
+
+                        createParticles();
+                    }
+                } else {
+                    document.getElementById('genre-input').value = "腸活";
+                }
+
+                if (localAspect) {
+                    setAspectMode(localAspect);
+                }
+            } catch (e) {
+                console.warn("LocalStorageからの即時復元に失敗しました。デフォルト初期値で起動します。:", e);
+            }
+        }
+
+        // Firebase / Firestoreの初期化と認証
+        async function initStorageAndAuth() {
+            // Firebaseがロードされていない、またはサンドボックスでブロックされている場合は安全にローカル運用に移行
+            if (typeof firebase === 'undefined') {
+                console.warn("Firebase SDK is not loaded/blocked. Running beautifully in local-only mode.");
+                return;
+            }
+            if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+                try {
+                    const firebaseConfig = JSON.parse(__firebase_config);
+                    if (firebase.apps.length === 0) {
+                        firebase.initializeApp(firebaseConfig);
+                    }
+                    db = firebase.firestore();
+                    auth = firebase.auth();
+
+                    // RULE 3: 認証が先 (Compat SDKの正しいメソッドチェーンに統一)
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        const userCredential = await auth.signInWithCustomToken(__initial_auth_token);
+                        currentUser = userCredential.user;
+                    } else {
+                        const userCredential = await auth.signInAnonymously();
+                        currentUser = userCredential.user;
+                    }
+
+                    if (currentUser) {
+                        // クラウド側データとの非同期同期
+                        await loadSavedKeywordsFromCloud();
+                    }
+                } catch (e) {
+                    console.warn("Firebase/Firestoreの同期連携をスキップし、ローカルモードで動作を継続します。:", e);
+                }
+            }
+        }
+
+        // キーワードをクラウド(Firestore)とLocalStorageにダブル保存
+        async function saveKeywords(genreText) {
+            // 1. ローカル(LocalStorage)へ即時セーブ
+            try {
+                localStorage.setItem('3d_ranking_keywords', JSON.stringify(rankingData));
+                localStorage.setItem('3d_ranking_aspect_mode', screenMode);
+                localStorage.setItem('3d_ranking_display_count', maxRankDisplay);
+                localStorage.setItem('3d_ranking_base_size', baseSizeMultiplier);
+                localStorage.setItem('3d_ranking_last_genre', genreText);
+            } catch (e) {
+                console.warn("LocalStorageへの書き込みに失敗しました:", e);
+            }
+
+            // 2. クラウド(Firestore)へセーブ
+            if (!db || !currentUser) return; // RULE 3のガード
+            try {
+                // RULE 1: 正しいパス規約を厳守
+                const docRef = db.collection('artifacts').doc(appId)
+                                 .collection('users').doc(currentUser.uid)
+                                 .collection('settings').doc('keywords');
+
+                const serverTimestamp = (typeof firebase !== 'undefined' && firebase.firestore)
+                    ? firebase.firestore.FieldValue.serverTimestamp()
+                    : new Date();
+
+                await docRef.set({
+                    rankingData: rankingData,
+                    aspectMode: screenMode,
+                    displayCount: maxRankDisplay,
+                    baseSize: baseSizeMultiplier,
+                    lastGenre: genreText,
+                    updatedAt: serverTimestamp
+                });
+            } catch (e) {
+                console.error("データのクラウド自動同期に失敗しました:", e);
+            }
+        }
+
+        // 保存されたキーワードをクラウドからロードして適用
+        async function loadSavedKeywordsFromCloud() {
+            if (!db || !currentUser) return;
+            try {
+                // RULE 1: 正しいパス規約を厳守
+                const docRef = db.collection('artifacts').doc(appId)
+                                 .collection('users').doc(currentUser.uid)
+                                 .collection('settings').doc('keywords');
+
+                const doc = await docRef.get();
+                if (doc.exists) {
+                    const data = doc.data();
+                    if (data && data.rankingData && data.rankingData.length > 0) {
+                        rankingData = data.rankingData;
+
+                        if (data.lastGenre) {
+                            document.getElementById('genre-input').value = data.lastGenre;
+                            localStorage.setItem('3d_ranking_last_genre', data.lastGenre);
+                        }
+
+                        if (data.aspectMode) {
+                            setAspectMode(data.aspectMode);
+                            localStorage.setItem('3d_ranking_aspect_mode', data.aspectMode);
+                        }
+
+                        if (data.displayCount) {
+                            maxRankDisplay = Math.min(parseInt(data.displayCount, 10), rankingData.length);
+                            localStorage.setItem('3d_ranking_display_count', maxRankDisplay);
+                        }
+
+                        if (data.baseSize) {
+                            baseSizeMultiplier = parseInt(data.baseSize, 10);
+                            if (sizeSlider) {
+                                sizeSlider.value = baseSizeMultiplier;
+                                sizeSliderVal.innerText = `${baseSizeMultiplier}px`;
+                            }
+                            localStorage.setItem('3d_ranking_base_size', baseSizeMultiplier);
+                        }
+
+                        localStorage.setItem('3d_ranking_keywords', JSON.stringify(rankingData));
+
+                        // スライダー同期
+                        if (rankSlider) {
+                            rankSlider.max = rankingData.length;
+                            rankSlider.value = maxRankDisplay;
+                            rankSliderVal.innerText = `${maxRankDisplay}件`;
+                        }
+
+                        syncParticlesWithNewData();
+                    }
+                }
+            } catch (e) {
+                console.error("クラウドデータの復元中にエラーが発生しました:", e);
+            }
+        }
+
+        // 既存のパーティクルの位置を維持したまま、表示文字列とランクを同期させる
+        function syncParticlesWithNewData() {
+            if (particles.length === rankingData.length) {
+                particles.forEach((p, idx) => {
+                    const newData = rankingData[idx];
+                    p.rank = newData.rank;
+                    if (p.rank <= 10) {
+                        p.displayText = `${newData.rank}位 ${newData.text}`;
+                    } else {
+                        p.displayText = newData.text;
+                    }
+                    p.updateColorsAndSparkles();
+                });
+            } else {
+                createParticles();
+            }
+        }
+
+        // 1位〜3位（トップ3）の周りを漂うリッチなキラキラ粒子クラス
+        class Sparkle {
+            constructor(parent) {
+                this.parent = parent; // 親要素(Keyword3D)への参照
+                this.reset();
+                this.age = Math.random() * this.maxAge; // タイミングを分散
+            }
+
+            reset() {
+                // 親の現在位置からの相対的な3D位置 (球状分散)
+                const radius = Math.random() * 200 + 40;
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.acos((Math.random() * 2) - 1);
+
+                this.relX = radius * Math.sin(phi) * Math.cos(theta);
+                this.relY = radius * Math.sin(phi) * Math.sin(theta);
+                this.relZ = radius * Math.cos(phi);
+
+                // フワフワとした微小速度
+                this.vx = (Math.random() - 0.5) * 4;
+                this.vy = (Math.random() - 0.5) * 4 - 2.0; // やや浮き上がる
+                this.vz = (Math.random() - 0.5) * 4;
+
+                this.size = Math.random() * 24 + 10;
+                this.maxAge = Math.random() * 40 + 20;
+                this.age = 0;
+            }
+
+            update() {
+                // 相対位置の更新
+                this.relX += this.vx * speedMultiplier;
+                this.relY += this.vy * speedMultiplier;
+                this.relZ += this.vz * speedMultiplier;
+
+                this.age += 1 * speedMultiplier;
+
+                if (this.age >= this.maxAge) {
+                    this.reset();
+                }
+
+                // 絶対3D座標
+                this.x = this.parent.x + this.relX;
+                this.y = this.parent.y + this.relY;
+                this.z = this.parent.z + this.relZ;
+
+                // 3D -> 2D投影
+                const scale = FL / (FL + this.z);
+                this.screenX = CENTER_X + this.x * scale;
+                this.screenY = CENTER_Y + this.y * scale;
+
+                this.screenSize = this.size * this.parent.adjustedScale;
+
+                // フェード効果
+                this.alpha = Math.min((1 - (this.age / this.maxAge)) * scale * 2.8, 1.0) * this.parent.alpha;
+            }
+
+            draw() {
+                if (this.screenX < 0 || this.screenX > canvas.width || this.screenY < 0 || this.screenY > canvas.height || this.alpha <= 0) return;
+
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.fillStyle = this.parent.glowColor;
+
+                ctx.shadowColor = this.parent.glowColor;
+                // グロー強度も奥行きに追従させ、空気遠近（フォグ）効果を演出
+                ctx.shadowBlur = 24 * (this.parent.adjustedScale);
+
+                // 4ポインテッドシャイニングスターの描画
+                ctx.beginPath();
+                ctx.moveTo(this.screenX, this.screenY - this.screenSize);
+                ctx.quadraticCurveTo(this.screenX, this.screenY, this.screenX + this.screenSize, this.screenY);
+                ctx.quadraticCurveTo(this.screenX, this.screenY, this.screenX, this.screenY + this.screenSize);
+                ctx.quadraticCurveTo(this.screenX, this.screenY, this.screenX - this.screenSize, this.screenY);
+                ctx.quadraticCurveTo(this.screenX, this.screenY, this.screenX, this.screenY - this.screenSize);
+                ctx.closePath();
+                ctx.fill();
+
+                ctx.restore();
+            }
+        }
+
+        // 3Dランダムバウンスキーワードクラス
+        class Keyword3D {
+            constructor(rank, text) {
+                this.rank = rank;
+
+                // 10位以下（11位〜20位）はランキング文字無し、キーワード単体のみ
+                if (this.rank <= 10) {
+                    this.displayText = `${rank}位 ${text}`;
+                } else {
+                    this.displayText = text;
+                }
+
+                // 3D初期位置
+                this.z = BOX.minZ + Math.random() * (BOX.maxZ - BOX.minZ);
+
+                // 初期位置が画面外にならないよう、仮のscaleから動的境界を算出して配置
+                const scale = FL / (FL + this.z);
+                const tempAdjustedScale = 1.0 + 1.0 * ((scale - MIN_SCALE) / (MAX_SCALE - MIN_SCALE));
+
+                // 1位から20位までの指定された文字スケール比率に更新
+                const rankFactor = (this.rank === 1) ? 1.3 :
+                                   (this.rank === 2) ? 1.2 :
+                                   (this.rank === 3) ? 1.1 :
+                                   (this.rank >= 4 && this.rank <= 9) ? 1.0 : 0.8;
+                const baseSize = baseSizeMultiplier * rankFactor;
+                const tempFontSize = baseSize * tempAdjustedScale;
+                const approxPadX = (this.displayText.length * tempFontSize * 0.6) / 2 + 30;
+                const approxPadY = tempFontSize / 2 + 30;
+                const initLimitX = Math.max(100, (CENTER_X - approxPadX) / scale);
+                const initLimitY = Math.max(100, (CENTER_Y - approxPadY) / scale);
+
+                this.x = (Math.random() - 0.5) * 2 * initLimitX;
+                this.y = (Math.random() - 0.5) * 2 * initLimitY;
+
+                // 3D方向ベクトル（移動速度）
+                const speed = 2.5 + Math.random() * 2.5;
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.acos((Math.random() * 2) - 1);
+
+                this.vx = speed * Math.sin(phi) * Math.cos(theta);
+                this.vy = speed * Math.sin(phi) * Math.sin(theta);
+                this.vz = speed * Math.cos(phi);
+
+                this.angle = 0; // 常に水平（0）
+
+                this.updateColorsAndSparkles();
+
+                // 動的なサイズ調整用の変数
+                this.adjustedScale = scale;
+            }
+
+            // ランクや表示文字列が同期されたときにカラーを更新する
+            updateColorsAndSparkles() {
+                // 1位:金, 2位:銀, 3位:銅, 4位以下を完全モノトーン
+                if (this.rank === 1) {
+                    this.color = '#ffd700';       // 金
+                    this.glowColor = '#ffb300';
+                } else if (this.rank === 2) {
+                    this.color = '#e0e0e0';       // 銀
+                    this.glowColor = '#ffffff';
+                } else if (this.rank === 3) {
+                    this.color = '#cd7f32';       // 銅
+                    this.glowColor = '#ff6d00';
+                } else if (this.rank <= 5) {
+                    this.color = '#ffffff';
+                    this.glowColor = '#888888';
+                } else if (this.rank <= 10) {
+                    this.color = '#cccccc';
+                    this.glowColor = '#555555';
+                } else {
+                    this.color = '#888888';
+                    this.glowColor = '#222222';
+                }
+
+                // キラキラ星屑の数をランクに合わせて再調整
+                this.sparkles = [];
+                if (this.rank <= 3) {
+                    const count = this.rank === 1 ? 22 : (this.rank === 2 ? 15 : 10);
+                    for (let i = 0; i < count; i++) {
+                        this.sparkles.push(new Sparkle(this));
+                    }
+                }
+            }
+
+            update() {
+                // 3D座標移動
+                this.x += this.vx * speedMultiplier;
+                this.y += this.vy * speedMultiplier;
+                this.z += this.vz * speedMultiplier;
+
+                // --- Z軸（奥行き）の境界判定と跳ね返り ---
+                if (this.z < BOX.minZ) {
+                    this.z = BOX.minZ;
+                    this.vz *= -1;
+                } else if (this.z > BOX.maxZ) {
+                    this.z = BOX.maxZ;
+                    this.vz *= -1;
+                }
+
+                // 現在のZ軸におけるカメラ投影スケールを計算
+                const scale = FL / (FL + this.z);
+
+                // 一番奥の最小スケールを1.0にし、手前に来たときの最大値を2.0にするマッピング
+                const t = (scale - MIN_SCALE) / (MAX_SCALE - MIN_SCALE);
+                this.adjustedScale = 1.0 + 1.0 * t;
+
+                // 1位から20位までの指定された文字スケール比率に更新 (リアルタイムスライダ追従のために毎フレーム動的計算)
+                const rankFactor = (this.rank === 1) ? 1.3 :
+                                   (this.rank === 2) ? 1.2 :
+                                   (this.rank === 3) ? 1.1 :
+                                   (this.rank >= 4 && this.rank <= 9) ? 1.0 : 0.8;
+                const baseSize = baseSizeMultiplier * rankFactor;
+
+                // 縦画面(Portrait)時は横幅はみ出しによる高速振動を防ぐため、フォントの全体サイズを0.65倍に安全補正する
+                const aspectScaleMultiplier = (screenMode === "portrait") ? 0.65 : 1.0;
+                let finalFontSize = baseSize * this.adjustedScale * aspectScaleMultiplier;
+
+                // トップ3専用：鼓動する（パルス）アニメーション効果
+                if (this.rank <= 3) {
+                    const pulseFreq = this.rank === 1 ? 0.0035 : (this.rank === 2 ? 0.0028 : 0.0022);
+                    const pulseAmount = this.rank === 1 ? 0.12 : (this.rank === 2 ? 0.09 : 0.07);
+                    const pulse = 1.0 + Math.sin(Date.now() * pulseFreq) * pulseAmount;
+                    finalFontSize *= pulse;
+                }
+                this.fontSize = finalFontSize;
+
+                // 現在のサイズを適用してテキストの実測幅と高さを取得
+                ctx.font = `bold ${this.fontSize}px sans-serif`;
+                const textWidth = ctx.measureText(this.displayText).width;
+                const textHeight = this.fontSize;
+
+                // 画面端から絶対にはみ出さないためのスクリーン上のマージン
+                const padX = textWidth / 2 + 15;
+                const padY = textHeight / 2 + 15;
+
+                // バウンス制限値（limitX, limitY）が極小やマイナスになって中央でガタガタ振動するのを防ぐため、最小を「100px」に安全制限(Math.max)する
+                const limitX = Math.max(100, (CENTER_X - padX) / scale);
+                const limitY = Math.max(100, (CENTER_Y - padY) / scale);
+
+                // 【方向制御スマートバウンス】
+                if (this.x < -limitX) {
+                    this.x = -limitX;
+                    if (this.vx < 0) this.vx *= -1;
+                } else if (this.x > limitX) {
+                    this.x = limitX;
+                    if (this.vx > 0) this.vx *= -1;
+                }
+
+                if (this.y < -limitY) {
+                    this.y = -limitY;
+                    if (this.vy < 0) this.vy *= -1;
+                } else if (this.y > limitY) {
+                    this.y = limitY;
+                    if (this.vy > 0) this.vy *= -1;
+                }
+
+                // スクリーン座標の決定
+                this.screenX = CENTER_X + this.x * scale;
+                this.screenY = CENTER_Y + this.y * scale;
+
+                // 境界手前・奥における滑らかなアルファフェードアウト
+                if (this.z > 1200) {
+                    this.alpha = (BOX.maxZ - this.z) / 300;
+                } else if (this.z < 250) {
+                    this.alpha = (this.z - BOX.minZ) / 150;
+                } else {
+                    this.alpha = 1.0;
+                }
+                this.alpha = Math.max(0.1, Math.min(this.alpha * scale * 2.2, 1.0));
+
+                // 追従粒子の更新
+                if (this.rank <= 3) {
+                    this.sparkles.forEach(s => s.update());
+                }
+            }
+
+            draw() {
+                // スライダー制限を超える順位の場合は描画をスキップ
+                if (this.rank > maxRankDisplay) return;
+
+                // カメラ後方やフェードアウト時はスキップ
+                if (this.z <= -FL || this.alpha <= 0) return;
+
+                // 粒子を描画
+                if (this.rank <= 3) {
+                    this.sparkles.forEach(s => s.draw());
+                }
+
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+
+                ctx.font = `bold ${this.fontSize}px sans-serif`;
+                ctx.fillStyle = this.color;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+
+                // グロー強度も奥行き(adjustedScale)に連動させ、遠い文字を優しくフォグらせる
+                ctx.shadowColor = this.glowColor;
+                ctx.shadowBlur = (this.rank <= 3 ? 38 : 12) * this.adjustedScale;
+                ctx.shadowOffsetX = 0;
+                ctx.shadowOffsetY = 0;
+
+                // 黒境界フチ取り
+                ctx.strokeStyle = 'rgba(0, 0, 0, 0.95)';
+                ctx.lineWidth = Math.max(2, this.fontSize * 0.16);
+                ctx.strokeText(this.displayText, this.screenX, this.screenY);
+
+                // キーワードの塗りつぶし描画
+                ctx.fillText(this.displayText, this.screenX, this.screenY);
+
+                ctx.restore();
+            }
+        }
+
+        // キーワード配列からアニメーション粒子を生成・再構築する関数
+        function createParticles() {
+            particles = rankingData.map(item => new Keyword3D(item.rank, item.text));
+        }
+
+        // メインアニメーションフレームループ
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (isPlaying) {
+                // 各キーワードの更新
+                particles.forEach(p => p.update());
+            }
+
+            // 【要望対応】表示レイヤーを「1位が一番上」になるようランキング順（降順）で完全にソートして描画
+            particles.sort((a, b) => b.rank - a.rank);
+
+            // 描画
+            particles.forEach(p => p.draw());
+
+            requestAnimationFrame(animate);
+        }
+
+        // ==========================================
+        //  Gemini API 連動の検索・生成関数
+        // ==========================================
+        async function fetchRankingFromAI(genre) {
+            const userQuery = `お題: 「${genre}」に関連する、最新の注目キーワード・最新トレンド、または人気アイテムのランキング上位20件をウェブ検索してリストアップしてください。`;
+            const systemPrompt = "あなたは入力されたジャンルやテーマについて、最新のウェブ情報を検索し、上位20個の代表的なトレンドキーワードや関連アイテムのランキングを作成するエキスパートです。各キーワードは必ず12文字い内の簡潔な短い単語にしてください。必ず1位から順番に合計20個の配列を出力してください。";
+
+            const payload = {
+                contents: [{ parts: [{ text: userQuery }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                tools: [{ "google_search": {} }],
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            ranking: {
+                                type: "ARRAY",
+                                description: "最新ランキング1位から20位までのトレンドキーワード（厳密に20要素）",
+                                items: { type: "STRING" }
+                            }
+                        },
+                        required: ["ranking"]
+                    }
+                }
+            };
+
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+
+            // 指数バックオフによる最大5回のリトライロジック
+            let delay = 1000;
+            for (let i = 0; i < 5; i++) {
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(payload)
+                    });
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+                    const data = await response.json();
+                    const jsonText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                    if (jsonText) {
+                        return JSON.parse(jsonText);
+                    }
+                    throw new Error("APIレスポンスのパースに失敗しました。");
+                } catch (error) {
+                    if (i === 4) throw error;
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    delay *= 2;
+                }
+            }
+        }
+
+        // ==========================================
+        //  UI操作・コントロールパネル制御スクリプト
+        // ==========================================
+
+        const panel = document.getElementById('control-panel');
+        const toggleBtn = document.getElementById('panel-toggle');
+
+        // パネル表示・非表示の切り替え（ナビも一緒に切り替え＝配信オーバーレイ時はクリーンに）
+        const hubNav = document.getElementById('hub-nav');
+        toggleBtn.addEventListener('click', () => {
+            panel.classList.toggle('hidden');
+            if (hubNav) hubNav.classList.toggle('hidden');
+        });
+
+        // アスペクト比変更イベントのハンドリング
+        const aspectLandscapeBtn = document.getElementById('aspect-landscape-btn');
+        const aspectPortraitBtn = document.getElementById('aspect-portrait-btn');
+
+        function setAspectMode(mode) {
+            screenMode = mode;
+            if (screenMode === "landscape") {
+                canvas.width = 1920;
+                canvas.height = 1080;
+                canvas.className = "landscape";
+
+                aspectLandscapeBtn.classList.add('btn-active');
+                aspectPortraitBtn.classList.remove('btn-active');
+            } else {
+                canvas.width = 1080;
+                canvas.height = 1920;
+                canvas.className = "portrait";
+
+                aspectPortraitBtn.classList.add('btn-active');
+                aspectLandscapeBtn.classList.remove('btn-active');
+            }
+
+            CENTER_X = canvas.width / 2;
+            CENTER_Y = canvas.height / 2;
+
+            // アスペクト比が切り替わった際の座標急変を吸収するマイルド再配置
+            particles.forEach(p => {
+                p.x = (Math.random() - 0.5) * (canvas.width * 0.4);
+                p.y = (Math.random() - 0.5) * (canvas.height * 0.4);
+            });
+        }
+
+        aspectLandscapeBtn.addEventListener('click', () => {
+            setAspectMode("landscape");
+            localStorage.setItem('3d_ranking_aspect_mode', "landscape");
+            saveKeywords(document.getElementById('genre-input').value || "腸活");
+        });
+
+        aspectPortraitBtn.addEventListener('click', () => {
+            setAspectMode("portrait");
+            localStorage.setItem('3d_ranking_aspect_mode', "portrait");
+            saveKeywords(document.getElementById('genre-input').value || "腸活");
+        });
+
+        // スライダー同期
+        if (rankSlider) {
+            rankSlider.addEventListener('input', (e) => {
+                maxRankDisplay = parseInt(e.target.value, 10);
+                rankSliderVal.innerText = `${maxRankDisplay}件`;
+                localStorage.setItem('3d_ranking_display_count', maxRankDisplay);
+                saveKeywords(document.getElementById('genre-input').value || "腸活");
+            });
+        }
+
+        // 文字サイズスライダー
+        if (sizeSlider) {
+            sizeSlider.addEventListener('input', (e) => {
+                baseSizeMultiplier = parseInt(e.target.value, 10);
+                sizeSliderVal.innerText = `${baseSizeMultiplier}px`;
+                localStorage.setItem('3d_ranking_base_size', baseSizeMultiplier);
+                saveKeywords(document.getElementById('genre-input').value || "腸活");
+            });
+        }
+
+        // 移動スピードスライダー
+        if (speedSlider) {
+            speedSlider.addEventListener('input', (e) => {
+                speedMultiplier = e.target.value / 10;
+                speedSliderVal.innerText = `x${speedMultiplier.toFixed(1)}`;
+            });
+        }
+
+        // プレビュー用背景色切り替え
+        function setBg(bgColor, btn) {
+            document.body.style.backgroundColor = bgColor;
+            const buttons = btn.parentElement.querySelectorAll('.btn');
+            buttons.forEach(b => b.classList.remove('btn-active'));
+            btn.classList.add('btn-active');
+        }
+
+        // シミュレーション一時停止・再開
+        function togglePlay() {
+            isPlaying = !isPlaying;
+            const btn = document.getElementById('play-pause-btn');
+            if (isPlaying) {
+                btn.innerText = "一時停止";
+                btn.classList.remove('btn-active');
+            } else {
+                btn.innerText = "再開";
+                btn.classList.add('btn-active');
+            }
+        }
+
+        // キーキーワードのAI自動検索・更新処理
+        const searchBtn = document.getElementById('search-btn');
+        const genreInput = document.getElementById('genre-input');
+        const errorArea = document.getElementById('error-area');
+        const btnBg = document.getElementById('search-btn-bg');
+        const btnText = document.getElementById('search-btn-text');
+
+        searchBtn.addEventListener('click', async () => {
+            const genre = genreInput.value.trim();
+            if (!genre) {
+                showError("検索お題を入力してください。");
+                return;
+            }
+
+            // UIを一時的にロック
+            searchBtn.disabled = true;
+            genreInput.disabled = true;
+            errorArea.style.display = 'none';
+
+            // プログレスゲージ（読み込み率）のアニメーション設定
+            let progress = 0;
+            btnBg.style.width = '0%';
+            btnText.innerHTML = '<span class="spinner"></span>最新トレンドを検索中... 0%';
+
+            // 擬似的な進捗進行タイマー
+            const progressInterval = setInterval(() => {
+                if (progress < 85) {
+                    progress += (85 - progress) * 0.12 + 0.8;
+                } else if (progress < 97) {
+                    progress += 0.3;
+                }
+                const displayPercent = Math.min(Math.floor(progress), 99);
+                btnBg.style.width = `${displayPercent}%`;
+                btnText.innerHTML = `<span class="spinner"></span>最新トレンドを検索中... ${displayPercent}%`;
+            }, 120);
+
+            try {
+                const result = await fetchRankingFromAI(genre);
+
+                if (result && result.ranking && result.ranking.length > 0) {
+                    const cleanKeywords = result.ranking.slice(0, 20);
+                    while (cleanKeywords.length < 20) {
+                        cleanKeywords.push(`トピック ${cleanKeywords.length + 1}`);
+                    }
+
+                    rankingData = cleanKeywords.map((text, index) => {
+                        return { rank: index + 1, text: text };
+                    });
+
+                    // スライダーの設定を同期
+                    rankSlider.max = rankingData.length;
+                    maxRankDisplay = rankingData.length;
+                    rankSlider.value = maxRankDisplay;
+                    rankSliderVal.innerText = `${maxRankDisplay}件`;
+
+                    createParticles();
+
+                    // ダブルセーブ（LocalStorageとFirestoreに即時保存）
+                    await saveKeywords(genre);
+
+                    // 成功時にゲージを100%に完了させる
+                    clearInterval(progressInterval);
+                    btnBg.style.width = '100%';
+                    btnText.innerHTML = '検索完了 100%';
+
+                    setTimeout(() => {
+                        btnBg.style.width = '0%';
+                        btnText.innerHTML = 'AIで検索してランキング生成';
+                        searchBtn.disabled = false;
+                        genreInput.disabled = false;
+                    }, 800);
+
+                } else {
+                    throw new Error("有効なランキングデータを取得できませんでした。");
+                }
+            } catch (err) {
+                clearInterval(progressInterval);
+                btnBg.style.width = '0%';
+                btnText.innerHTML = 'AIで検索してランキング生成';
+                searchBtn.disabled = false;
+                genreInput.disabled = false;
+                showError("AI検索またはパース処理中にエラーが発生しました。時間を置いてもう一度お試しください。");
+            }
+        });
+
+        function showError(msg) {
+            errorArea.innerText = msg;
+            errorArea.style.display = 'block';
+        }
+
+        // 初期起動シーケンス
+        async function startApp() {
+            // 1. 【超高速ロード】LocalStorageから前回のお題・レイアウト・設定値を即時展開してスタート
+            loadFromLocalStorage();
+
+            // 2. クラウド（Firestore）との非同期認証と同期処理を開始
+            await initStorageAndAuth();
+        }
+
+        // 最初から腸活ランキングのパーティクルを生成
+        createParticles();
+        startApp();
+        animate();
+    </script>
+</body>
+</html>
