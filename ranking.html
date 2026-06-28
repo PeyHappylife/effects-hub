@@ -209,55 +209,36 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
 
-        /* ===== Effects Hub ナビ（全ページ共通） ===== */
+        /* ===== Effects Hub ナビ（設定パネル上部に横並び配置） ===== */
         #hub-nav {
-            position: fixed; top: 14px; left: 50%; transform: translateX(-50%);
-            z-index: 12; display: flex; justify-content: center; align-items: center;
-            gap: 0.5rem; flex-wrap: wrap; max-width: 760px;
-            padding: 6px 10px; border-radius: 12px;
-            background: rgba(20,20,20,0.55); backdrop-filter: blur(6px);
-            transition: opacity 0.3s, transform 0.3s;
+            display: flex; flex-wrap: wrap; align-items: center;
+            gap: 5px; margin-bottom: 10px; padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.12);
         }
-        #hub-nav.hidden { opacity: 0; transform: translateX(-50%) translateY(-20px); pointer-events: none; }
         .hub-tab {
-            padding: 0.45rem 0.9rem; background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.1); border-radius: 10px;
-            color: #aaa; cursor: pointer; font-size: 0.8rem; font-weight: 600;
+            padding: 4px 7px; background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;
+            color: #bbb; cursor: pointer; font-size: 11px; font-weight: 600;
             text-decoration: none; white-space: nowrap; transition: all 0.2s;
-            display: inline-flex; align-items: center;
+            display: inline-flex; align-items: center; line-height: 1;
         }
         .hub-tab:hover { color: #fff; border-color: rgba(96,165,250,0.4); }
         .hub-tab.active {
-            background: linear-gradient(120deg, rgba(96,165,250,0.25), rgba(167,139,250,0.25));
+            background: linear-gradient(120deg, rgba(96,165,250,0.3), rgba(167,139,250,0.3));
             border-color: rgba(96,165,250,0.6); color: #fff;
         }
         .hub-tab-avatar {
-            flex: 0 0 auto; width: 36px; height: 36px; border-radius: 50%;
+            flex: 0 0 auto; width: 28px; height: 28px; border-radius: 50%;
             display: inline-flex; align-items: center; justify-content: center;
             background: linear-gradient(135deg, rgba(96,165,250,0.20), rgba(236,72,153,0.20));
             border: 1px solid rgba(255,255,255,0.14); color: #e0e0e0;
             text-decoration: none; transition: all 0.2s;
         }
         .hub-tab-avatar:hover { color: #fff; transform: translateY(-2px) scale(1.06); border-color: rgba(167,139,250,0.7); box-shadow: 0 0 16px rgba(167,139,250,0.55); }
-        .hub-tab-avatar svg { width: 20px; height: 20px; }
+        .hub-tab-avatar svg { width: 17px; height: 17px; }
     </style>
 </head>
 <body>
-
-    <!-- Effects Hub ナビ（全ページ共通・ギアで設定パネルと一緒に表示切替） -->
-    <nav id="hub-nav">
-        <a class="hub-tab" href="index.html#sec-button">🔘 ボタン</a>
-        <a class="hub-tab" href="index.html#sec-text">🔤 文字</a>
-        <a class="hub-tab" href="index.html#sec-anim">🎬 アニメーション</a>
-        <a class="hub-tab" href="index.html#sec-telop">📺 テロップ</a>
-        <a class="hub-tab-avatar" href="avatar.html" title="アバターアニメーション" aria-label="アバターアニメーション">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
-        </a>
-        <a class="hub-tab" href="cutin.html" title="カットインエフェクト一覧（17種）">✂️ カットイン</a>
-        <a class="hub-tab active" href="ranking.html" title="3Dランキングアニメーション（現在のページ）" aria-current="page">📊 ランキング</a>
-    </nav>
 
     <!-- アニメーションステージ（デフォルト：横画面クラス付与） -->
     <canvas id="stage" width="1920" height="1080" class="landscape"></canvas>
@@ -267,6 +248,21 @@
 
     <!-- コントロールパネル（左上） -->
     <div id="control-panel">
+        <!-- Effects Hub ナビ（設定タイトルの上に横並び・ギアでパネルごと表示切替） -->
+        <nav id="hub-nav">
+            <a class="hub-tab" href="index.html#sec-button">🔘 ボタン</a>
+            <a class="hub-tab" href="index.html#sec-text">🔤 文字</a>
+            <a class="hub-tab" href="index.html#sec-anim">🎬 アニメ</a>
+            <a class="hub-tab" href="index.html#sec-telop">📺 テロップ</a>
+            <a class="hub-tab-avatar" href="avatar.html" title="アバターアニメーション" aria-label="アバターアニメーション">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+            </a>
+            <a class="hub-tab" href="cutin.html" title="カットインエフェクト一覧（17種）">✂️ カットイン</a>
+            <a class="hub-tab active" href="ranking.html" title="3Dランキングアニメーション（現在のページ）" aria-current="page">📊 ランキング</a>
+        </nav>
+
         <h4 style="margin: 0 0 12px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 6px; display: flex; justify-content: space-between;">
             <span>AIリアルタイム検索設定</span>
             <span style="font-size: 10px; color: #888;">3D Overlay</span>
@@ -285,6 +281,11 @@
 
             <!-- エラーエリア -->
             <div id="error-area"></div>
+
+            <!-- Gemini APIキー（このブラウザの localStorage に保存・リポジトリや外部には送信しない） -->
+            <label for="api-key-input" style="margin-top:8px;">Gemini APIキー <span style="font-weight:normal;color:#888;font-size:10px;">（このブラウザに保存）</span></label>
+            <input type="password" id="api-key-input" placeholder="AIza... を貼り付け" autocomplete="off" spellcheck="false">
+            <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" style="font-size:10px;color:#00f3ff;text-decoration:none;">▶ APIキーを取得（Google AI Studio）</a>
         </div>
 
         <!-- アスペクト比切り替えオプション -->
@@ -338,8 +339,12 @@
         const canvas = document.getElementById('stage');
         const ctx = canvas.getContext('2d');
 
-        // Gemini API 用の設定
-        const apiKey = "";
+        // Gemini API キー：ハードコードせず、利用者各自のブラウザ localStorage に保存して使用する
+        function getApiKey() {
+            const el = document.getElementById('api-key-input');
+            const v = el && el.value ? el.value.trim() : '';
+            return v || localStorage.getItem('gemini_api_key') || '';
+        }
 
         // アニメーション制御用グローバル変数（基準文字サイズ40px、スピードx0.5に変更）
         let speedMultiplier = 0.5;
@@ -951,7 +956,7 @@
                 }
             };
 
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${getApiKey()}`;
 
             // 指数バックオフによる最大5回のリトライロジック
             let delay = 1000;
@@ -987,12 +992,21 @@
         const panel = document.getElementById('control-panel');
         const toggleBtn = document.getElementById('panel-toggle');
 
-        // パネル表示・非表示の切り替え（ナビも一緒に切り替え＝配信オーバーレイ時はクリーンに）
-        const hubNav = document.getElementById('hub-nav');
+        // パネル表示・非表示の切り替え（ナビはパネル内なので一緒に切り替わる＝配信オーバーレイ時はクリーンに）
         toggleBtn.addEventListener('click', () => {
             panel.classList.toggle('hidden');
-            if (hubNav) hubNav.classList.toggle('hidden');
         });
+
+        // Gemini APIキー入力欄：localStorage から復元＆変更を保存
+        const apiKeyInput = document.getElementById('api-key-input');
+        if (apiKeyInput) {
+            apiKeyInput.value = localStorage.getItem('gemini_api_key') || '';
+            apiKeyInput.addEventListener('input', (e) => {
+                const v = e.target.value.trim();
+                if (v) localStorage.setItem('gemini_api_key', v);
+                else localStorage.removeItem('gemini_api_key');
+            });
+        }
 
         // アスペクト比変更イベントのハンドリング
         const aspectLandscapeBtn = document.getElementById('aspect-landscape-btn');
@@ -1098,6 +1112,12 @@
             const genre = genreInput.value.trim();
             if (!genre) {
                 showError("検索お題を入力してください。");
+                return;
+            }
+            if (!getApiKey()) {
+                showError("Gemini APIキーを入力してください。下の「APIキーを取得」から取得できます。");
+                const k = document.getElementById('api-key-input');
+                if (k) k.focus();
                 return;
             }
 
